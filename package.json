@@ -1,0 +1,52 @@
+{
+  "name": "tristris-2.0",
+  "version": "2.0.0",
+  "description": "Yet another Tetris clone",
+  "main": "index.js",
+  "scripts": {
+    "clean": "gulp clean",
+    "build:debug": "NODE_ENV=debug gulp build",
+    "build:prod": "NODE_ENV=production gulp build",
+    "serve": "NODE_ENV=debug gulp serve",
+    "build": "npm run build:prod",
+    "start": "npm run serve",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tristan00b/tristris-2.git"
+  },
+  "keywords": [
+    "Tetris",
+    "WebGL",
+    "JavaScript",
+    "HTML5",
+    "Game"
+  ],
+  "author": "Tristan Bayfield",
+  "license": "AGPL-3.0",
+  "devDependencies": {
+    "@babel/cli": "^7.13.14",
+    "@babel/core": "^7.13.15",
+    "@babel/preset-env": "^7.13.15",
+    "babelify": "^10.0.0",
+    "browser-sync": "^2.26.14",
+    "browserify": "^17.0.0",
+    "cssnano": "^5.0.1",
+    "del": "^6.0.0",
+    "fibers": "^5.0.0",
+    "gulp": "^4.0.2",
+    "gulp-cli": "^2.3.0",
+    "gulp-ejs": "^5.1.0",
+    "gulp-git": "^2.10.1",
+    "gulp-postcss": "^9.0.0",
+    "gulp-rename": "^2.0.0",
+    "gulp-sass": "^4.1.0",
+    "gulp-sourcemaps": "^3.0.0",
+    "gulp-uglify": "^3.0.2",
+    "gulplog": "^1.0.0",
+    "readable-stream": "^2.3.7",
+    "vinyl-buffer": "^1.0.1",
+    "vinyl-source-stream": "^2.0.0"
+  }
+}
