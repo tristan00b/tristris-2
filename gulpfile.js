@@ -6,6 +6,7 @@ const del = require('del')
 const fiber = require('fibers')
 const gulp = require('gulp')
 const log = require('gulplog')
+const autoprefix = require('gulp-autoprefixer')
 const ejs = require('gulp-ejs')
 const git = require('gulp-git')
 const rename = require('gulp-rename')
@@ -61,6 +62,7 @@ const clean = _ => {
 const styles = _ => {
   return src('app/scss/**/*.scss', opts.sourcemaps)
     .pipe(sass(opts.sass).on('error', sass.logError))
+    .pipe(autoprefix())
     .pipe(dst('build/css', opts.sourcemaps))
     .pipe(sync.stream())
 }

@@ -36,6 +36,7 @@
     "del": "^6.0.0",
     "fibers": "^5.0.0",
     "gulp": "^4.0.2",
+    "gulp-autoprefixer": "^7.0.1",
     "gulp-cli": "^2.3.0",
     "gulp-ejs": "^5.1.0",
     "gulp-git": "^2.10.1",
