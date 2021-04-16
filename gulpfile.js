@@ -95,7 +95,7 @@ const markup = _ => {
 }
 
 const assets = _ => {
-  return src('app/assets/**/*.*').pipe(dst('build'))
+  return src('app/assets/**/*.*').pipe(dst('build/assets'))
 }
 
 const build = par(markup, styles, scripts, assets)
