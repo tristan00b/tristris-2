@@ -25,9 +25,22 @@
   ],
   "author": "Tristan Bayfield",
   "license": "AGPL-3.0",
+  "babel": {
+    "presets": [
+      "@babel/preset-env"
+    ],
+    "plugins": [
+      "@babel/plugin-proposal-private-methods",
+      "@babel/plugin-proposal-private-property-in-object",
+      "@babel/plugin-proposal-throw-expressions"
+    ]
+  },
   "devDependencies": {
     "@babel/cli": "^7.13.14",
     "@babel/core": "^7.13.15",
+    "@babel/plugin-proposal-private-methods": "^7.13.0",
+    "@babel/plugin-proposal-private-property-in-object": "^7.13.0",
+    "@babel/plugin-proposal-throw-expressions": "^7.12.13",
     "@babel/preset-env": "^7.13.15",
     "babelify": "^10.0.0",
     "browser-sync": "^2.26.14",

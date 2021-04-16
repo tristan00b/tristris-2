@@ -72,7 +72,7 @@ const scripts = _ => {
   const b = browserify({
     entries: 'app/scripts/main.js',
     debug: is_debugging_enabled,
-    transform: [babelify.configure({ presets: ["@babel/preset-env"] })]
+    transform: [babelify]
   })
 
   return pipeline(
