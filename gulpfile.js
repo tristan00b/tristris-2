@@ -70,14 +70,14 @@ const styles = _ => {
 const scripts = _ => {
 
   const b = browserify({
-    entries: 'app/scripts/app.js',
+    entries: 'app/scripts/main.js',
     debug: is_debugging_enabled,
     transform: [babelify.configure({ presets: ["@babel/preset-env"] })]
   })
 
   return pipeline(
     b.bundle(),
-    source_stream('app.js'),
+    source_stream('main.js'),
     buffer(),
     sourcemaps.init(opts.sourcemaps),
     uglify(),
