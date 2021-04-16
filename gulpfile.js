@@ -100,12 +100,26 @@ const assets = _ => {
 
 const build = par(markup, styles, scripts, assets)
 
-const watch = _ => {
+gulp.task('watch:markup', _ => {
   gulp.watch('app/**/*.@(ejs|html)', markup)
+      .on('change', sync.reload)
+})
+
+gulp.task('watch:scripts', _ => {
   gulp.watch('app/scripts/**/*.js', scripts)
+      .on('change', sync.reload)
+})
+
+gulp.task('watch:styles', _ => {
   gulp.watch('app/scss/**/*.scss', styles)
+})
+
+gulp.task('watch:assets', _ => {
   gulp.watch('app/assets/**.*', assets)
-}
+      .on('change', sync.reload)
+})
+
+const watch = par('watch:markup', 'watch:scripts', 'watch:styles', 'watch:assets')
 
 const serve = _ => {
   sync.init(opts.bsync)
