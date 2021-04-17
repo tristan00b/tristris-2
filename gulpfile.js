@@ -1,5 +1,4 @@
 
-const babelify = require("babelify")
 const browserify = require('browserify')
 const sync = require('browser-sync').create()
 const del = require('del')
@@ -13,15 +12,30 @@ const rename = require('gulp-rename')
 const sass = require('gulp-dart-sass')
 const sourcemaps = require('gulp-sourcemaps')
 const uglify = require('gulp-uglify')
-const pipeline = require('readable-stream').Stream.pipeline
 const buffer = require('vinyl-buffer')
 const source_stream = require('vinyl-source-stream');
 
 const { series:ser, parallel:par, src, dest:dst, } = gulp
 
+
+/* ------------------------------------------------------------------------------------------------------------------ *\
+  Config Options
+\* ------------------------------------------------------------------------------------------------------------------ */
+
 const is_debugging_enabled = process.env.NODE_ENV === 'debug'
 
 const opts = {
+  babelify: {
+    presets: [
+      "@babel/preset-env"
+    ],
+    plugins: [
+      "@babel/plugin-proposal-private-methods",
+      "@babel/plugin-proposal-private-property-in-object",
+      "@babel/plugin-proposal-throw-expressions"
+    ],
+    sourceMaps: is_debugging_enabled
+  },
   browserify: {
     debug: is_debugging_enabled
   },
@@ -40,24 +54,15 @@ const opts = {
     outputStyle: 'compressed',
   },
   sourcemaps: {
-    sourcemaps: is_debugging_enabled
-  },
-  source_stream: {
+    sourcemaps: is_debugging_enabled,
     loadMaps: is_debugging_enabled
   }
-
-} // opts
-
-const setenv = _ => {
-  return git.revParse({args: '--short HEAD'}, (err, hash) => {
-    if (err) throw err
-    process.env.REVISION = `${hash}`
-  })
 }
 
-const clean = _ => {
-  return del('build/*')
-}
+
+/* ------------------------------------------------------------------------------------------------------------------ *\
+  Build Tasks
+\* ------------------------------------------------------------------------------------------------------------------ */
 
 const styles = _ => {
   return src('app/scss/**/*.scss', opts.sourcemaps)
@@ -68,22 +73,18 @@ const styles = _ => {
 }
 
 const scripts = _ => {
-
-  const b = browserify({
+  return browserify({
     entries: 'app/scripts/main.js',
     debug: is_debugging_enabled,
-    transform: [babelify]
   })
-
-  return pipeline(
-    b.bundle(),
-    source_stream('main.js'),
-    buffer(),
-    sourcemaps.init(opts.sourcemaps),
-    uglify(),
-    sourcemaps.write('.'),
-    dst('build/scripts')
-  )
+  .transform("babelify", opts.babelify)
+  .bundle()
+  .pipe(source_stream('main.js'))
+  .pipe(buffer())
+  .pipe(sourcemaps.init(opts.sourcemaps))
+  .pipe(uglify())
+  .pipe(sourcemaps.write('.'))
+  .pipe(dst('build/scripts'))
   .on('error', log.error)
 }
 
@@ -94,11 +95,25 @@ const markup = _ => {
     .pipe(dst('build'))
 }
 
-const assets = _ => {
-  return src('app/assets/**/*.*').pipe(dst('build/assets'))
+const assets = _ => src('app/assets/**/*.*').pipe(dst('build/assets'))
+
+const clean = _ => del('build/*')
+
+const setenv = _ => {
+  return git.revParse({args: '--short HEAD'}, (err, hash) => {
+    if (err) throw err
+    process.env.REVISION = `${hash}`
+  })
 }
 
+const serve = _ => sync.init(opts.bsync)
+
 const build = par(markup, styles, scripts, assets)
+
+
+/* ------------------------------------------------------------------------------------------------------------------ *\
+  Watch Tasks
+\* ------------------------------------------------------------------------------------------------------------------ */
 
 gulp.task('watch:markup', _ => {
   gulp.watch('app/**/*.@(ejs|html)', markup)
@@ -121,9 +136,10 @@ gulp.task('watch:assets', _ => {
 
 const watch = par('watch:markup', 'watch:scripts', 'watch:styles', 'watch:assets')
 
-const serve = _ => {
-  sync.init(opts.bsync)
-}
+
+/* ------------------------------------------------------------------------------------------------------------------ *\
+  Exports
+\* ------------------------------------------------------------------------------------------------------------------ */
 
 exports.clean   = clean
 exports.setenv  = setenv
