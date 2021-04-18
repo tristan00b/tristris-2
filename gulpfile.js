@@ -1,4 +1,3 @@
-
 const browserify = require('browserify')
 const sync = require('browser-sync').create()
 const del = require('del')
@@ -26,14 +25,6 @@ const is_debugging_enabled = process.env.NODE_ENV === 'debug'
 
 const opts = {
   babelify: {
-    presets: [
-      "@babel/preset-env"
-    ],
-    plugins: [
-      "@babel/plugin-proposal-private-methods",
-      "@babel/plugin-proposal-private-property-in-object",
-      "@babel/plugin-proposal-throw-expressions"
-    ],
     sourceMaps: is_debugging_enabled
   },
   browserify: {
