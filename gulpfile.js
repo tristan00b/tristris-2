@@ -1,20 +1,21 @@
-const browserify = require('browserify')
-const sync = require('browser-sync').create()
-const del = require('del')
-const fiber = require('fibers')
-const gulp = require('gulp')
-const log = require('gulplog')
-const autoprefix = require('gulp-autoprefixer')
-const ejs = require('gulp-ejs')
-const git = require('gulp-git')
-const rename = require('gulp-rename')
-const sass = require('gulp-dart-sass')
-const sourcemaps = require('gulp-sourcemaps')
-const uglify = require('gulp-uglify')
-const buffer = require('vinyl-buffer')
-const source_stream = require('vinyl-source-stream');
+import browserify from 'browserify'
+import browserSync from 'browser-sync'
+import del from 'del'
+import fiber from 'fibers'
+import gulp from 'gulp'
+import log from 'gulplog'
+import autoprefix from 'gulp-autoprefixer'
+import ejs from 'gulp-ejs'
+import git from 'gulp-git'
+import rename from 'gulp-rename'
+import sass from 'gulp-dart-sass'
+import sourcemaps from 'gulp-sourcemaps'
+import uglify from 'gulp-uglify'
+import buffer from 'vinyl-buffer'
+import source_stream from 'vinyl-source-stream'
 
 const { series:ser, parallel:par, src, dest:dst, } = gulp
+const bsync = browserSync.create()
 
 
 /* ------------------------------------------------------------------------------------------------------------------ *\
@@ -52,15 +53,16 @@ const opts = {
 
 
 /* ------------------------------------------------------------------------------------------------------------------ *\
-  Build Tasks
+  Task Definitions
 \* ------------------------------------------------------------------------------------------------------------------ */
 
-const styles = _ => {
-  return src('app/scss/**/*.scss', opts.sourcemaps)
-    .pipe(sass(opts.sass).on('error', sass.logError))
-    .pipe(autoprefix())
-    .pipe(dst('build/css', opts.sourcemaps))
-    .pipe(sync.stream())
+const assets = _ => src('app/assets/**/*.*').pipe(dst('build/assets'))
+
+const markup = _ => {
+  return src('app/**/*.@(ejs|html)')
+    .pipe(ejs())
+    .pipe(rename({ extname: '.html' }))
+    .pipe(dst('build'))
 }
 
 const scripts = _ => {
@@ -79,16 +81,13 @@ const scripts = _ => {
   .on('error', log.error)
 }
 
-const markup = _ => {
-  return src('app/**/*.@(ejs|html)')
-    .pipe(ejs())
-    .pipe(rename({ extname: '.html' }))
-    .pipe(dst('build'))
+const styles = _ => {
+  return src('app/scss/**/*.scss', opts.sourcemaps)
+    .pipe(sass(opts.sass).on('error', sass.logError))
+    .pipe(autoprefix())
+    .pipe(dst('build/css', opts.sourcemaps))
+    .pipe(bsync.stream())
 }
-
-const assets = _ => src('app/assets/**/*.*').pipe(dst('build/assets'))
-
-const clean = _ => del('build/*')
 
 const setenv = _ => {
   return git.revParse({args: '--short HEAD'}, (err, hash) => {
@@ -97,43 +96,39 @@ const setenv = _ => {
   })
 }
 
-const serve = _ => sync.init(opts.bsync)
+gulp.task('watch:assets', _ => {
+  gulp.watch('app/assets/**.*', assets)
+      .on('change', bsync.reload)
+})
 
-const build = par(markup, styles, scripts, assets)
-
-
-/* ------------------------------------------------------------------------------------------------------------------ *\
-  Watch Tasks
-\* ------------------------------------------------------------------------------------------------------------------ */
 
 gulp.task('watch:markup', _ => {
   gulp.watch('app/**/*.@(ejs|html)', markup)
-      .on('change', sync.reload)
+      .on('change', bsync.reload)
 })
 
 gulp.task('watch:scripts', _ => {
   gulp.watch('app/scripts/**/*.js', scripts)
-      .on('change', sync.reload)
+      .on('change', bsync.reload)
 })
 
 gulp.task('watch:styles', _ => {
   gulp.watch('app/scss/**/*.scss', styles)
 })
 
-gulp.task('watch:assets', _ => {
-  gulp.watch('app/assets/**.*', assets)
-      .on('change', sync.reload)
-})
-
-const watch = par('watch:markup', 'watch:scripts', 'watch:styles', 'watch:assets')
+const clean = _ => del('build/*')
+const build = ser(clean, setenv, par(assets, markup, styles, scripts))
+const watch = par('watch:assets', 'watch:markup', 'watch:scripts', 'watch:styles')
+const serve = ser(build, par(watch, _ => bsync.init(opts.bsync)))
 
 
 /* ------------------------------------------------------------------------------------------------------------------ *\
   Exports
 \* ------------------------------------------------------------------------------------------------------------------ */
 
-exports.clean   = clean
-exports.setenv  = setenv
-exports.build   = ser(setenv, build)
-exports.serve   = ser(clean, setenv, build, par(watch, serve))
-exports.default = exports.serve
+export {
+  clean,
+  build,
+  serve,
+  serve as default
+}

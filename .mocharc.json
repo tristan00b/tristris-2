@@ -1,0 +1,4 @@
+{
+  "ui": "bdd",
+  "spec": ["test/**/*.spec.@(js|cjs|mjs)"]
+}
