@@ -10,7 +10,7 @@
     "serve": "NODE_ENV=debug gulp serve",
     "build": "npm run build:prod",
     "start": "npm run serve",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -25,6 +25,30 @@
   ],
   "author": "Tristan Bayfield",
   "license": "AGPL-3.0",
+  "type": "module",
+  "babel": {
+    "presets": [
+      "@babel/preset-env"
+    ],
+    "plugins": [
+      "@babel/plugin-proposal-private-methods",
+      "@babel/plugin-proposal-private-property-in-object",
+      "@babel/plugin-proposal-throw-expressions"
+    ]
+  },
+  "eslint": {
+    "parser": "@babel/eslint-parser",
+    "parserOptions": {
+      "ecmaVersion": 2021
+    },
+    "plugins": [
+      "@babel"
+    ],
+    "env": {
+      "browser": true,
+      "node": true
+    }
+  },
   "devDependencies": {
     "@babel/cli": "^7.13.14",
     "@babel/core": "^7.13.15",
@@ -33,10 +57,12 @@
     "@babel/plugin-proposal-private-methods": "^7.13.0",
     "@babel/plugin-proposal-private-property-in-object": "^7.13.0",
     "@babel/plugin-proposal-throw-expressions": "^7.12.13",
+    "@babel/plugin-syntax-throw-expressions": "^7.12.13",
     "@babel/preset-env": "^7.13.15",
     "babelify": "^10.0.0",
     "browser-sync": "^2.26.14",
     "browserify": "^17.0.0",
+    "canvas": "^2.7.0",
     "del": "^6.0.0",
     "eslint": "^7.24.0",
     "fibers": "^5.0.0",
@@ -50,6 +76,7 @@
     "gulp-sourcemaps": "^3.0.0",
     "gulp-uglify": "^3.0.2",
     "gulplog": "^1.0.0",
+    "jest": "^26.6.3",
     "sass": "^1.32.8",
     "vinyl-buffer": "^1.0.1",
     "vinyl-source-stream": "^2.0.0"
