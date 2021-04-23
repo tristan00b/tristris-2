@@ -1,9 +1,9 @@
 import config from './config'
+import { MakeErrorType } from './util'
 import { Game } from './Game'
 
-export const AppError = class extends Error {
-  toString() { return `${this.name}: ${this.message}` }
-}
+class App {}
+const AppError = MakeErrorType(App)
 
 window.addEventListener('load', async _ => {
   Promise.resolve(config)
@@ -17,7 +17,6 @@ window.addEventListener('load', async _ => {
     .then(args => new Game(args))
     .then(game => game.run())
     .catch(console.error)
-
 })
 
 window.addEventListener('unhandledrejection', event => {

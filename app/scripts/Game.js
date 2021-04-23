@@ -1,14 +1,8 @@
 // import InputHandler from './Input'
 import { Renderer } from './Renderer'
+import { MakeErrorType } from './util'
 
-/**
- * Class GameError
- * @extends Error
- * @param {String} msg The error message
- */
-export const GameError = class extends Error {
-  toString() { return `${this.name}: ${this.message}` }
-}
+export const GameError = MakeErrorType(Game)
 
 /**
  * Class Game
