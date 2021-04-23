@@ -9,7 +9,7 @@ window.addEventListener('load', async _ => {
   Promise.resolve(config)
 
     .then(config => {
-      const canvas = document.querySelector('#game-canvas')
+      const canvas = document.querySelector(`#${config.canvas.id}`)
       return canvas
         ? { config, canvas }
         : Promise.reject(new AppError('unable to acquire canvas object'))

@@ -46,8 +46,8 @@ const config = {
   canvas: {
     id: "game-canvas",
     relativeSize: { w: 0.75, h: 0.90 },
-
   },
+
   grid: {
     scale: 36,
     main: { w: 10, h: 20 },
@@ -56,17 +56,17 @@ const config = {
   },
 
   input: {
-    "audio/skipSong":    83,
-    "audio/toggleMusic": 77,
-    "game/exitToTitle":  27,
-    "game/pause":        80,
-    "game/start":        13,
-    "player/hold":       16,
-    "player/down":       40,
-    "player/left":       37,
-    "player/tight":      39,
-    "player/rotate":     38,
-    "player/slam":       32,
+    83: "audio/skipSong",
+    77: "audio/toggleMusic",
+    27: "game/exitToTitle",
+    80: "game/pause",
+    13: "game/start",
+    16: "player/hold",
+    40: "player/down",
+    37: "player/left",
+    39: "player/tight",
+    38: "player/rotate",
+    32: "player/slam",
   },
 
   sound: {
