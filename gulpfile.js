@@ -49,6 +49,12 @@ const opts = {
   sourcemaps: {
     sourcemaps: is_debugging_enabled,
     loadMaps: is_debugging_enabled
+  },
+  uglify: {
+    keep_fnames: is_debugging_enabled,
+    output: {
+      beautify: is_debugging_enabled,
+    }
   }
 }
 
@@ -76,7 +82,7 @@ const scripts = _ => {
   .pipe(source_stream('main.js'))
   .pipe(buffer())
   .pipe(gulpif(is_debugging_enabled, sourcemaps.init(opts.sourcemaps)))
-  .pipe(uglify())
+  .pipe(uglify(opts.uglify))
   .pipe(gulpif(is_debugging_enabled, sourcemaps.write('.')))
   .pipe(dst('build/scripts'))
   .on('error', log.error)
