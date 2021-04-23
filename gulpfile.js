@@ -83,7 +83,7 @@ const scripts = _ => {
 }
 
 const styles = _ => {
-  return src('app/scss/**/*.scss', opts.sourcemaps)
+  return src('app/sass/**/*.scss', opts.sourcemaps)
     .pipe(sass(opts.sass).on('error', sass.logError))
     .pipe(autoprefix())
     .pipe(dst('build/css', opts.sourcemaps))

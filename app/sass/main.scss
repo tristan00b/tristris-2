@@ -1,0 +1,22 @@
+@use 'fonts';
+@use 'colours' as c;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  overflow: hidden;
+
+  background-color: #222;
+}
+
+#game-canvas {
+  width: 100vw;
+  height: 100vh;
+}
