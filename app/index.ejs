@@ -10,10 +10,13 @@
 </head>
 <body>
   <header></header>
-  <canvas id="game-canvas"></canvas>
+  <main>
+    <canvas id="game-canvas"></canvas>
+  </main>
   <footer>
-    <p id="frame-rate"></p>
-    <p id="app-version"><%= process.env.REVISION %></p>
+    <debug-info class="debugging-info">
+      <app-version data-app-version="<%= process.env.REVISION %>"></app-version>
+    </debug-info>
     <script defer src="/scripts/main.js"></script>
   </footer>
 </body>

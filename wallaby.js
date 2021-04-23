@@ -6,7 +6,8 @@ export default function (wallaby) {
 
   return {
     files: [
-      { pattern: 'app/scripts/**/*.js' }
+      { pattern: 'app/scripts/**/*.js' },
+      { pattern: 'test/mock/**/*.mock.js' }
     ],
 
     tests: [
@@ -14,7 +15,8 @@ export default function (wallaby) {
     ],
 
     env: {
-      type: 'node'
+      type: 'node',
+      runner: 'node'
     },
 
     compilers: {
