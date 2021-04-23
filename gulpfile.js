@@ -7,6 +7,7 @@ import log from 'gulplog'
 import autoprefix from 'gulp-autoprefixer'
 import ejs from 'gulp-ejs'
 import git from 'gulp-git'
+import gulpif from 'gulp-if'
 import rename from 'gulp-rename'
 import sass from 'gulp-dart-sass'
 import sourcemaps from 'gulp-sourcemaps'
@@ -74,9 +75,9 @@ const scripts = _ => {
   .bundle()
   .pipe(source_stream('main.js'))
   .pipe(buffer())
-  .pipe(sourcemaps.init(opts.sourcemaps))
+  .pipe(gulpif(is_debugging_enabled, sourcemaps.init(opts.sourcemaps)))
   .pipe(uglify())
-  .pipe(sourcemaps.write('.'))
+  .pipe(gulpif(is_debugging_enabled, sourcemaps.write('.')))
   .pipe(dst('build/scripts'))
   .on('error', log.error)
 }
