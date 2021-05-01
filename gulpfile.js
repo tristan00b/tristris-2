@@ -105,18 +105,18 @@ const setenv = _ => {
 
 gulp.task('watch:assets', _ => {
   gulp.watch('app/assets/**.*', assets)
-      .on('change', bsync.reload)
+  gulp.watch('build/scripts/**/*').on('change', bsync.reload)
 })
 
 
 gulp.task('watch:markup', _ => {
   gulp.watch('app/**/*.@(ejs|html)', markup)
-      .on('change', bsync.reload)
+  gulp.watch('build/scripts/**/*.html').on('change', bsync.reload)
 })
 
 gulp.task('watch:scripts', _ => {
   gulp.watch('app/scripts/**/*.js', scripts)
-      .on('change', bsync.reload)
+  gulp.watch('build/scripts/**/*.js').on('change', bsync.reload)
 })
 
 gulp.task('watch:styles', _ => {
