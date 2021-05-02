@@ -10,6 +10,7 @@
     "serve:debug": "NODE_ENV=debug gulp serve",
     "serve:prod": "npm run clean && npm run build:prod && python3 -m http.server --directory=build 4141",
     "build": "npm run build:prod",
+    "docs": "gulp docs",
     "start": "npm run serve:debug",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest"
   },
@@ -83,11 +84,13 @@
     "gulp-ejs": "^5.1.0",
     "gulp-git": "^2.10.1",
     "gulp-if": "^3.0.0",
+    "gulp-jsdoc3": "^3.0.0",
     "gulp-rename": "^2.0.0",
     "gulp-sourcemaps": "^3.0.0",
     "gulp-uglify": "^3.0.2",
     "gulplog": "^1.0.0",
     "jest": "^26.6.3",
+    "jsdoc": "^3.6.6",
     "sass": "^1.32.8",
     "vinyl-buffer": "^1.0.1",
     "vinyl-source-stream": "^2.0.0"

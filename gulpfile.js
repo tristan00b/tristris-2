@@ -8,6 +8,7 @@ import autoprefix from 'gulp-autoprefixer'
 import ejs from 'gulp-ejs'
 import git from 'gulp-git'
 import gulpif from 'gulp-if'
+import jsdoc from 'gulp-jsdoc3'
 import rename from 'gulp-rename'
 import sass from 'gulp-dart-sass'
 import sourcemaps from 'gulp-sourcemaps'
@@ -42,6 +43,18 @@ const opts = {
       index: 'index.html'
     }
   },
+  jsdoc: {
+    opts: {
+      destination: 'build/doc',
+      template: 'templates/default',
+    },
+    recurseDepth: 10,
+    sourceType: 'module',
+    templates: {
+      cleverLinks: true,
+      monospaceLinks: true
+  }
+  },
   sass: {
     fiber: fiber,
     outputStyle: 'compressed',
@@ -63,21 +76,21 @@ const opts = {
   Task Definitions
 \* ------------------------------------------------------------------------------------------------------------------ */
 
-const assets = _ => src('app/assets/**/*.*').pipe(dst('build/assets'))
+const assets = async _ => src('app/assets/**/*.*').pipe(dst('build/assets'))
 
-const markup = _ => {
+const markup = async _ => {
   return src('app/**/*.@(ejs|html)')
     .pipe(ejs())
     .pipe(rename({ extname: '.html' }))
     .pipe(dst('build'))
 }
 
-const scripts = _ => {
+const scripts = async _ => {
   return browserify({
     entries: 'app/scripts/main.js',
     debug: is_debugging_enabled,
   })
-  .transform("babelify", opts.babelify)
+  .transform('babelify', opts.babelify)
   .bundle()
   .pipe(source_stream('main.js'))
   .pipe(buffer())
@@ -88,7 +101,7 @@ const scripts = _ => {
   .on('error', log.error)
 }
 
-const styles = _ => {
+const styles = async _ => {
   return src('app/sass/**/*.scss', opts.sourcemaps)
     .pipe(sass(opts.sass).on('error', sass.logError))
     .pipe(autoprefix())
@@ -96,37 +109,52 @@ const styles = _ => {
     .pipe(bsync.stream())
 }
 
-const setenv = _ => {
+const setenv = async _ => {
   return git.revParse({args: '--short HEAD'}, (err, hash) => {
     if (err) throw err
     process.env.REVISION = `${hash}`
   })
 }
 
-gulp.task('watch:assets', _ => {
-  gulp.watch('app/assets/**.*', assets)
-  gulp.watch('build/scripts/**/*').on('change', bsync.reload)
+const docs = async _ => {
+  return src('app/scripts/**/*.js')
+    .pipe(jsdoc(opts.jsdoc))
+    .pipe(dst('build/doc' /* this arg expected to be ignored by jsdoc */))
+}
+
+const reload = async _ => {
+  bsync.reload()
+}
+
+gulp.task('watch:assets', async _ => {
+  gulp.watch('app/assets/**.*', assets).on('change', bsync.reload)
 })
 
-
-gulp.task('watch:markup', _ => {
-  gulp.watch('app/**/*.@(ejs|html)', markup)
-  gulp.watch('build/scripts/**/*.html').on('change', bsync.reload)
+gulp.task('watch:markup', async _ => {
+  gulp.watch('app/**/*.@(ejs|html)', markup).on('change', bsync.reload)
 })
 
-gulp.task('watch:scripts', _ => {
-  gulp.watch('app/scripts/**/*.js', scripts)
-  gulp.watch('build/scripts/**/*.js').on('change', bsync.reload)
+gulp.task('watch:scripts', async _ => {
+  // ensure reload happens after scripts are processed
+  gulp.watch('app/scripts/**/*.js', ser(scripts, reload))
 })
 
-gulp.task('watch:styles', _ => {
+gulp.task('watch:docs', async _ => {
+  gulp.watch('app/scripts/**/*.js', docs)
+})
+
+gulp.task('watch:styles', async _ => {
   gulp.watch('app/scss/**/*.scss', styles)
 })
 
+gulp.task('server:start', async _ => {
+  bsync.init(opts.bsync)
+})
+
 const clean = _ => del('build/*')
-const build = ser(clean, setenv, par(assets, markup, styles, scripts))
-const watch = par('watch:assets', 'watch:markup', 'watch:scripts', 'watch:styles')
-const serve = ser(build, par(watch, _ => bsync.init(opts.bsync)))
+const build = ser(clean, setenv, par(assets, docs, markup, styles, scripts))
+const watch = par('watch:assets', 'watch:markup', 'watch:scripts', 'watch:styles', 'watch:docs')
+const serve = ser(build, par(watch, 'server:start'))
 
 
 /* ------------------------------------------------------------------------------------------------------------------ *\
@@ -137,5 +165,6 @@ export {
   clean,
   build,
   serve,
+  docs,
   serve as default
 }
