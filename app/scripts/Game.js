@@ -1,28 +1,28 @@
 // import InputHandler from './Input'
+import config from './config'
 import { Renderer } from './Renderer'
-import { MakeErrorType } from './util'
+import { MakeErrorType, MakeLogger } from './util'
 
-export const GameError = MakeErrorType(Game)
 
 /**
  * Class Game
  */
-export class Game
+class Game
 {
   /**
    * @constructor
-   * @param {{ config: Object, canvas: Object }} args
-   * @param {Object} args.config The game config data
-   * @param {Object} args.canvas HTML canvas object
-   * @throws {GameError} Throws if either elt of args is missing
    */
-  constructor({ config, canvas }) {
-    this.config = config ?? throw new GameError('config not supplied')
-    this.canvas = canvas ?? throw new GameError('canvas not supplied')
-    this.context = canvas?.getContext('webgl2') ?? throw new GameError('failed to acquire context')
-    this.frameId  = 0
+  constructor() {
+    const canvas = document.getElementById(config.canvas.id)
+    const context = canvas.getContext('webgl2')
 
-    this.renderer = new Renderer(this)
+    const renderer = new Renderer({ canvas, context })
+
+    Object.assign(this, {
+      config,
+      frameId:0,
+      renderer,
+    })
   }
 
   /**
@@ -38,7 +38,7 @@ export class Game
 
     this.__draw__({ state: s1 })
 
-    if (this.running) window.requestAnimationFrame(time => this.__loop__({ t0:t1, t1:time, state:s1 }))
+    // this.running && window.requestAnimationFrame(time => this.__loop__({ t0:t1, t1:time, state:s1 }))
   }
 
   /**
@@ -46,6 +46,7 @@ export class Game
    * @param {{ dt:number, state:Object }} args
    * @param {Object} args.dt The time elapsed since the previous update
    * @param {Object} args.state The game state model
+   * @returns {Object} The updated state
    */
   __update__({ dt, state })
   {
@@ -62,11 +63,20 @@ export class Game
     this.renderer.draw(state)
   }
 
+  __resizeCanvas__()
+  {
+    this.canvas.width = window.innerWidth
+    this.canvas.height = window.innerHeight
+  }
+
+
+
   /**
    * Starts the game loop
    */
   run()
   {
+    // Log.debug('Loop disabled')
     this.running = true
     this.frameId = window.requestAnimationFrame(time => this.__loop__({ t0:0, t1:time, state:this.config }))
   }
@@ -79,4 +89,20 @@ export class Game
     this.running = false
     window.cancelAnimationFrame(this.frameId)
   }
+
+  resizeEventHandler(event)
+  {
+    this.renderer.resizeCanvas()
+  }
+
+  unhandledRejectionEventHandler(event)
+  {
+    throw new GameError(event.reason)
+  }
 }
+
+
+const GameError = MakeErrorType(Game)
+const Log = MakeLogger(Game)
+
+export { Game }
