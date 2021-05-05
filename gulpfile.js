@@ -85,7 +85,7 @@ const markup = async _ => {
     .pipe(dst('build'))
 }
 
-const scripts = async _ => {
+const scripts = /* must be synchronouse for proper browser reloading */ _ => {
   return browserify({
     entries: 'app/scripts/main.js',
     debug: is_debugging_enabled,
