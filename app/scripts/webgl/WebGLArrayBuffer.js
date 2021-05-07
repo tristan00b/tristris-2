@@ -1,13 +1,22 @@
-import { MakeErrorType, MakeLogger } from '../util'
+import { MakeErrorType, MakeLogger } from '../Util'
 import { WebGLBuffer } from './WebGLBuffer'
 
-/** @module webgl/WebGLArrayBuffer */
 
 /**
  * A specialization of WebGLBuffer
+ * @extends WebGLBuffer
  */
 export class WebGLArrayBuffer extends WebGLBuffer
 {
+  /**
+   * @constructor
+   * @param {WebGL2RenderingContext} gl WebGL2 rendering context
+   */
+  constructor(gl)
+  {
+    super(gl)
+  }
+
   /**
    * Binds the buffer to the gl.ARRAY_BUFFER target
    * @param {WebGL2RenderingContext} gl WebGL2 rendering context
@@ -16,6 +25,7 @@ export class WebGLArrayBuffer extends WebGLBuffer
   {
     super.bind(gl, gl.ARRAY_BUFFER)
   }
+
   /**
    * Unbinds the buffer from the gl.ARRAY_BUFFER target
    * @param {WebGL2RenderingContext} gl WebGL2 rendering context
@@ -24,6 +34,7 @@ export class WebGLArrayBuffer extends WebGLBuffer
   {
     super.unbind(gl, gl.ARRAY_BUFFER)
   }
+
   /**
    * Creates and initializes the buffer's data store
    * @param {WebGL2RenderingContext} gl WebGL2 rendering context
@@ -36,8 +47,16 @@ export class WebGLArrayBuffer extends WebGLBuffer
   }
 }
 
-/** @see {@link util.MakeLogger} */
+
+/**
+ * @private
+ * @see {@link module:util.MakeLogger}
+ */
 const Log = MakeLogger(WebGLArrayBuffer)
 
-/** @see {@link util.MakeErrorType} */
+
+/**
+ * @private
+ * @see {@link module:util.MakeErrorType}
+ */
 const WebGLArrayBufferError = MakeErrorType(WebGLArrayBuffer)

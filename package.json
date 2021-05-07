@@ -74,6 +74,7 @@
     "browser-sync": "^2.26.14",
     "browserify": "^17.0.0",
     "del": "^6.0.0",
+    "docdash": "^1.2.0",
     "eslint": "^7.24.0",
     "fibers": "^5.0.0",
     "gl-matrix": "^3.3.0",

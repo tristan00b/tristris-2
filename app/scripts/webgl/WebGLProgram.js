@@ -1,6 +1,5 @@
-import { MakeErrorType, MakeLogger } from "../util"
+import { MakeErrorType, MakeLogger } from "../Util"
 
-/** @module webgl/WebGLProgram */
 
 /**
  * Interface for creating and managing a WebGL shader program
@@ -8,7 +7,6 @@ import { MakeErrorType, MakeLogger } from "../util"
 export class WebGLProgram
 {
   /**
-   * @constructor
    * @param {WebGL2RenderingContext} gl WebGL2 rendering context
    */
   constructor(gl)
@@ -82,8 +80,16 @@ export class WebGLProgram
   }
 }
 
-/** @see {@link util.MakeLogger} */
+
+/**
+ * @private
+ * @see {@link util.MakeLogger}
+ */
 const Log = MakeLogger(WebGLProgram)
 
-/** @see {@link util.MakeErrorType} */
+
+/**
+ * @private
+ * @see {@link util.MakeErrorType}
+ */
 const WebGLProgramError = MakeErrorType(WebGLProgram)

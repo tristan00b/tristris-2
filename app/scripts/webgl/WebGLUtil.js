@@ -1,13 +1,14 @@
-import { MakeErrorType, MakeLogger } from "../util"
+import { MakeErrorType, MakeLogger } from "../Util"
 
-/** @module webgl/WebGLUtil */
+/** @module WebGLUtil */
 
 /**
  * A collection static WebGL helper methods
- * @class
+ * @exports WebGLUtil
+ * @hideconstructor
  */
-export default class WebGLUtil {
-
+export default class WebGLUtil
+{
   /**
    * @param {WebGL2RenderingContext} gl WebGL2 rendering context
    * @returns {Boolean}
@@ -74,8 +75,16 @@ export default class WebGLUtil {
   }
 }
 
-/** @see {@link util.MakeLogger} */
+
+/**
+ * @private
+ * @see {@link util.MakeLogger}
+ */
 const Log = MakeLogger(WebGLUtil)
 
-/** @see {@link util.MakeErrorType} */
+
+/**
+ * @private
+ * @see {@link util.MakeErrorType}
+ */
 const WebGLUtilError = MakeErrorType(WebGLUtil)

@@ -1,4 +1,4 @@
-/** @module util */
+/** @module Util */
 
 /**
  * @ typedef {Object} Type Generic types for documentation purposes

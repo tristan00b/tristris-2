@@ -1,11 +1,12 @@
-import { MakeErrorType, MakeLogger } from './util'
+import { MakeErrorType, MakeLogger } from './Util'
 import { mat4 } from 'gl-matrix'
 import { shaders } from './shaders'
 
-import * as webgl from './webgl'
+import * as WebGL from './WebGL'
 import WebGLUtil from './webgl/WebGLUtil'
 
-/** @module Renderer */
+import { Camera } from './Camera'
+
 
 /**
  * @class
@@ -41,43 +42,44 @@ export class Renderer
     gl.clearColor(0,0,0,1)
 
     this.shaders = [
-      new webgl.Shader(gl, gl.VERTEX_SHADER, shaders.vsource),
-      new webgl.Shader(gl, gl.FRAGMENT_SHADER, shaders.fsource)
+      new WebGL.Shader(gl, gl.VERTEX_SHADER, shaders.vsource),
+      new WebGL.Shader(gl, gl.FRAGMENT_SHADER, shaders.fsource)
     ]
 
-    this.program = new webgl.Program(gl)
+    this.program = new WebGL.Program(gl)
     this.program.attachShaders(gl, ...(this.shaders))
     this.program.linkProgram(gl)
 
     this.programInfo = {
-      program: this.program,
       attrs: {
         position: gl.getAttribLocation(this.program.location, 'vertex_position')
       },
       unifs: {
-        modelViewMatrix: gl.getUniformLocation(this.program.location, 'model_view_matrix')
-      , projectionMatrix: gl.getUniformLocation(this.program.location, 'projection_matrix')
+        screenResolution: gl.getUniformLocation(this.program.location, 'screen_resolution'),
+        modelViewMatrix:  gl.getUniformLocation(this.program.location, 'model_view_matrix'),
+        projectionMatrix: gl.getUniformLocation(this.program.location, 'projection_matrix'),
       }
     }
 
-    Log.debug(this.programInfo.attrs.position)
+    this.camera = new Camera(gl)
+    this.modelViewMatrix = mat4.create(/* identity */)
 
     const vertices = [
-       0.5,  0.5, 0.0,
-      -0.5,  0.5, 0.0,
-      -0.5, -0.5, 0.0,
-       0.5, -0.5, 0.0,
+       1000.0,  1000.0, 0.1,
+      -1000.0,  1000.0, 0.1,
+      -1000.0, -1000.0, 0.1,
+       1000.0, -1000.0, 0.1,
     ]
 
     const indices = [ 0,1,2,2,3,0 ]
 
-    this.vao = new webgl.VertexArray(gl)
+    this.vao = new WebGL.VertexArray(gl)
     this.vao.bind(gl)
-      this.buffer = new webgl.ArrayBuffer(gl)
+      this.buffer = new WebGL.ArrayBuffer(gl)
       this.buffer.bind(gl)
       this.buffer.data(gl, new Float32Array(vertices), gl.STATIC_DRAW)
 
-      this.indices = new webgl.ElementArrayBuffer(gl)
+      this.indices = new WebGL.ElementArrayBuffer(gl)
       this.indices.bind(gl)
       this.indices.data(gl, new Uint32Array(indices), gl.STATIC_DRAW)
 
@@ -95,7 +97,10 @@ export class Renderer
     const gl = this.context
 
     // Resize canvas as needed
-    WebGLUtil.needCanvasResize(gl) && WebGLUtil.resizeCanvas(gl)
+    WebGLUtil.needCanvasResize(gl) && do {
+      WebGLUtil.resizeCanvas(gl)
+      this.camera = new Camera(gl)
+    }
 
     // Clear canvas
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
@@ -103,14 +108,25 @@ export class Renderer
     // Draw
     this.program.use(gl)
     this.vao.bind(gl)
+      gl.uniform4f(this.programInfo.unifs.screenResolution, gl.canvas.width, gl.canvas.height, 1.0, 1.0)
+      gl.uniformMatrix4fv(this.programInfo.unifs.modelViewMatrix,  false, this.modelViewMatrix)
+      gl.uniformMatrix4fv(this.programInfo.unifs.projectionMatrix, false, this.camera.projectionMatrix)
+      gl.uniformMatrix4fv(this.programInfo.unifs.projectionMatrix, false, this.modelViewMatrix)
       gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_INT, 0)
     this.vao.unbind(gl)
   }
-
 }
 
-/** @see {@link util.MakeLogger} */
+
+/**
+ * @private
+ * @see {@link util.MakeLogger}
+ */
 var Log = MakeLogger(Renderer)
 
-/** @see {@link util.MakeErrorType} */
+
+/**
+ * @private
+ * @see {@link util.MakeErrorType}
+ */
 const RendererError = MakeErrorType(Renderer)

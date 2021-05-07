@@ -1,14 +1,12 @@
-import { MakeErrorType, MakeLogger } from "../util";
+import { MakeErrorType, MakeLogger } from "../Util";
 
-/** @module webgl */
 
 /**
  * Interface for manageing vertex array attributes
  */
-export class WebGLVertexArray {
-
+export class WebGLVertexArray
+{
   /**
-   * @constructor
    * @param {WebGL2RenderingContext} gl WebGL2 rendering context
    */
   constructor(gl)
@@ -18,7 +16,7 @@ export class WebGLVertexArray {
 
   /**
    * Returns a WebGL reference to the vertex array object
-   * @type {WebGLBuffer}
+   * @type {module:WebGL.Buffer}
    */
   get location()
   {
@@ -77,11 +75,18 @@ export class WebGLVertexArray {
   {
     gl.vertexAttribPointer(index, components, type, normalize, stride, offset)
   }
-
 }
 
-/** @see {@link util.MakeLogger} */
+
+/**
+ * @private
+ * @see {@link util.MakeLogger}
+ */
 const Log = MakeLogger(WebGLVertexArray)
 
-/** @see {@link util.MakeErrorType} */
+
+/**
+ * @private
+ * @see {@link util.MakeErrorType}
+ */
 const WebGLVertexArrayError = MakeErrorType(WebGLVertexArray)

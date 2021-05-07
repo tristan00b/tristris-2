@@ -46,14 +46,34 @@ const opts = {
   jsdoc: {
     opts: {
       destination: 'build/doc',
-      template: 'templates/default',
+      template: 'node_modules/docdash',
     },
     recurseDepth: 10,
+    plugins: [
+      'plugins/markdown'
+    ],
     sourceType: 'module',
     templates: {
       cleverLinks: true,
       monospaceLinks: true
-  }
+    },
+    docdash: {
+      static: true,
+      sort: true,
+      search: true,
+      collapse: true,
+      typedefs: true,
+      removeQuotes: "none",
+      scripts: [],
+      menu:{
+        "Github repo": {
+          href:"https://github.com/tristan00b/tristris-2",
+          target:"_blank",
+          class:"menu-item",
+          id:"repository"
+        }
+      }
+    },
   },
   sass: {
     fiber: fiber,

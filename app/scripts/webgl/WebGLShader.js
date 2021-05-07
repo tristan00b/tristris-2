@@ -1,4 +1,5 @@
-import { MakeErrorType, MakeLogger } from "../util"
+import { MakeErrorType, MakeLogger } from "../Util"
+
 
 /**
  * Interface for creating and and managing a shader, and associated paramters/uniforms
@@ -7,7 +8,6 @@ export class WebGLShader
 {
   /**
    * Internally creates a WebGL shader and compiles it
-   * @constructor
    * @param {WebGL2RenderingContext} gl WebGL2 rendering context
    * @param {GLenum} type An enum specifying the shader's type (e.g. gl.VERTEX_SHADER)
    * @param {String} source The shader's source code
@@ -62,8 +62,16 @@ export class WebGLShader
   }
 }
 
-/** @see {@link util.MakeLogger} */
+
+/**
+ * @private
+ * @see {@link util.MakeLogger}
+ */
 const Log = MakeLogger(WebGLShader)
 
-/** @see {@link util.MakeErrorType} */
+
+/**
+ * @private
+ * @see {@link util.MakeErrorType}
+ */
 const WebGLShaderError = MakeErrorType(WebGLShader)

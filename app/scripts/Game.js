@@ -1,13 +1,14 @@
 // import InputHandler from './Input'
 import config from './config'
+import { InputHandler } from './Input'
 import { Renderer } from './Renderer'
-import { MakeErrorType, MakeLogger } from './util'
+import { MakeErrorType, MakeLogger } from './Util'
 
 
 /**
  * Class Game
  */
-class Game
+export class Game
 {
   /**
    * @constructor
@@ -16,11 +17,13 @@ class Game
     const canvas = document.getElementById(config.canvas.id)
     const context = canvas.getContext('webgl2')
 
+    const input = new InputHandler
     const renderer = new Renderer({ canvas, context })
 
     Object.assign(this, {
       config,
       frameId:0,
+      input,
       renderer,
     })
   }
@@ -38,7 +41,7 @@ class Game
 
     this.__draw__({ state: s1 })
 
-    // this.running && window.requestAnimationFrame(time => this.__loop__({ t0:t1, t1:time, state:s1 }))
+    this.running && window.requestAnimationFrame(time => this.__loop__({ t0:t1, t1:time, state:s1 }))
   }
 
   /**
@@ -62,14 +65,6 @@ class Game
   {
     this.renderer.draw(state)
   }
-
-  __resizeCanvas__()
-  {
-    this.canvas.width = window.innerWidth
-    this.canvas.height = window.innerHeight
-  }
-
-
 
   /**
    * Starts the game loop
@@ -102,7 +97,15 @@ class Game
 }
 
 
-const GameError = MakeErrorType(Game)
+/**
+ * @private
+ * @see {@link util.MakeLogger}
+ */
 const Log = MakeLogger(Game)
 
-export { Game }
+
+/**
+ * @private
+ * @see {@link util.MakeErrorType}
+ */
+const GameError = MakeErrorType(Game)

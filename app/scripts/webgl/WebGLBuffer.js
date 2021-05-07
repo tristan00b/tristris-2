@@ -1,7 +1,6 @@
-import { MakeErrorType, MakeLogger } from "../util";
+import { MakeErrorType, MakeLogger } from "../Util";
 import WebGLUtil from "./WebGLUtil";
 
-/** @module webgl/WebGLBuffer */
 
 /**
  * An interface for storing data such as vertices or colors
@@ -60,8 +59,16 @@ export class WebGLBuffer
   }
 }
 
-/** @see {@link util.MakeLogger} */
+
+/**
+ * @private
+ * @see {@link util.MakeLogger}
+ */
 const Log = MakeLogger(WebGLBuffer)
 
-/** @see {@link util.MakeErrorType} */
+
+/**
+ * @private
+ * @see {@link util.MakeErrorType}
+ */
 const WebGLBufferError = MakeErrorType(WebGLBuffer)
