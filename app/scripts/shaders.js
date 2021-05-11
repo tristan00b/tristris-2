@@ -3,13 +3,12 @@ export const shaders = {
 vsource: `#version 300 es
 in vec4 vertex_position;
 
-uniform vec4 screen_resolution;
-uniform mat4 model_view_matrix;
+uniform mat4 model_matrix;
+uniform mat4 view_matrix;
 uniform mat4 projection_matrix;
 
 void main() {
-
-  gl_Position = projection_matrix * model_view_matrix * (vertex_position / screen_resolution);
+  gl_Position = projection_matrix * view_matrix * model_matrix * vertex_position;
 }
 
 `,

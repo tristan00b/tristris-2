@@ -29,16 +29,16 @@ export class WebGLShader
       throw new WebGLShaderError(`${shaderType}_SHADER compilation failed:\n\t${shaderLog}`)
     }
 
-    this._shaderId = shader
+    this._location = shader
   }
 
   /**
    * Returns a WebGL reference to the shader
    * @type {WebGLShader}
    */
-  get shaderId()
+  get location()
   {
-    return this._shaderId
+    return this._location
   }
 
   /**
@@ -49,7 +49,7 @@ export class WebGLShader
    */
   getParameter(gl, name)
   {
-    return gl.getShaderParameter(gl, this.shaderId, name)
+    return gl.getShaderParameter(gl, this.location, name)
   }
 
   /**
@@ -58,7 +58,7 @@ export class WebGLShader
    */
   destroy(gl)
   {
-    gl.deleteShader(this.shaderId)
+    gl.deleteShader(this.location)
   }
 }
 

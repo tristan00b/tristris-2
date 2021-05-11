@@ -41,7 +41,7 @@ export class WebGLProgram
    */
   attachShaders(gl, ...shaders)
   {
-    shaders.forEach(s => gl.attachShader(this.location, s.shaderId))
+    shaders.forEach(s => gl.attachShader(this.location, s.location))
   }
 
   /**

@@ -1,4 +1,4 @@
-import { mat4 } from 'gl-matrix'
+import { mat4, vec3 } from 'gl-matrix'
 import { MakeErrorType, MakeLogger } from './Util'
 
 
@@ -7,32 +7,61 @@ import { MakeErrorType, MakeLogger } from './Util'
  */
 export class Camera
 {
-  /**
-   * @constructor
-   * @param {WebGL2RenderingContext} gl WebGL2 rendering context
-   * @param {*} param1
-   */
-  constructor(gl, { near, far, fovy, aspect } = {}) {
-    near   ??= 0.1
-    far    ??= 100.0
-    fovy   ??= 60 * Math.PI / 180
-    aspect ??= gl.canvas.clientWidth / gl.canvas.clientHeight
-    this._projectionMatrix = mat4.create()
+  constructor({ lookat, perspective } = {})
+  {
+    lookat
+      ? (this.lookat  = lookat            )
+      : (this._lookat = mat4.create()     )
 
-    mat4.perspective(this._projectionMatrix,
-      fovy,
-      aspect,
-      near,
-      far)
+    perspective
+      ? (this.perspective  = perspective  )
+      : (this._perspective = mat4.create())
+  }
+
+  set lookat({ eye, at, up })
+  {
+    this._eye =  eye ?? this._eye ?? [0, 0, 0]
+    this._at  =  at  ?? this._at  ?? [0, 0, 0]
+    this._up  =  up  ?? this._up  ?? [0, 0, 0]
+
+    this._lookat = mat4.lookAt(mat4.create(),
+      this._eye,
+      this._at,
+      this._up)
+  }
+
+  get lookat()
+  {
+    return this._lookat
+  }
+
+  set perspective({ near, far, fovy, aspect })
+  {
+    this._near   = near   ?? this._near   ?? 0.1,
+    this._far    = far    ?? this._far    ?? 100.0,
+    this._fovy   = fovy   ?? this._fovy   ?? 45.0 * Math.PI / 180.0,
+    this._aspect = aspect ?? this._aspect ?? 300/150
+
+    this._perspective = mat4.perspective(mat4.create(),
+      this._fovy,
+      this._aspect,
+      this._near,
+      this._far)
+  }
+
+  get perspective()
+  {
+    return this._perspective
   }
 
   /**
-   * Returns a projection matrix
-   * @type {mat4}
+   * @param {Object} args
+   * @param {number} args.width
+   * @param {number} args.height
    */
-  get projectionMatrix()
+  aspectFrom({ width, height }) // ignore coverage
   {
-    return this._projectionMatrix
+    this.perspective = { aspect: width/height }
   }
 }
 
