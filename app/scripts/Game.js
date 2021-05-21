@@ -1,18 +1,17 @@
 import { mat4 } from 'gl-matrix'
 
-// import InputHandler from './Input'
 import { Camera } from './Camera'
-import config from './config'
 import { InputHandler } from './Input'
 import { Mesh } from  './Mesh'
-import { Model } from './Model'
+import { MeshData } from './MeshData'
 import { Renderer } from './Renderer'
+import { SceneGraph } from './SceneGraph'
+import { SceneNode } from './SceneNode'
 import { ShaderProgram } from './ShaderProgram'
 import { shaders } from './shaders'
 import { MakeErrorType, MakeLogger } from './Util'
 
-
-import * as WebGL from './WebGL'
+import config from './config'
 import WebGLUtil from './webgl/WebGLUtil'
 
 /**
@@ -39,19 +38,19 @@ export class Game
       [gl.FRAGMENT_SHADER, shaders.fsource]
     )
 
-    const vertices = [
-      1.0,  1.0, 0.0,
-     -1.0,  1.0, 0.0,
-     -1.0, -1.0, 0.0,
-      1.0, -1.0, 0.0,
-    ]
-    const indices = [ 0,1,2,2,3,0 ]
+    const data = new MeshData({
+      vertices: [
+        1.0,  1.0, 0.0,
+       -1.0,  1.0, 0.0,
+       -1.0, -1.0, 0.0,
+        1.0, -1.0, 0.0,
+      ],
+      indices: [ 0,1,2,2,3,0 ],
+      primtype: gl.TRIANGLES,
+    })
 
-    const mesh    = new Mesh({ vertices, indices, type: gl.TRIANGLES })
-    const models  = [
-      new Model({ gl, mesh, shader }),
-      new Model({ gl, mesh, shader, transform: mat4.fromTranslation(mat4.create(), [-1, 0, 0]) })
-    ]
+    const mesh = new Mesh({ gl, data, shader })
+
     const camera  = new Camera
     camera.lookat = {
       eye: [0, 0, 10],
@@ -59,29 +58,27 @@ export class Game
     }
     camera.perspective = {}
 
-    models.forEach(model => {
-      this.renderer.enqueue({ model, shader, camera })
-    })
+    const n0 = new SceneNode({ shader })
+    const n1 = new SceneNode({ mesh })
+    const n2 = new SceneNode({ mesh }).setWorldTransform(mat4.fromTranslation(mat4.create(), [-1, -0.5, 0]))
+
+    n0.addChildren(n1, n2)
+
+    const scene = new SceneGraph({ root: n0, camera })
+
+    this.renderer.enqueue(scene)
     // -----------------------------------------------------------------------------------------------------------------
 
     window.addEventListener('resize', this.resizeCanvas.bind(this))
     window.addEventListener('resize', camera.aspectFrom.bind(camera, this.canvas))
   }
 
-  /**
-   * The game loop
-   * @param {{ t0:number, t1:number, state:Object }} args
-   * @param {Object} args.t0 The time of the previous loop iteration
-   * @param {Object} args.t1 The time of the current loop iteration
-   * @param {Object} args.state The game state model
-   */
-  __loop__({ t0, t1, state:s0 })
+
+  __loop__(t0, t1)
   {
-    const s1 = this.__update__({ dt: t1-t0, state:s0 })
-
-    this.__draw__({ state: s1 })
-
-    this.running && window.requestAnimationFrame(time => this.__loop__({ t0:t1, t1:time, state:s1 }))
+    // this.scene.update(t1 - t2)
+    this.renderer.render()
+    this.running && window.requestAnimationFrame(t2 => this.__loop__(t1, t2))
   }
 
   /**
@@ -96,15 +93,6 @@ export class Game
     return state
   }
 
-  /**
-   * Draws the game state data
-   * @param {{ state:Object }} args
-   * @param {Object} args.state The game state model
-   */
-  __draw__({ state })
-  {
-    this.renderer.draw(this.camera)
-  }
 
   /**
    * Starts the game loop

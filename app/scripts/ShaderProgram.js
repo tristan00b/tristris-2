@@ -1,5 +1,7 @@
 import { MakeErrorType, MakeLogger } from './Util'
+import { createUniformSetters, createAttributeSetters, setParams } from './webgl/WebGLTypeSetters'
 import * as WebGL from './WebGL'
+import WebGLUtil from './webgl/WebGLUtil'
 
 export class ShaderProgram
 {
@@ -10,14 +12,18 @@ export class ShaderProgram
     this.program.attachShaders(gl, ...(this.shaders))
     this.program.linkProgram(gl)
 
-    this.attribute = {
+    this.attributes = {
       position: gl.getAttribLocation(this.program.location, 'vertex_position')
     }
-    this.uniform = {
-      modelMatrix:      gl.getUniformLocation(this.program.location, 'model_matrix'),
-      viewMatrix:       gl.getUniformLocation(this.program.location, 'view_matrix'),
-      projectionMatrix: gl.getUniformLocation(this.program.location, 'projection_matrix'),
-    }
+
+    this.setters = {}
+    this.setters.uniforms   = createUniformSetters(gl, this.program.location)
+    this.setters.attributes = createAttributeSetters(gl, this.program.location)
+  }
+
+  get location()
+  {
+    return this.program.location
   }
 
   use(gl)
@@ -30,12 +36,23 @@ export class ShaderProgram
     gl.useProgram(null)
   }
 
+  setUniforms(uniforms)
+  {
+    setParams(this.setters.uniforms, uniforms)
+  }
+
+  setAttributes(attributes)
+  {
+    setParams(this.setters.attributes, attributes)
+  }
+
   destroy(gl)
   {
     this.program.destroy(gl)
     this.shaders.forEach(s => s.destroy(gl))
   }
 }
+
 
 /**
  * @private

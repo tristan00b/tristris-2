@@ -1,5 +1,5 @@
 import { MakeErrorType, MakeLogger } from "../Util"
-
+import { createUniformSetters, createAttributeSetters, setParams } from './WebGLTypeSetters'
 
 /**
  * Interface for creating and and managing a shader, and associated paramters/uniforms
@@ -51,6 +51,8 @@ export class WebGLShader
   {
     return gl.getShaderParameter(gl, this.location, name)
   }
+
+
 
   /**
    * Marks the WebGL shader for deletion, which is deleted when shader is no longer in use.

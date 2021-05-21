@@ -17,6 +17,7 @@ export class Renderer
   {
     this.canvas = canvas ?? throw new RendererError('reference to canvas object not supplied')
     this.context = context ?? throw new RendererError('reference to the context not supplied')
+    this._task_queue = []
 
     const gl = this.context
     gl.enable(gl.CULL_FACE)
@@ -26,33 +27,18 @@ export class Renderer
     gl.clearColor(0,0,0,1)
   }
 
-  enqueue({ model, shader, camera })
+  enqueue(scene)
   {
-    this._queue ??= []
-    this._queue.push({ model, shader, camera })
+    this._task_queue.push(...scene.generateRenderTasks())
   }
 
-  draw()
+  render()
   {
-    const gl = this.context
-
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-
-    this._queue.forEach(({ model, shader, camera }) => {
-      shader.use(gl)
-
-        camera.projection = { aspect: this.canvas.width / this.canvas.height }
-
-        gl.uniformMatrix4fv(shader.uniform.modelMatrix, false, model.transform)
-        gl.uniformMatrix4fv(shader.uniform.projectionMatrix, false, camera.perspective)
-        gl.uniformMatrix4fv(shader.uniform.viewMatrix, false, camera.lookat)
-
-        model.draw(gl)
-
-      shader.unuse(gl)
-    })
+    this.context.clear(this.context.COLOR_BUFFER_BIT | this.context.DEPTH_BUFFER_BIT)
+    this._task_queue.forEach(task => task(this.context))
   }
 }
+
 
 /**
  * @private
