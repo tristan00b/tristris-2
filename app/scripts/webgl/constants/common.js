@@ -35,3 +35,11 @@ export const FLOAT_MAT3                                     = 0x8B5B
 export const FLOAT_MAT4                                     = 0x8B5C
 export const SAMPLER_2D                                     = 0x8B5E
 export const SAMPLER_CUBE                                   = 0x8B60
+
+/** Faces */
+export const CULL_FACE                                      = 0x0B44
+export const FRONT                                          = 0x0404
+export const BACK                                           = 0x0405
+export const FRONT_AND_BACK                                 = 0x0408
+export const CW                                             = 0x0900
+export const CCW                                            = 0x0901

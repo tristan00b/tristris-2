@@ -3,7 +3,7 @@ import { mat4 } from 'gl-matrix'
 import { Camera } from './Camera'
 import { InputHandler } from './Input'
 import { Mesh } from  './Mesh'
-import { MeshData } from './MeshData'
+import { MeshData, VertexAttributes } from './MeshData'
 import { Renderer } from './Renderer'
 import { SceneGraph } from './SceneGraph'
 import { SceneNode } from './SceneNode'
@@ -47,6 +47,9 @@ export class Game
       ],
       indices: [ 0,1,2,2,3,0 ],
       primtype: gl.TRIANGLES,
+      attribs: [
+        { type: VertexAttributes.POSITION, size: 3 }
+      ],
     })
 
     const mesh = new Mesh({ gl, data, shader })

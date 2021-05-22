@@ -14,7 +14,7 @@ export class Mesh
 {
   constructor({ gl, data, shader, usage=gl.STATIC_DRAW })
   {
-    const { vertices, indices, primtype } = data
+    const { vertices, indices, primtype, attribs } = data
 
     this._vao = new WebGL.VertexArray(gl)
     this._vao.bind(gl)
@@ -28,6 +28,7 @@ export class Mesh
         this._vbo[BufferT.INDEX_BUFFER] = new WebGL.ElementArrayBuffer(gl)
         this._vbo[BufferT.INDEX_BUFFER].bind(gl)
         this._vbo[BufferT.INDEX_BUFFER].data(gl, new Uint32Array(indices), usage)
+
         this._draw = gl => gl.drawElements(primtype, indices.length, gl.UNSIGNED_INT, 0)
       }
       else
@@ -35,8 +36,11 @@ export class Mesh
         this._draw = gl => gl.drawArrays(primtype, 0, vertices.length)
       }
 
-      this._vao.enableAttribute(gl, shader.attributes.position)
-      this._vao.defineAttributePointer(gl, shader.attributes.position, 3, gl.FLOAT)
+      attribs.forEach(attr => {
+        this._vao.enableAttribute(gl, attr.type)
+        this._vao.defineAttributePointer(gl, attr.type, attr.size, gl.FLOAT)
+      })
+
     this._vao.unbind(gl)
   }
 
