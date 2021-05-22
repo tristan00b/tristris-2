@@ -1,4 +1,4 @@
-import * as gl from './constants/common'
+import * as gl from './WebGLConstants'
 import WebGLUtil from './WebGLUtil'
 
 

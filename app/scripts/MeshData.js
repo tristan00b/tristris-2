@@ -1,5 +1,5 @@
 import { MakeErrorType, MakeLogger } from './Util'
-import * as gl from './webgl/constants/common'
+import * as gl from './webgl/WebGLConstants'
 
 
 export const VertexAttributes = Object.freeze({
