@@ -12,8 +12,8 @@ describe('MeshData', function () {
         interleaved: true,
         attribs: [
           { type: VertexAttributes.POSITION, size: 3 },
-          { type: VertexAttributes.NORMAL, size: 3 },
-          { type: VertexAttributes.COLOUR, size: 3 },
+          { type: VertexAttributes.NORMAL,   size: 3 },
+          { type: VertexAttributes.COLOUR,   size: 3 },
         ]
       }
 
@@ -58,13 +58,12 @@ describe('MeshData', function () {
       expect(_ => new MeshData(args)).toThrow(/attributes must be specified/)
     })
 
-    it('will throw if attributes if type data is missing or malformed', function () {
+    it('will throw if attribute data is missing or malformed', function () {
 
       const args = {
         vertices:    [1,2,3,4],
         indices:     [0,1,2,2,3,0],
         interleaved: true,
-        attribs: [{ size: 4 }]
       }
 
       args.attribs = [{ size: 4}]
