@@ -58,14 +58,14 @@ describe('Camera', function () {
 
     it('default constructs a perspective matrix', function () {
       const cam = new Camera
-      expect( cam.perspective.toString() ).toEqual( identity.toString() )
+      expect( cam.projection.toString() ).toEqual( identity.toString() )
     })
 
 
     it('cat generate a perspective matrix', function () {
       const cam = new Camera
       cam.perspective = { near, far, fovy, aspect }
-      expect( cam.perspective.toString() ).toEqual( perspective.toString() )
+      expect( cam.projection.toString() ).toEqual( perspective.toString() )
     })
 
     it('overwrites a perspective parameter when after already being set', function () {

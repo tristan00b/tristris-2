@@ -1,16 +1,16 @@
-import { MakeErrorType, MakeLogger } from '../Util'
-import { WebGLBuffer } from './WebGLBuffer'
+import { MakeErrorType, MakeLogger } from '../../utilities'
+import { Buffer } from './Buffer'
 
 
 /**
  * A specialization of WebGLBuffer
- * @extends WebGLBuffer
+ * @extends WebGL.Buffer
  */
-export class WebGLElementArrayBuffer extends WebGLBuffer
+export class ElementArrayBuffer extends Buffer
 {
   /**
    * @constructor
-   * @param {WebGL2RenderingContext} gl WebGL2 rendering context
+   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
    */
   constructor(gl)
   {
@@ -19,7 +19,7 @@ export class WebGLElementArrayBuffer extends WebGLBuffer
 
   /**
    * Binds the buffer to the gl.ELEMENT_ARRAY_BUFFER target
-   * @param {WebGL2RenderingContext} gl WebGL2 rendering context
+   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
    */
   bind(gl)
   {
@@ -28,7 +28,7 @@ export class WebGLElementArrayBuffer extends WebGLBuffer
 
   /**
    * Unbinds the buffer from the gl.ELEMENT_ARRAY_BUFFER target
-   * @param {WebGL2RenderingContext} gl WebGL2 rendering context
+   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
    */
   unbind(gl)
   {
@@ -37,7 +37,7 @@ export class WebGLElementArrayBuffer extends WebGLBuffer
 
   /**
    * Creates and initializes the buffer's data store
-   * @param {WebGL2RenderingContext} gl WebGL2 rendering context
+   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
    * @param {ArrayBuffer|SharedArrayBuffer|ArrayBufferView|null} data The data to copy to the data store. If `null`, a data store is still be created but will be uninitialized.
    * @param {GLenum} usage Specifies the intended usage pattern of the data store
    */
@@ -49,14 +49,14 @@ export class WebGLElementArrayBuffer extends WebGLBuffer
 
 
 /**
+ * @see {@link module:Engine/Utilities.MakeLogger}
  * @private
- * @see {@link util.MakeLogger}
  */
-const Log = MakeLogger(WebGLElementArrayBuffer)
+const Log = MakeLogger(ElementArrayBuffer)
 
 
 /**
+ * @see {@link module:Engine/Utilities.MakeErrorType}
  * @private
- * @see {@link util.MakeErrorType}
  */
-const WebGLElementArrayBufferError = MakeErrorType(WebGLElementArrayBuffer)
+const ElementArrayBufferError = MakeErrorType(ElementArrayBuffer)

@@ -1,13 +1,13 @@
-import { MakeErrorType, MakeLogger } from "../Util";
+import { MakeErrorType, MakeLogger } from "../../utilities";
 
 
 /**
  * Interface for manageing vertex array attributes
  */
-export class WebGLVertexArray
+export class VertexArray
 {
   /**
-   * @param {WebGL2RenderingContext} gl WebGL2 rendering context
+   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
    */
   constructor(gl)
   {
@@ -16,7 +16,8 @@ export class WebGLVertexArray
 
   /**
    * Returns a WebGL reference to the vertex array object
-   * @type {module:WebGL.Buffer}
+   * @type {Buffer}
+   * @readonly
    */
   get location()
   {
@@ -25,7 +26,7 @@ export class WebGLVertexArray
 
   /**
    * Binds the WebGLVertexArray to the buffer
-   * @param {WebGL2RenderingContext} gl WebGL2 rendering context
+   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
    */
   bind(gl)
   {
@@ -34,7 +35,7 @@ export class WebGLVertexArray
 
   /**
    * Unbinds the WebGLVertexArray from the buvver
-   * @param {WebGL2RenderingContext} gl WebGL2 rendering context
+   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
    */
   unbind(gl)
   {
@@ -43,7 +44,7 @@ export class WebGLVertexArray
 
   /**
    * Turns on the vertex attribue at the specified index into the list of attribute arrays
-   * @param {WebGL2RenderingContext} gl WebGL2 rendering context
+   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
    * @param {GLuint} index The index of the vertex attribute to enable
    */
   enableAttribute(gl, index)
@@ -53,7 +54,7 @@ export class WebGLVertexArray
 
   /**
    * Turns off the vertex attribute array at the specified index
-   * @param {WebGL2RenderingContext} gl WebGL2 rendering context
+   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
    * @param {GLuint} index The index of the vertex attribute to disable
    */
   disableAttribute(gl, index)
@@ -63,13 +64,13 @@ export class WebGLVertexArray
 
   /**
    * Specifies the location and data format of a generic vertex attribute to use while rendering
-   * @param {WebGL2RenderingContext} gl WebGL2 rendering context
+   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
    * @param {GLuint} index The index of the vertex attribute to be used
    * @param {GLint} components The number of components per vertex attribute (must be in range [0..4])
    * @param {GLenum} type The component data type (e.g. gl.FLOAT)
-   * @param {Boolean} [normalize] Specifies whether integer data values should be normalized
-   * @param {GLsizei} [stride] The offset between consecutive attributes in the array (must be in range [0..255])
-   * @param {GLintptr} [offset] The offset in bytes of the first component in the vertex attribute array (must be a multiple of the byte length of `type`)
+   * @param {Boolean} [normalize=false] Specifies whether integer data values should be normalized
+   * @param {GLsizei} [stride=0] The offset between consecutive attributes in the array (must be in range [0..255])
+   * @param {GLintptr} [offset=0] The offset in bytes of the first component in the vertex attribute array (must be a multiple of the byte length of `type`)
    */
   defineAttributePointer(gl, index, components, type, normalize=false, stride=0, offset=0)
   {
@@ -79,14 +80,14 @@ export class WebGLVertexArray
 
 
 /**
+ * @see {@link module:Engine/Utilities.MakeLogger}
  * @private
- * @see {@link util.MakeLogger}
  */
-const Log = MakeLogger(WebGLVertexArray)
+const Log = MakeLogger(VertexArray)
 
 
 /**
+ * @see {@link module:Engine/Utilities.MakeErrorType}
  * @private
- * @see {@link util.MakeErrorType}
  */
-const WebGLVertexArrayError = MakeErrorType(WebGLVertexArray)
+const VertexArrayError = MakeErrorType(VertexArray)

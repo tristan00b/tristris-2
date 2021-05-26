@@ -1,14 +1,13 @@
-import { MakeErrorType, MakeLogger } from './Util'
+import { MakeErrorType, MakeLogger } from '../utilities'
 
 
 /**
  * Handles mouse and keyboard input events
+ *
+ * @todo document input handlers
  */
 export class InputHandler
 {
-  /**
-   * @constructor
-   */
   constructor()
   {
     document.addEventListener('keydown', this.handleKeyDnEvent)
@@ -43,6 +42,7 @@ export class InputHandler
   }
 }
 
+
 /**
  * @enum {number}
  * @private
@@ -56,14 +56,14 @@ export class InputHandler
 
 
 /**
+ * @see {@link module:Util.MakeLogger}
  * @private
- * @see {@link util.MakeLogger}
  */
 const Log = MakeLogger(InputHandler)
 
 
 /**
+ * @see {@link module:Util.MakeErrorType}
  * @private
- * @see {@link util.MakeErrorType}
  */
 const InputHandlerError = MakeErrorType(InputHandler)

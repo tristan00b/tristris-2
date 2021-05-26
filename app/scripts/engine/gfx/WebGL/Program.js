@@ -1,13 +1,13 @@
-import { MakeErrorType, MakeLogger } from "../Util"
+import { MakeErrorType, MakeLogger } from "../../utilities"
 
 
 /**
  * Interface for creating and managing a WebGL shader program
  */
-export class WebGLProgram
+export class Program
 {
   /**
-   * @param {WebGL2RenderingContext} gl WebGL2 rendering context
+   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
    */
   constructor(gl)
   {
@@ -15,8 +15,8 @@ export class WebGLProgram
   }
 
   /**
-   * Returns a WebGL reference to the buffer
-   * @type {WebGLBuffer}
+   * Returns a WebGL reference to the program
+   * @type {WebGLProgram}
    */
   get location()
   {
@@ -25,7 +25,7 @@ export class WebGLProgram
 
   /**
    * Returns information about the program
-   * @param {WebGL2RenderingContext} gl WebGL2 rendering context
+   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
    * @param {String} name The name of the paramter to be retrieved
    * @returns {String}
    */
@@ -36,8 +36,8 @@ export class WebGLProgram
 
   /**
    * Attaches shaders to the WebGL program
-   * @param {WebGL2RenderingContext} gl WebGL2 rendering context
-   * @param  {...WebGLShader} shaders
+   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
+   * @param  {...Shader} shaders
    */
   attachShaders(gl, ...shaders)
   {
@@ -46,8 +46,8 @@ export class WebGLProgram
 
   /**
    * Links the program, completing the process of preparing the GPU for using the program's shaders
-   * @param {WebGL2RenderingContext} gl WebGL2 rendering context
-   * @throws {WebGLProgramError}
+   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
+   * @throws {ShaderProgramError}
    */
   linkProgram(gl)
   {
@@ -56,13 +56,13 @@ export class WebGLProgram
     this.getParameter(gl, gl.LINK_STATUS) || do {
       const programLog = gl.getProgramInfoLog(this.location)
 
-      throw new WebGLProgramError(`shader linking failed:\t\n${programLog}`)
+      throw new ShaderProgramError(`shader linking failed:\t\n${programLog}`)
     }
   }
 
   /**
    * Sets the program as part of the current rendering state
-   * @param {WebGL2RenderingContext} gl WebGL2 rendering context
+   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
    */
   use(gl)
   {
@@ -71,7 +71,7 @@ export class WebGLProgram
 
   /**
    * Deletes the program
-   * @param {WebGL2RenderingContext} gl WebGL2 rendering context
+   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
    */
   destroy(gl)
   {
@@ -82,14 +82,14 @@ export class WebGLProgram
 
 
 /**
+ * @see {@link module:Engine/Utilities.MakeLogger}
  * @private
- * @see {@link util.MakeLogger}
  */
-const Log = MakeLogger(WebGLProgram)
+const Log = MakeLogger(Program)
 
 
 /**
+ * @see {@link module:Engine/Utilities.MakeErrorType}
  * @private
- * @see {@link util.MakeErrorType}
  */
-const WebGLProgramError = MakeErrorType(WebGLProgram)
+const ProgramError = MakeErrorType(Program)

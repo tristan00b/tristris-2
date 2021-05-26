@@ -1,17 +1,18 @@
-import { MakeErrorType, MakeLogger } from "../Util"
-import { createUniformSetters, createAttributeSetters, setParams } from './WebGLTypeSetters'
+import { createUniformSetters, createAttributeSetters, setParams } from './ShaderTypeSetters'
+import { MakeErrorType, MakeLogger } from "../../utilities"
+
 
 /**
  * Interface for creating and and managing a shader, and associated paramters/uniforms
  */
-export class WebGLShader
+export class Shader
 {
   /**
    * Internally creates a WebGL shader and compiles it
-   * @param {WebGL2RenderingContext} gl WebGL2 rendering context
+   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
    * @param {GLenum} type An enum specifying the shader's type (e.g. gl.VERTEX_SHADER)
    * @param {String} source The shader's source code
-   * @throws {WebGLShaderError}
+   * @throws {ShaderError}
    */
   constructor(gl, type, source)
   {
@@ -23,10 +24,10 @@ export class WebGLShader
       const shaderType = type == gl.VERTEX_SHADER   ? 'VERTEX'
                        : type == gl.FRAGMENT_SHADER ? 'FRAGMENT'
                        : type == gl.COMPUTE_SHADER  ? 'COMPUTE'
-                       : 'unknown' /* should not happen */
+                       : 'unknown'
       const shaderLog = gl.getShaderInfoLog(shader)
 
-      throw new WebGLShaderError(`${shaderType}_SHADER compilation failed:\n\t${shaderLog}`)
+      throw new ShaderError(`${shaderType}_SHADER compilation failed:\n\t${shaderLog}`)
     }
 
     this._location = shader
@@ -35,6 +36,7 @@ export class WebGLShader
   /**
    * Returns a WebGL reference to the shader
    * @type {WebGLShader}
+   * @readonly
    */
   get location()
   {
@@ -43,7 +45,7 @@ export class WebGLShader
 
   /**
    * Returns information about the shader
-   * @param {WebGL2RenderingContext} gl WebGL2 rendering context
+   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
    * @param {String} name The name of the shader parameter to retrieve
    * @returns {String}
    */
@@ -52,11 +54,9 @@ export class WebGLShader
     return gl.getShaderParameter(gl, this.location, name)
   }
 
-
-
   /**
-   * Marks the WebGL shader for deletion, which is deleted when shader is no longer in use.
-   * @param {WebGL2RenderingContext} gl WebGL2 rendering context
+   * Marks the WebGL shader for deletion, which is deleted when shader is no longer in use
+   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
    */
   destroy(gl)
   {
@@ -66,14 +66,14 @@ export class WebGLShader
 
 
 /**
+ * @see {@link module:Engine/Utilities.MakeLogger}
  * @private
- * @see {@link util.MakeLogger}
  */
-const Log = MakeLogger(WebGLShader)
+const Log = MakeLogger(Shader)
 
 
 /**
+ * @see {@link module:Engine/Utilities.MakeErrorType}
  * @private
- * @see {@link util.MakeErrorType}
  */
-const WebGLShaderError = MakeErrorType(WebGLShader)
+const ShaderError = MakeErrorType(Shader)

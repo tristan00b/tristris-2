@@ -1,3 +1,9 @@
+/**
+ * Tristris 2 Config
+ *
+ * @todo document config structure
+ */
+
 const config = {
   tetromino: {
     I: {

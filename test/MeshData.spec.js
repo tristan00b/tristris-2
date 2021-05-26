@@ -1,4 +1,4 @@
-import { MeshData, VertexAttributes } from '../app/scripts/MeshData'
+import { MeshData, VertexAttributeType } from '../app/scripts/MeshData'
 
 describe('MeshData', function () {
 
@@ -11,9 +11,9 @@ describe('MeshData', function () {
         indices:     [0,1,2,2,3,0],
         interleaved: true,
         attribs: [
-          { type: VertexAttributes.POSITION, size: 3 },
-          { type: VertexAttributes.NORMAL,   size: 3 },
-          { type: VertexAttributes.COLOUR,   size: 3 },
+          { type: VertexAttributeType.POSITION, size: 3 },
+          { type: VertexAttributeType.NORMAL,   size: 3 },
+          { type: VertexAttributeType.COLOUR,   size: 3 },
         ]
       }
 
@@ -26,9 +26,9 @@ describe('MeshData', function () {
         indices:     [0,1,2,2,3,0],
         interleaved: true,
         attribs: [
-          { type: VertexAttributes.POSITION, size: 3 },
-          { type: VertexAttributes.NORMAL,   size: 3 },
-          { type: VertexAttributes.COLOUR,   size: 3 },
+          { type: VertexAttributeType.POSITION, size: 3 },
+          { type: VertexAttributeType.NORMAL,   size: 3 },
+          { type: VertexAttributeType.COLOUR,   size: 3 },
         ]
       }
 
@@ -69,13 +69,13 @@ describe('MeshData', function () {
       args.attribs = [{ size: 4}]
       expect(_ => new MeshData(args)).toThrow(/attributes require a type/)
 
-      args.attribs = [{ type: VertexAttributes.POSITION }]
+      args.attribs = [{ type: VertexAttributeType.POSITION }]
       expect(_ => new MeshData(args)).toThrow(/attributes require a size/)
 
       args.attribs = [{ type: -1, size: 4}]
       expect(_ => new MeshData(args)).toThrow(/invalid attribute type/)
 
-      args.attribs = [{ type: VertexAttributes.POSITION, size: 0}]
+      args.attribs = [{ type: VertexAttributeType.POSITION, size: 0}]
       expect(_ => new MeshData(args)).toThrow(/attribute size limited to between 1 and 4/)
     })
 

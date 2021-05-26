@@ -1,12 +1,19 @@
 import { mat4, vec3 } from 'gl-matrix'
-import { MakeErrorType, MakeLogger } from './Util'
+
+import { MakeErrorType, MakeLogger } from '../utilities'
 
 
 /**
- *
+ * Represents the view point from which a scene is to be drawn
  */
 export class Camera
 {
+  /**
+   *
+   * @param {Object}        [args]
+   * @param {external:mat4} [args.lookat] A 4x4 lookat transform matrix (defaults to the identity matrix)
+   * @param {external:mat4} [args.perspective] A 4x4 perspective transform matrix (defaults to the identity matrix)
+   */
   constructor({ lookat, perspective } = {})
   {
     lookat
@@ -18,6 +25,10 @@ export class Camera
       : (this._perspective = mat4.create())
   }
 
+  /**
+   * Sets the lookat tranform matrix
+   * @type {Object<external:vec3,external:vec3,external:vec3>}
+   */
   set lookat({ eye, at, up })
   {
     this._eye =  eye ?? this._eye ?? [0, 0, 0]
@@ -30,6 +41,11 @@ export class Camera
       this._up)
   }
 
+  /**
+   * Gets lookat transform matrix
+   * @type {external:mat4}
+   * @readonly
+   */
   get lookat()
   {
     return this._lookat
@@ -49,7 +65,11 @@ export class Camera
       this._far)
   }
 
-  get perspective()
+  /**
+   * @type {external:mat4}
+   * @readonly
+   */
+  get projection()
   {
     return this._perspective
   }
@@ -59,7 +79,7 @@ export class Camera
    * @param {number} args.width
    * @param {number} args.height
    */
-  aspectFrom({ width, height }) // ignore coverage
+  setAspect({ width, height }) // ignore coverage
   {
     this.perspective = { aspect: width/height }
   }
@@ -67,14 +87,14 @@ export class Camera
 
 
 /**
+ * @see {@link module:Engine/Utilities.MakeLogger}
  * @private
- * @see {@link util.MakeLogger}
  */
 const Log = MakeLogger(Camera)
 
 
 /**
+ * @see {@link module:Engine/Utilities.MakeErrorType}
  * @private
- * @see {@link util.MakeErrorType}
  */
 const CameraError = MakeErrorType(Camera)

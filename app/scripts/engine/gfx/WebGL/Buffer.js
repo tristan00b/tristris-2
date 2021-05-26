@@ -1,15 +1,13 @@
-import { MakeErrorType, MakeLogger } from "../Util";
-import WebGLUtil from "./WebGLUtil";
-
+import { MakeErrorType, MakeLogger } from "../../utilities"
+import { onErrorThrowAs } from './wrappers'
 
 /**
  * An interface for storing data such as vertices or colors
  */
-export class WebGLBuffer
+export class Buffer
 {
   /**
-   * @constructor
-   * @param {WebGL2RenderingContext} gl WebGL2 rendering context
+   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
    */
   constructor(gl)
   {
@@ -27,18 +25,18 @@ export class WebGLBuffer
 
   /**
    * Binds the buffer to `target`
-   * @param {WebGL2RenderingContext} gl WebGL2 rendering context
+   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
    * @param {GLenum} target The binding point (e.g. gl.ARRAY_BUFFER)
    */
   bind(gl, target)
   {
     gl.bindBuffer(target, this.location)
-    WebGLUtil.onErrorThrowAs(gl, WebGLBufferError)
+    onErrorThrowAs(gl, BufferError)
   }
 
   /**
    * Unbinds the buffer from `target`
-   * @param {WebGL2RenderingContext} gl WebGL2 rendering context
+   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
    */
   unbind(gl)
   {
@@ -47,7 +45,7 @@ export class WebGLBuffer
 
   /**
    * Creates and initializes the buffer's data store
-   * @param {WebGL2RenderingContext} gl WebGL2 rendering context
+   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
    * @param {GLenum} target The binding point (e.g. gl.ARRAY_BUFFER)
    * @param {ArrayBuffer|SharedArrayBuffer|ArrayBufferView|null} data The data to copy to the data store. If `null`, a data store is still be created but will be uninitialized.
    * @param {GLenum} usage Specifies the intended usage pattern of the data store
@@ -55,20 +53,20 @@ export class WebGLBuffer
   data(gl, target, data, usage)
   {
     gl.bufferData(target, data, usage)
-    WebGLUtil.onErrorThrowAs(gl, WebGLBufferError)
+    onErrorThrowAs(gl, BufferError)
   }
 }
 
 
 /**
+ * @see {@link module:Engine/Utilities.MakeLogger}
  * @private
- * @see {@link util.MakeLogger}
  */
-const Log = MakeLogger(WebGLBuffer)
+const Log = MakeLogger(Buffer)
 
 
 /**
+ * @see {@link module:Engine/Utilities.MakeErrorType}
  * @private
- * @see {@link util.MakeErrorType}
  */
-const WebGLBufferError = MakeErrorType(WebGLBuffer)
+const BufferError = MakeErrorType(Buffer)
