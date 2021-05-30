@@ -1,4 +1,4 @@
-import { MakeErrorType, MakeLogger } from '../utilities'
+import { MakeConstEnumerator, MakeErrorType, MakeLogger } from '../utilities'
 
 
 /**
@@ -44,15 +44,19 @@ export class InputHandler
 
 
 /**
- * @enum {number}
- * @private
+ * Enumerates mouse buttons 1-3
+ * @enum {Number}
+ * @property {Number} LEFT
+ * @property {Number} MIDDLE
+ * @property {Number} RIGHT
  * @readonly
+ * @private
  */
- const MouseButton = Object.freeze({
-  LEFT   : 0,
-  MIDDLE : 1,
-  RIGHT  : 2
-})
+const MouseButton = MakeConstEnumerator('MouseButton', [
+  'LEFT',
+  'MIDDLE',
+  'RIGHT',
+])
 
 
 /**

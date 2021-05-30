@@ -1,25 +1,23 @@
 import * as WebGL from './WebGL/all'
 import { mat4 } from 'gl-matrix'
 import { MeshData } from './MeshData'
-import { MakeErrorType, MakeLogger } from '../utilities'
+import { MakeConstEnumerator, MakeErrorType, MakeLogger } from '../utilities'
 
 
 /**
  * Enumerates the types of WebGL Array Buffers
  * @enum {Number}
- * @property {Number} VERTEX_BUFFER 0
- * @property {Number} INDEX_BUFFER  1
- * @property {Number} NUM_BUFFERS   2
+ * @property {Number} VERTEX_BUFFER
+ * @property {Number} INDEX_BUFFER
+ * @property {Number} NUM_BUFFER_TYPES
  * @readonly
  * @private
  */
-const BufferType = {}
-
-Object.defineProperties(BufferType, {
-  VERTEX_BUFFER : { value: 0, writable: false, enumerable: true },
-  INDEX_BUFFER  : { value: 1, writable: false, enumerable: true },
-  NUM_BUFFERS   : { value: 2, writable: false, enumerable: true },
-})
+const BufferType = MakeConstEnumerator('BufferType', [
+  'VERTEX_BUFFER',
+  'INDEX_BUFFER',
+  'NUM_BUFFER_TYPES'
+])
 
 
 /**

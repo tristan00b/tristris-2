@@ -1,4 +1,4 @@
-import { MakeErrorType, MakeLogger } from '../utilities'
+import { MakeConstEnumerator, MakeErrorType, MakeLogger } from '../utilities'
 import * as gl from './WebGL/constants'
 
 
@@ -8,22 +8,20 @@ import * as gl from './WebGL/constants'
 /**
  * Enumerates the types of vertex attributes
  * @enum {Number}
- * @property {Number} POSITION       0
- * @property {Number} COLOUR         1
- * @property {Number} NORMAL         2
- * @property {Number} TEXTURE        3
- * @property {Number} MAX_ATTRIBUTES 4
+ * @property {Number} POSITION
+ * @property {Number} COLOUR
+ * @property {Number} NORMAL
+ * @property {Number} TEXTURE
+ * @property {Number} NUM_ATTRIBUTE_TYPES
  * @readonly
  */
-export const VertexAttributeType = {}
-
-Object.defineProperties(VertexAttributeType, {
-  POSITION       : { value: 0, writeable: false, enumerable: true },
-  COLOUR         : { value: 1, writeable: false, enumerable: true },
-  NORMAL         : { value: 2, writeable: false, enumerable: true },
-  TEXTURE        : { value: 3, writeable: false, enumerable: true },
-  MAX_ATTRIBUTES : { value: 4, writeable: false, enumerable: true },
-})
+export const VertexAttributeType = MakeConstEnumerator('VertexAttributeType', [
+  'POSITION',
+  'COLOUR',
+  'NORMAL',
+  'TEXTURE',
+  'NUM_ATTRIBUTE_TYPES',
+])
 
 
 /**
@@ -78,7 +76,7 @@ export class MeshData
       type ?? throw new MeshDataError('attributes require a type to be defined')
       size ?? throw new MeshDataError('attributes require a size to be defined')
 
-      type >= 0 && type < VertexAttributeType.MAX_ATTRIBUTES ||
+      type >= 0 && type < VertexAttributeType.NUM_ATTRIBUTE_TYPES ||
         throw new MeshDataError(`invalid attribute type specified (received type: ${type})`)
 
       size > 0 && size <= 4 ||
