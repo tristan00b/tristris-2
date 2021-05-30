@@ -7,7 +7,7 @@
 /**
  * Returns a new type `T` derived from of `Error`
  * @param {Type} T The type to derive an error type from
- * @returns {TypeError} A new error type `${T.name}Error`
+ * @returns {*} A new error type `${T.name}Error`
  */
 export function MakeErrorType(T) {
   return class extends Error {
@@ -24,7 +24,7 @@ export function MakeErrorType(T) {
  * Log.debug('this is a message') // logs "MyType: this is a log message"
  *
  * @param {Type} T The type to derive from
- * @returns {TypeLogger} A new logger type `${T.name}Logger`
+ * @returns {*} A new logger type `${T.name}Logger`
  */
 export function MakeLogger(T) {
   return class {
@@ -33,7 +33,7 @@ export function MakeLogger(T) {
     /**
      * Writes to `console.debug`
      * @param {*} msg
-     * @param  {...any} rest
+     * @param {...any} rest
      */
     static debug(msg, ...rest)
     {
@@ -43,7 +43,7 @@ export function MakeLogger(T) {
     /**
      * Writes to `console.info`
      * @param {*} msg
-     * @param  {...any} rest
+     * @param {...any} rest
      */
     static info(msg, ...rest)
     {
@@ -53,7 +53,7 @@ export function MakeLogger(T) {
     /**
      * Writes to console.warn
      * @param {*} msg
-     * @param  {...any} rest
+     * @param {...any} rest
      */
     static warn(msg, ...rest)
     {
@@ -63,7 +63,7 @@ export function MakeLogger(T) {
     /**
      * Writes to console.error
      * @param {*} msg
-     * @param  {...any} rest
+     * @param {...any} rest
      */
     static error(msg, ...rest)
     {
