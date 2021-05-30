@@ -47,7 +47,7 @@ export class Program
   /**
    * Links the program, completing the process of preparing the GPU for using the program's shaders
    * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
-   * @throws {ShaderProgramError}
+   * @throws {ShaderProgramError} Throws on program link failure
    */
   linkProgram(gl)
   {

@@ -176,11 +176,12 @@ const ShaderAttributeSetters = Object.freeze({
  * @param {external:GLint|external:WebGLUniformLocation} location The location of a WebGLShader attribute, or uniform, as returned by WebGL.{getAttribLocation|getUniformLocation}, respectively
  * @param {ShaderParameterSetters|ShaderUniformSetters}
  * @returns {ShaderParameterSetterCallback} A shader parameter setter callback
+ * @throws {ShaderTypeSetterError} Throws on unknown setter type info
  * @private
  */
 function createShaderSetter(gl, setterInfo, location, shaderSetters)
 {
-  const typeInfo = ShaderTypeSetterMap[setterInfo.type] ?? throw new ShaderTypeSetterError(`Mising setter type: ${setterInfo.type}`)
+  const typeInfo = ShaderTypeSetterMap[setterInfo.type] ?? throw new ShaderTypeSetterError(`Missing setter type info: ${setterInfo.type}`)
   const setter   = shaderSetters[typeInfo.setter]
   const Type     = typeInfo.type
 
@@ -194,6 +195,7 @@ function createShaderSetter(gl, setterInfo, location, shaderSetters)
  * @param {external:WebGLProgram} program The WebGL shader program for which the setters are being created
  * @param {SetterType} type The type of setter to create
  * @returns {ShaderParameterSetterCallback[]} An array of shader parameter setter callbacks
+ * @throws {ShaderTypeSetterError} Throws on unknown setter types
  * @private
  */
 function createShaderSetters(gl, program, type)

@@ -53,6 +53,7 @@ export class MeshData
    * Checks the vertices and returns them if they are found to be well-formed (`vertices` is neither `null|undefined` nor empty)
    * @param {Number[]} vertices
    * @returns {Number[]} vertices
+   * @throws {MeshDataError} Throws when `vertices` is undefined or empty
    */
   checkVertices(vertices)
   {
@@ -67,6 +68,7 @@ export class MeshData
    * - The `size` specifies a number of components from 1 to 4 inclusive
    * @param {Array.<{ type: VertexAttributeType, size: Number}>} attribs
    * @returns {Array.<{ type: VertexAttributeType, size: Number}>} attribs
+   * @throws {MeshDataError} Throws when the attribute check has failed
    */
   checkAttributes(attribs)
   {

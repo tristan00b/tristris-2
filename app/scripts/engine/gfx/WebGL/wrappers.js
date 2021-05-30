@@ -32,6 +32,7 @@ export function resizeCanvas(gl) {
 /**
  * Convenience method for logging information about the rendering context
  * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
+ * @throws Throws on failure to acquire WebGL context attributes
  */
 export function logContextInfo(gl)
 {
@@ -67,6 +68,7 @@ export function getError(gl)
  * Checks for WebGL errors and throws as `ErrorType` if any are found
  * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
  * @param {Type} ErrorType The type to throw as
+ * @throws {*} Throws instance of `ErrorType` when a WebGL error has occured
  */
 export function onErrorThrowAs(gl, ErrorType)
 {

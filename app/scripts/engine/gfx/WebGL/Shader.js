@@ -12,7 +12,7 @@ export class Shader
    * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
    * @param {external:GLenum} type An enum specifying the shader's type (e.g. gl.VERTEX_SHADER)
    * @param {String} source The shader's source code
-   * @throws {ShaderError}
+   * @throws {ShaderError} Throws on shader compilation failure
    */
   constructor(gl, type, source)
   {
