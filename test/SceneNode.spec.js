@@ -1,4 +1,4 @@
-import { SceneNode } from '../app/scripts/SceneNode'
+import { SceneNode } from '../app/scripts/engine/gfx/SceneNode'
 
 describe('SceneNode', function () {
 

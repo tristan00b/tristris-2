@@ -1,4 +1,4 @@
-import { MeshData, VertexAttributeType } from '../app/scripts/MeshData'
+import { MeshData, VertexAttributeType } from '../app/scripts/engine/gfx/MeshData'
 
 describe('MeshData', function () {
 
