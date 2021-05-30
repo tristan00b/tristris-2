@@ -12,6 +12,11 @@
  */
 
 /**
+ * @external WebGL.GLenum
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Types}
+ */
+
+/**
  * @external WebGL.GLint
  * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Types}
  */

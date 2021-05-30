@@ -38,7 +38,7 @@ export class ArrayBuffer extends Buffer
    * Creates and initializes the buffer's data store
    * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
    * @param {TypedArray|null} data The data to copy to the data store. If `null`, a data store is still be created but will be uninitialized.
-   * @param {GLenum} usage Specifies the intended usage pattern of the data store
+   * @param {external:GLenum} usage Specifies the intended usage pattern of the data store
    */
   data(gl, data, usage)
   {

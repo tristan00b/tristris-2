@@ -67,7 +67,7 @@ export class VertexArray
    * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
    * @param {GLuint} index The index of the vertex attribute to be used
    * @param {GLint} components The number of components per vertex attribute (must be in range [0..4])
-   * @param {GLenum} type The component data type (e.g. gl.FLOAT)
+   * @param {external:GLenum} type The component data type (e.g. gl.FLOAT)
    * @param {Boolean} [normalize=false] Specifies whether integer data values should be normalized
    * @param {GLsizei} [stride=0] The offset between consecutive attributes in the array (must be in range [0..255])
    * @param {GLintptr} [offset=0] The offset in bytes of the first component in the vertex attribute array (must be a multiple of the byte length of `type`)

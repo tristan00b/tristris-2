@@ -26,7 +26,7 @@ export class Buffer
   /**
    * Binds the buffer to `target`
    * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
-   * @param {GLenum} target The binding point (e.g. gl.ARRAY_BUFFER)
+   * @param {external:GLenum} target The binding point (e.g. gl.ARRAY_BUFFER)
    */
   bind(gl, target)
   {
@@ -46,9 +46,9 @@ export class Buffer
   /**
    * Creates and initializes the buffer's data store
    * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
-   * @param {GLenum} target The binding point (e.g. gl.ARRAY_BUFFER)
+   * @param {external:GLenum} target The binding point (e.g. gl.ARRAY_BUFFER)
    * @param {ArrayBuffer|SharedArrayBuffer|ArrayBufferView|null} data The data to copy to the data store. If `null`, a data store is still be created but will be uninitialized.
-   * @param {GLenum} usage Specifies the intended usage pattern of the data store
+   * @param {external:GLenum} usage Specifies the intended usage pattern of the data store
    */
   data(gl, target, data, usage)
   {
