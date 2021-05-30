@@ -1,15 +1,6 @@
 import { mat4 } from 'gl-matrix'
 
-// import { Camera } from './Camera'
-// import { InputHandler } from './Input'
-// import { Mesh } from  './Mesh'
-// import { MeshData, VertexAttributeType } from './MeshData'
-// import { Renderer } from './Renderer'
-// import { SceneGraph } from './SceneGraph'
-// import { SceneNode } from './SceneNode'
-// import { ShaderProgram } from './ShaderProgram'
-import { MakeErrorType, MakeLogger } from './engine/utilities'
-// import WebGL from './WebGL'
+import { MakeErrorType, MakeLogger } from '../engine/utilities'
 
 import {
   Camera,
@@ -21,7 +12,7 @@ import {
   SceneNode,
   VertexAttributeType,
   WebGL
-} from './engine/gfx/all'
+} from '../engine/gfx/all'
 
 import config from './config'
 

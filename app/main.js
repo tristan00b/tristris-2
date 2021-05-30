@@ -1,4 +1,4 @@
-import { Tristris as Game } from './scripts/Tristris'
+import { Tristris as Game } from './scripts/game/Tristris'
 
 window.addEventListener('load', async _ => {
   Promise.resolve(new Game())
