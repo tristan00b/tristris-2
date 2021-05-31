@@ -48,7 +48,7 @@ export class Renderer
   render()
   {
     this.context.clear(this.context.COLOR_BUFFER_BIT | this.context.DEPTH_BUFFER_BIT)
-    this._task_queue.forEach(task => task(this.context))
+    this._task_queue.forEach(task => task(this))
   }
 
   /**

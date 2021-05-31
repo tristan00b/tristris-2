@@ -39,25 +39,25 @@ export class SceneGraph
       {
         curShader = node.shader
 
-        subTasks.push(gl => {
-          curShader.use(gl)
+        subTasks.push(renderer => {
+          curShader.use(renderer.context)
 
-          curShader.setUniforms(gl, {
-            view_matrix          : this._camera.lookat,
-            projection_matrix    : this._camera.projection
+          curShader.setUniforms(renderer.context, {
+            view_matrix       : this._camera.lookat,
+            projection_matrix : this._camera.projection
           })
         })
 
         /* reverse order */
-        postTasks.unshift(gl => {
-          curShader.unuse(gl)
+        postTasks.unshift(renderer => {
+          curShader.unuse(renderer.context)
         })
       }
 
       if (node.worldTransform)
       {
-        subTasks.push(gl => {
-          curShader.setUniforms(gl, {
+        subTasks.push(renderer => {
+          curShader.setUniforms(renderer.context, {
             model_matrix : node.worldTransform
           })
         })
@@ -65,7 +65,7 @@ export class SceneGraph
 
       if (node.draw)
       {
-        subTasks.push(gl => node.draw(gl))
+        subTasks.push(renderer => node.draw(renderer.context))
       }
 
       return subTasks
