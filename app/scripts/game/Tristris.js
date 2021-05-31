@@ -1,20 +1,8 @@
 import { mat4 } from 'gl-matrix'
-
 import { MakeErrorType, MakeLogger } from '../engine/utilities'
-
-import {
-  Camera,
-  Mesh,
-  MeshData,
-  Renderer,
-  ShaderProgram,
-  SceneGraph,
-  SceneNode,
-  VertexAttributeType,
-  WebGL
-} from '../engine/gfx/all'
-
+import { Renderer } from '../engine/gfx/all'
 import config from './config'
+import { JustSpheresScene } from './scenes/just-balls'
 
 
 /**
@@ -29,72 +17,9 @@ export class Tristris
     this.renderer = new Renderer(this)
     // this.audio  = new AudioServer(this)
 
-    const gl = this.context
-
-    // -----------------------------------------------------------------------------------------------------------------
-    /** @todo load entry scene */
-    const shader = new ShaderProgram(gl,
-      {
-        type:     gl.VERTEX_SHADER,
-        source:  `#version 300 es
-                  in vec4 vertex_position;
-
-                  uniform mat4 model_matrix;
-                  uniform mat4 view_matrix;
-                  uniform mat4 projection_matrix;
-
-                  void main() {
-                    gl_Position = projection_matrix * view_matrix * model_matrix * vertex_position;
-                  }`
-      },
-      {
-        type:     gl.FRAGMENT_SHADER,
-        source:  `#version 300 es
-                  precision highp float;
-
-                  out vec4 out_color;
-
-                  void main() {
-                    out_color = vec4(1.0, 1.0, 1.0, 1.0);
-                  }`
-      }
-    )
-
-    const data = new MeshData({
-      vertices: [
-        1.0,  1.0, 0.0,
-       -1.0,  1.0, 0.0,
-       -1.0, -1.0, 0.0,
-        1.0, -1.0, 0.0,
-      ],
-      indices: [ 0,1,2,2,3,0 ],
-      primtype: gl.TRIANGLES,
-      attribs: [
-        { type: VertexAttributeType.POSITION, size: 3 }
-      ],
-    })
-
-    const mesh = new Mesh({ gl, data, shader })
-
-    const camera  = new Camera
-    camera.lookat = {
-      eye: [0, 0, 10],
-      up:  [0, 1,  0],
-    }
-    camera.perspective = {}
-
-    const n0 = new SceneNode({ shader })
-    const n1 = new SceneNode({ mesh })
-    const n2 = new SceneNode({ mesh }).setWorldTransform(mat4.fromTranslation(mat4.create(), [-1, -0.5, 0]))
-
-    n0.addChildren(n1, n2)
-
-    const scene = new SceneGraph({ root: n0, camera })
+    const scene = JustSpheresScene(this.context)
 
     this.renderer.enqueue(scene)
-    // -----------------------------------------------------------------------------------------------------------------
-
-    window.addEventListener('resize', camera.setAspect.bind(camera, this.canvas))
   }
 
   /**

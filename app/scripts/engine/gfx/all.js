@@ -5,6 +5,7 @@
 */
 export * as WebGL from './WebGL/all'
 
+export { /** @see BasicShader          */ BasicShader         } from './shaders/BasicShader'
 export { /** @see Camera               */ Camera              } from './Camera'
 export { /** @see Light                */ Light               } from './Light'
 export { /** @see Mesh                 */ Mesh                } from './Mesh'
