@@ -1,5 +1,5 @@
 import { MakeErrorType, MakeLogger } from "../../utilities"
-import { onErrorThrowAs } from './wrappers'
+import { onErrorThrowAs } from './utilities'
 
 /**
  * An interface for storing data such as vertices or colors

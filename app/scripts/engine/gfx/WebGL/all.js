@@ -13,10 +13,9 @@ export * from './constants'
 
 
 /**
- * @see {@link module:gfx/WebGL/Wrappers}
+ * @see {@link module:gfx/WebGL/Utilities}
  */
-export * from './wrappers'
-
+export * from './utilities'
 
 
 export { /** @see ArrayBuffer        */ ArrayBuffer        } from './ArrayBuffer'

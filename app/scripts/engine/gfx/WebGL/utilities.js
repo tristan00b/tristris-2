@@ -1,9 +1,10 @@
 import { MakeErrorType, MakeLogger } from '../../utilities'
+import { ElementArrayBuffer } from './ElementArrayBuffer'
 
 
 /**
  * A collection static WebGL helper methods
- * @module WebGL/Wrappers
+ * @module WebGL/Utilities
  */
 
 
