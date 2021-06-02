@@ -157,20 +157,26 @@ export class SceneNode
   /**
    * Returns an iterator for stepping through all nodes from `this` through all of its successors in breadth-first order
    *
-   * @alias "*[Symbol.iterator]"
+   * @todo Only the `generator` and `yields` tags should be needed here but, for some reason, this method's
+   * documentation is not being emitted without the extra tags (see MeshData iterator for comparison).
+   * Note also, the sidebar like to this method is also not being correctly generated. Revisit this method at a later
+   * time.
+   *
+   * @alias "Symbol.iterator"
    * @memberof SceneNode
+   * @generator
    * @yields {SceneNode} The next node in breadth-first order
    */
-  *[Symbol.iterator]()
-  {
-    let node  = null,
-        nodes = [this]
+   *[Symbol.iterator]()
+   {
+     let nodes = [this],
+         node  = null
 
-    while (node = nodes.shift()) {
-      nodes = [...nodes, ...node._children]
-      yield node
-    }
-  }
+     while (node = nodes.shift()) {
+       nodes = [...nodes, ...node._children]
+       yield node
+     }
+   }
 }
 
 

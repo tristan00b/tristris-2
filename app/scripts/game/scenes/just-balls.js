@@ -12,24 +12,29 @@ import {
   WebGL,
 } from '../../engine/gfx/all'
 
-import * as sphereModel from '../models/sphere'
+import * as model from '../models/sphere'
 
 export function JustSpheresScene(gl, sphereCount=4)
 {
-  const shader = new BasicShader(gl)
+  const { positions, normals } = model
 
   const data = new MeshData({
-    vertices: sphereModel.vertices,
-    indices:  sphereModel.indices,
+    vertices: positions.data,
+    indices:  positions.indices,
     primtype: gl.TRIANGLES,
-    attribs: [
-      { type: VertexAttributeType.POSITION, size: 3 }
-    ],
+    attrib:   { type: VertexAttributeType.POSITION, size:3, format: gl.FLOAT }
+  },
+  {
+    vertices: normals.data,
+    indices:  normals.indices,
+    primtype: gl.TRIANGLES,
+    attrib:   { type: VertexAttributeType.NORMAL, size: 3, format: gl.FLOAT }
   })
 
-  const mesh = new Mesh({ gl, data, shader })
+  const shader = new BasicShader(gl)
+  const mesh   = new Mesh({ gl, data, shader })
+  const camera = new Camera
 
-  const camera  = new Camera
   camera.lookat = {
     eye: [0, 0, 10],
     up:  [0, 1,  0],

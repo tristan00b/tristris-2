@@ -22,6 +22,7 @@ export class Renderer
     /** @todo wrap into configuration scheme */
     {
       const gl = this.context
+      gl.frontFace(gl.CCW)
       gl.enable(gl.CULL_FACE)
       gl.cullFace(gl.BACK)
       gl.enable(gl.DEPTH_TEST)
