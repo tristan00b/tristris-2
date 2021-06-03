@@ -34,6 +34,11 @@ export class Renderer
     window.addEventListener('resize', this.resizeCanvas.bind(this))
   }
 
+  setActiveCamera(camera)
+  {
+    if (this._camera !== camera) { this._camera = camera }
+  }
+
   /**
    * Queries the scene for the sequence of `RenderTask` objects required to render the scene
    * @param {SceneGraph} scene
@@ -65,7 +70,14 @@ export class Renderer
    */
   resizeCanvas()
   {
-    WebGL.resizeCanvas(this.context)
+    const gl = this.context
+    WebGL.resizeCanvas(gl)
+
+    if (this._camera)
+    {
+      this._camera.perspective = { aspect: (gl.canvas.width / gl.canvas.height) }
+      Log.debug(`new aspect: ${gl.canvas.width / gl.canvas.height}`)
+    }
   }
 }
 

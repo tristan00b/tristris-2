@@ -28,8 +28,13 @@ export class SceneGraph
    */
   generateRenderTasks()
   {
+    let preTasks = []
     let postTasks = []
     let curShader = null
+
+    preTasks.push(renderer => {
+      renderer.setActiveCamera(this._camera)
+    })
 
     let nodeTasks = [...this._root].flatMap(node =>
     {
@@ -71,7 +76,7 @@ export class SceneGraph
       return subTasks
     })
 
-    return [...nodeTasks, ...postTasks]
+    return [...preTasks, ...nodeTasks, ...postTasks]
   }
 }
 
