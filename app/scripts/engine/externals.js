@@ -3,6 +3,19 @@
  */
 
 
+/* Canvas ----------------------------------------------------------------------------------------------------------- */
+
+/**
+ * @namespace Canvas
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API}
+ */
+
+/**
+ * @external Canvas.HTMLCanvasElement
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement}
+ */
+
+
 /* WebGL ------------------------------------------------------------------------------------------------------------ */
 
 /**
