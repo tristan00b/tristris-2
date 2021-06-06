@@ -1,8 +1,6 @@
 # Tristris 2
 
-## Contributors
-
-- Tristan Bayfield
+Note: *Tristris 2* is still in development and should not be expected to work yet!
 
 ## License
 
