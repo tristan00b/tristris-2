@@ -49,8 +49,6 @@ export class Tristris
    */
   run()
   {
-    window.dispatchEvent(new Event('resize'))
-
     this.running = true
     this.frameId = window.requestAnimationFrame(time => this.__loop__({ t0:0, t1:time, state:this.config }))
   }

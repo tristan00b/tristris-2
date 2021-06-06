@@ -13,17 +13,19 @@ export class SceneNode
    * @param {SceneNode}     [args.parent=null] The parent node for this node
    * @param {SceneNode[]}   [args.children=[]] An array of child nodes for this node
    * @param {Mesh}          [args.mesh=null] The mesh to associate with this node
+   * @param {Material}      [args.material=null] The material to associate with this node
    * @param {external:mat4} [args.localTransform=mat4.create()] The transform that orients the node within its local coordinate system (defaults to the identity matrix)
    * @param {external:mat4} [args.worldTransform=mat4.create()] The transform that orients the node within the world coordinate system (defaults to the identity matrix)
    * @param {ShaderProgram} [args.shader=null] The shader that will be used to draw this node and it's decendents
    *
    * @todo check for cycles
    */
-  constructor({ parent, children, mesh, localTransform, worldTransform, shader } = {})
+  constructor({ parent, children, mesh, material, localTransform, worldTransform, shader } = {})
   {
     this._parent = parent ?? null
     this._children = children ?? []
     this._mesh = mesh ?? null
+    this._material = material ?? null
     this._localTransform = localTransform ?? mat4.create()
     this._worldTransform = worldTransform ?? mat4.create()
     this._shader = shader ?? null
@@ -43,6 +45,22 @@ export class SceneNode
   setMesh(mesh)
   {
     this._mesh = mesh
+    return this
+  }
+
+  /**
+   * @type {Material}
+   */
+  get material() { return this._material }
+  set material(material) { this._material = material }
+
+  /**
+   * Sets the node's material property and returns `this` to allow for chaining operations
+   * @param {Material} material
+   */
+  setMaterial(material)
+  {
+    this._material = material
     return this
   }
 

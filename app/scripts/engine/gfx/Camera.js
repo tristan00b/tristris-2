@@ -9,7 +9,6 @@ import { MakeErrorType, MakeLogger } from '../utilities'
 export class Camera
 {
   /**
-   *
    * @param {Object}        [args]
    * @param {external:mat4} [args.lookat] A 4x4 lookat transform matrix (defaults to the identity matrix)
    * @param {external:mat4} [args.perspective] A 4x4 perspective transform matrix (defaults to the identity matrix)

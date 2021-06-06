@@ -8,16 +8,16 @@ import { MakeErrorType, MakeLogger } from '../utilities'
 export class SceneGraph
 {
   /**
-   * @param {Object}    args
+   * @param {Object} args
    * @param {SceneNode} args.root The root a `SceneNode` hierarchy
-   * @param {Camera}    args.camera The camera from whose view point to draw the scene with
-   * @param {Light[]}   [args.lights] A collection of lights to illuminate the scene with
+   * @param {Camera} args.camera The camera from whose view point to draw the scene with
+   * @param {Light} args.light A light to illuminate the scene with
    */
-  constructor({ root, camera, lights })
+  constructor({ root, camera, light })
   {
     this._root = root
     this._camera = camera
-    this._lights = lights
+    this._light = light
   }
 
   /**
@@ -40,6 +40,19 @@ export class SceneGraph
     {
       let subTasks = []
 
+      if (node.material)
+      {
+        const m = node.material
+        subTasks.push(renderer => {
+          curShader.setUniforms(renderer.context, {
+            'material.ambient'   : m.ambient,
+            'material.diffuse'   : m.diffuse,
+            'material.specular'  : m.specular,
+            'material.shininess' : [m.shininess],
+          })
+        })
+      }
+
       if (node.shader)
       {
         curShader = node.shader
@@ -49,7 +62,9 @@ export class SceneGraph
 
           curShader.setUniforms(renderer.context, {
             view_matrix       : this._camera.lookat,
-            projection_matrix : this._camera.projection
+            projection_matrix : this._camera.projection,
+            "light.position"  : this._light.position,
+            "light.colour"    : this._light.colour
           })
         })
 
