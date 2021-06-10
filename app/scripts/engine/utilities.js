@@ -72,6 +72,7 @@ export function MakeLogger(T) {
   }
 }
 
+
 /**
  * Given a name and array of property names, creates constant enumerator of type `enum.<Number>`
  * @param {String}   clsname The name for the new enum type
@@ -86,4 +87,24 @@ export function MakeConstEnumerator(clsname, properties)
   const descriptors = Object.fromEntries([name, ...rest])
 
   return Object.defineProperties({}, descriptors)
+}
+
+
+/**
+ * Produces a copy of `str` with all leading and trailing instances of `char` removed
+ * @param {String} str The string to strip `char` from
+ * @param {String} [char='<space>'] A one character string
+ * @returns {String}
+ *
+ * The following inputs (with `char='_'`) all produce the same output (`a_test`):
+ * - `a_test`
+ * - `__a_test__`
+ * - `_a_test`
+ * - `a_test_`
+ */
+export function stringstrip(str, char=' ')
+{
+  const l = new RegExp(`^[${char}]+`)
+  const r = new RegExp(`[${char}]+$`)
+  return str.replace(l, '').replace(r, '')
 }
