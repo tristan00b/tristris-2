@@ -108,3 +108,38 @@ export function stringstrip(str, char=' ')
   const r = new RegExp(`[${char}]+$`)
   return str.replace(l, '').replace(r, '')
 }
+
+
+/**
+ * Extends the behaviour of `Object.getOwnPropertyDescriptors` by accepting a list of keys to filter from the results
+ * @param {Object} args
+ * @param {Object} args.object The object to get the property descriptors from
+ * @param {String[]} args.filterkeys A list of keys to filter out of the results
+ * @returns {Object} The property descriptors for `object`
+ */
+ export function getPropertyDescriptors({ object, filterkeys=[] })
+ {
+   const descriptors = Object.getOwnPropertyDescriptors(object)
+   filterkeys.forEach(key => {
+     delete descriptors?.[key]
+   })
+   return descriptors
+ }
+
+
+/**
+ * Sets a name property on an object (intended for use with classes)
+ * @param {Object} args
+ * @param {Object} args.object The object on which to set the name property
+ * @param {String} args.name The value to assign to the object's name property
+ * @returns {Object} Returns `object` after its name property has been set
+ */
+export function setNameProperty({ object, name })
+{
+  Object.defineProperty(object, 'name', {
+    value:      name,
+    enumerable: false,
+    writable:   false,
+  })
+  return object
+}
