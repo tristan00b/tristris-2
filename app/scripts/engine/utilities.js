@@ -143,3 +143,29 @@ export function setNameProperty({ object, name })
   })
   return object
 }
+
+
+/**
+ * Returns a unique integer value with each call
+ * @generator
+ * @function
+ * @returns {Number}
+ * @example
+ * // do call like a normal function
+ * generateUniqueId() // => 1
+ * generateUniqueId() // => 2
+ * generateUniqueId() // => 3
+ *
+ * // do not use generator semantics
+ * generateUniqueId.next().value // => error!
+ */
+export const generateUniqueId = (function()
+{
+  const gen = (function* () {
+    let uid = 0
+    while(true)
+      yield ++uid
+  })()
+
+  return () => gen.next().value
+})()
