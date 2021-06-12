@@ -1,3 +1,4 @@
 /** @module Engine/ecs */
 
-export { /** @see MakeComponent */ MakeComponent } from './Component'
+export { /** @see GameObject         */ GameObject         } from './GameObject'
+export { /** @see MakeComponent      */ MakeComponent      } from './Component'
