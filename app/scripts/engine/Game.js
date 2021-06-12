@@ -33,11 +33,11 @@ export class Game
   /**
    * @todo document game loop
    */
-  __loop__(t0, t1)
+  loop(t0, t1)
   {
     // this.scene.update(t1 - t2)
     this.renderer.render()
-    this.running && window.requestAnimationFrame(t2 => this.__loop__(t1, t2))
+    this.running && window.requestAnimationFrame(t2 => this.loop(t1, t2))
   }
 
   /**
@@ -47,7 +47,7 @@ export class Game
    * @param   {Object} args.state The game state model
    * @returns {Object} The updated state
    */
-  __update__({ dt, state })
+  update({ dt, state })
   {
     return state
   }
@@ -58,7 +58,7 @@ export class Game
   run()
   {
     this.running = true
-    this.frameId = window.requestAnimationFrame(time => this.__loop__({ t0:0, t1:time, state:this.config }))
+    this.frameId = window.requestAnimationFrame(t1 => this.loop(0, t1))
   }
 
   /**

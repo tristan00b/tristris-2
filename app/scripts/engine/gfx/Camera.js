@@ -30,9 +30,9 @@ export class Camera
    */
   set lookat({ eye, at, up })
   {
-    this._eye =  eye ?? this._eye ?? [0, 0, 0]
-    this._at  =  at  ?? this._at  ?? [0, 0, 0]
-    this._up  =  up  ?? this._up  ?? [0, 0, 0]
+    this._eye = eye ?? this._eye ?? [0, 0, 0]
+    this._at  = at  ?? this._at  ?? [0, 0, 0]
+    this._up  = up  ?? this._up  ?? [0, 0, 0]
 
     this._lookat = mat4.lookAt(mat4.create(),
       this._eye,

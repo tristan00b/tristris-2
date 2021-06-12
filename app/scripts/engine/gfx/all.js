@@ -2,7 +2,7 @@
 
 /**
  * @see {@link module:Engine/gfx/WebGL}
-*/
+ */
 export * as WebGL from './WebGL/all'
 
 export { /** @see BasicShader          */ BasicShader         } from './shaders/BasicShader'
