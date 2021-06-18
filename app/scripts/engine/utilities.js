@@ -128,44 +128,32 @@ export function stringstrip(str, char=' ')
 
 
 /**
+ * Sets an immutable property on an object
+ * @param   {Object}  args
+ * @param   {Object}  args.object The object on which to set the property
+ * @param   {String}  args.name The name of the property to set
+ * @param   {*}       args.value The value of the property to set
+ * @param   {Boolean} [args.enumerable=false] Whether the property should be enumerable
+ * @returns {Object} Returns `object` on which the immutable property was set
+ */
+export function defineImmutableProperty({ object, name, value, enumerable = false })
+{
+  Object.defineProperty(object, name, {
+    value,
+    enumerable,
+    writable: false,
+    configurable: false
+  })
+
+  return object
+}
+
+
+/**
  * Sets a name property on an object (intended for use with classes)
  * @param {Object} args
  * @param {Object} args.object The object on which to set the name property
  * @param {String} args.name The value to assign to the object's name property
  * @returns {Object} Returns `object` after its name property has been set
  */
-export function setNameProperty({ object, name })
-{
-  Object.defineProperty(object, 'name', {
-    value:      name,
-    enumerable: false,
-    writable:   false,
-  })
-  return object
-}
-
-
-/**
- * Returns a unique integer value with each call
- * @generator
- * @function
- * @returns {Number}
- * @example
- * // do call like a normal function
- * generateUniqueId() // => 1
- * generateUniqueId() // => 2
- * generateUniqueId() // => 3
- *
- * // do not use generator semantics
- * generateUniqueId.next().value // => error!
- */
-export const generateUniqueId = (function()
-{
-  const gen = (function* () {
-    let uid = 0
-    while(true)
-      yield ++uid
-  })()
-
-  return () => gen.next().value
-})()
+export const setNameProperty = ({ object, name }) => defineImmutableProperty({ object, name: 'name', value: name })
