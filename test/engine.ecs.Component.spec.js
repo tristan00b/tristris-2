@@ -1,4 +1,5 @@
-import { Component, MakeComponent } from '../app/scripts/engine/ecs/Component'
+import { Component, MakeComponent } from '../app/scripts/engine/ecs/components/Component'
+import { getPropertyDescriptors } from '../app/scripts/engine/utilities'
 
 describe('MakeComponent', function () {
 
@@ -24,32 +25,32 @@ describe('MakeComponent', function () {
   }
 
   const TestComponent = MakeComponent(_TestComponent)
-  const component = new TestComponent()
+  const testComponent = new TestComponent()
 
   it('has it\'s name property derived from subclass\' name', function () {
-    const DerivedClass = MakeComponent(_TestComponent)
-    expect(DerivedClass.name).toBe('TestComponent')
+    expect(TestComponent.name).toBe('TestComponent')
+    expect(testComponent.name).toBe('TestComponent')
   })
 
   it('produces a subclass of Component', function () {
-    expect(component instanceof Component).toBe(true)
-    expect(component instanceof TestComponent).toBe(true)
+    expect(testComponent instanceof Component).toBe(true)
+    expect(testComponent instanceof TestComponent).toBe(true)
   })
 
   it('preserves subclass members', function () {
-    expect(component._prop).toBeDefined()
+    expect(testComponent._prop).toBeDefined()
   })
 
   it('preserves subclass methods', function () {
-    expect(component.fn).toBeDefined()
+    expect(testComponent.fn).toBeDefined()
   })
 
   it('preserves subclass public fields', function () {
-    expect(component.public).toBeDefined()
+    expect(testComponent.public).toBeDefined()
   })
 
   it('preserves subclass private fields', function () {
-    expect(component.private).toBe('private')
+    expect(testComponent.private).toBe('private')
   })
 
   it('preserves subclass static members', function () {
@@ -61,18 +62,18 @@ describe('MakeComponent', function () {
   })
 
   it('preserves subclass accessors', function () {
-    expect(component.prop).toBeDefined()
+    expect(testComponent.prop).toBeDefined()
   })
 
   it('initalizes base class members', function () {
-    expect(component.isEnabled).toBeTruthy()
+    expect(testComponent.isEnabled).toBeTruthy()
   })
 
   it('can disable/enable subclass methods', function () {
-    component.disable()
-    expect(component.fn()).toBeUndefined()
+    testComponent.disable()
+    expect(testComponent.fn()).toBeUndefined()
 
-    component.enable()
-    expect(component.fn()).toBe('fn')
+    testComponent.enable()
+    expect(testComponent.fn()).toBe('fn')
   })
 })
