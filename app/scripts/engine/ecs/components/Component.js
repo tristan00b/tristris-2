@@ -21,6 +21,12 @@ export class Component
    * @type {Boolean}s
    * @readonly
    */
+  static get isComponent() { return true }
+
+  /**
+   * @type {Boolean}
+   * @readonly
+   */
   get isComponent() { return true }
 
   /**
@@ -28,12 +34,6 @@ export class Component
    * @readonly
    */
   get name() { return this.constructor.name }
-
-  /**
-   * @type {Boolean}
-   * @readonly
-   */
-  get isComponentType() { return this.constructor.isComponentType }
 
   /**
    * Enables calling instance methods on subclasses of Component
