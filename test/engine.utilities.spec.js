@@ -1,20 +1,7 @@
-import {
-  generateUniqueId,
-  MakeConstEnumerator
-} from "../app/scripts/engine/utilities"
+import { MakeConstEnumerator } from "../app/scripts/engine/utilities"
+
 
 describe('Engine/Utilities', function () {
-
-  describe('generateUniqueId', function () {
-    it('generates unique integer ID\'s starting from 1', function () {
-      const length   = 10
-      const expected = Array(length).fill().map((_, idx) => idx+1)
-      const received = Array(length).fill().map(generateUniqueId)
-      const allEqual = expected.reduce((acc, _, idx) => acc && (expected[idx] === received[idx]))
-
-      expect(allEqual).toBe(true)
-    })
-  })
 
   describe('MakeEnumerator', function () {
     const clsname   = 'MyConstEnum'
