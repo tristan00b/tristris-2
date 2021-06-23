@@ -12,11 +12,12 @@ export class Entity
    */
 
   /** */
+  constructor() { throw new EntityError('constructor disabled, use static method Entity.create instead') }
+
+  /** */
   static create()
   {
-    const Entity = class { }
-
-    const en = Object.create(Entity, {
+    return Object.create(Entity.prototype, {
       _id: {
         writable: false,
         configurable: false,
@@ -31,7 +32,6 @@ export class Entity
       }
     })
 
-    return en
   }
 }
 
