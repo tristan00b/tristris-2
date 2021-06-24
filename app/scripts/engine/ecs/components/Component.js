@@ -4,6 +4,14 @@ import {
   MakeLogger,
 } from '../../utilities'
 
+
+/**
+ * This type is for documentation purposes and includes any type whose base class is `Component`, (e.g. `TagComponent`)
+ * @class ComponentType
+ * @extends Component
+ */
+
+
 /**
  * Component base class (not intended to be used directly)
  */

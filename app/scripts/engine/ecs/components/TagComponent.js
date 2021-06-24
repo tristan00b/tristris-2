@@ -3,6 +3,13 @@ import { defineImmutableProperty } from '../../utilities'
 
 
 /**
+ * This class is for documentation purposes and includes any type whose base class is `TagComponent`
+ * @class TagComponentType
+ * @extends TagComponent
+ */
+
+
+/**
  * Used for grouping components by tag type
  * @example
  * const components = [...]
