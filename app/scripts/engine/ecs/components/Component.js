@@ -26,7 +26,7 @@ export class Component
   }
 
   /**
-   * @type {Boolean}s
+   * @type {Boolean}
    * @readonly
    */
   static get isComponent() { return true }
