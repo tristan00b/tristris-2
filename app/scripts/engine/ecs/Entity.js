@@ -12,12 +12,9 @@ export class Entity
    */
 
   /** */
-  constructor() { throw new EntityError('constructor disabled, use static method Entity.create instead') }
-
-  /** */
-  static create()
+  constructor()
   {
-    return Object.create(Entity.prototype, {
+    Object.defineProperties(this, {
       _id: {
         writable: false,
         configurable: false,
@@ -31,7 +28,6 @@ export class Entity
         set: undefined
       }
     })
-
   }
 }
 
@@ -56,7 +52,7 @@ export class Entity
    const gen = (function* () {
      let uid = 0
      while(true)
-       yield ++uid
+       yield uid++
    })()
 
    return () => gen.next().value

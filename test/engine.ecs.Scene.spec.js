@@ -111,7 +111,7 @@ describe('Scene', function () {
 
     it('gets entity all components that have been set', function () {
       const scene = new Scene
-      const entity = Entity.create()
+      const entity = new Entity
       const types = [C0, C1, C2]
 
       scene.registerComponentType(...types)
@@ -131,7 +131,7 @@ describe('Scene', function () {
 
     it ('tells whether and entity\'s component(s) have been set', function () {
       const scene = new Scene
-      const entity = Entity.create()
+      const entity = new Entity
       const types = [C0, C1, C2]
 
       scene.registerComponentType(C0, C1, C2)
@@ -184,7 +184,7 @@ describe('Scene', function () {
   describe('Scene.setEntityComponent', function () {
 
     const scene  = new Scene
-    const entity = Entity.create()
+    const entity = new Entity
     const types  = [C0, C1, C2]
 
     scene.addEntity(entity)
@@ -206,7 +206,7 @@ describe('Scene', function () {
     })
 
     it('does not set components on entities that have not yet been added', function () {
-      const notAdded = Entity.create()
+      const notAdded = new Entity
       scene.setEntityComponent(notAdded, new C0)
       expect(scene._components[C0.name][notAdded.id]).toBeUndefined()
     })
