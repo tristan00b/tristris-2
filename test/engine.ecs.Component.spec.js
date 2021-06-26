@@ -3,14 +3,7 @@ import { getPropertyDescriptors } from '../app/scripts/engine/utilities'
 
 describe('MakeComponent', function () {
 
-  class TestComponent extends Component
-  {
-    constructor(...args)
-    {
-      super(...args)
-    }
-  }
-
+  class TestComponent extends Component { }
   const testComponent = new TestComponent
 
   it('declares itself to be a component type', function () {

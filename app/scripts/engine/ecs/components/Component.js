@@ -1,10 +1,3 @@
-import {
-  defineImmutableProperty,
-  MakeErrorType,
-  MakeLogger,
-} from '../../utilities'
-
-
 /**
  * This type is for documentation purposes and includes any type whose base class is `Component`, (e.g. `TagComponent`)
  * @class ComponentType
@@ -44,33 +37,8 @@ export class Component
   get name() { return this.constructor.name }
 
   /**
-   * Enables calling instance methods on subclasses of Component
-   */
-  enable() { this._isEnabled = true }
-
-  /**
-   * Disables calling instance methods on subclasses of Component (doing so will result in a warning being printed to
-   * the console)
-   */
-  disable() { this._isEnabled = false }
-
-  /**
-   * Gets the enabled/disabled state of the component
-   * @type {Boolean}
-   * @readonly
-   */
-  get isEnabled() { return this._isEnabled }
-
-  /**
    * Performs no work--Override in subclass
    * @param {Number} dt The time ellapsed since the previous call to `update`
    */
   update(dt) { }
 }
-
-defineImmutableProperty({
-  object: Component,
-  name: 'isComponentType',
-  value: true,
-  enumerable: true
-})
