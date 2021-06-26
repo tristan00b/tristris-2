@@ -45,6 +45,14 @@ export class Scene
   }
 
   /**
+   * @type {Entity[]}
+   */
+  get entities()
+  {
+    return this._entities
+  }
+
+  /**
    * Registers subclasses of `Component` enabling instances of their respective types to be added to entities
    * @param  {...ComponentType} types Any type that is a subclass of `Component`
    * @returns {Number} The number of `Component` types that were successfully added
@@ -79,6 +87,16 @@ export class Scene
   {
     return types.length == 1 ? this._isComponentTypeRegistered(types[0])
                              : types.map(this._isComponentTypeRegistered.bind(this))
+  }
+
+  /**
+   * @param  {...ComponentType} types
+   * @returns
+   */
+  getComponentsOfType(...types)
+  {
+    return types.filter(type => this._isComponentTypeRegistered(type))
+                .map(type => this._components[type.name])
   }
 
   /**
