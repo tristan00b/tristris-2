@@ -1,0 +1,47 @@
+import { makeTestScene } from './helpers'
+
+import { Component } from '../app/scripts/engine/ecs/components/Component'
+import { Entity } from '../app/scripts/engine/ecs/Entity'
+import { Query } from '../app/scripts/engine/ecs/Query'
+import { Scene } from '../app/scripts/engine/ecs/Scene'
+import { System } from '../app/scripts/engine/ecs/System'
+
+
+class ComponentA extends Component {
+  constructor () {
+    super()
+    this.prop = 1
+  }
+}
+
+class ComponentB extends Component {
+  constructor() {
+    super()
+    this.prop = 10
+  }
+}
+
+describe('System', () => {
+
+  const entityCount = 100
+  const types = [ComponentA, ComponentB]
+  const scene = makeTestScene(entityCount, ...types)
+
+  it('applies a callback to entity components satisfied by a query', () => {
+
+    const updateCallback = (deltaTime, componentA, componentB) => {
+      componentA.prop += componentB.prop
+    }
+
+    const query  = new Query(scene, ComponentA, ComponentB)
+    const system = new System(query, updateCallback)
+
+    system.update()
+
+    const allEqualEleven = query.components
+      .map(([a, _]) => a.prop === 11)
+      .reduce((acc, val) => acc && val)
+
+    expect(allEqualEleven).toBe(true)
+  })
+})
