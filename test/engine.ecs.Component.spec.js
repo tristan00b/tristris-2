@@ -1,4 +1,4 @@
-import { Component } from '../app/scripts/engine/ecs/components/Component'
+import { Component } from '../app/scripts/engine/ecs/Component'
 import { getPropertyDescriptors } from '../app/scripts/engine/utilities'
 
 describe('MakeComponent', function () {

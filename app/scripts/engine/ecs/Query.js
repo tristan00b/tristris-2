@@ -1,5 +1,4 @@
 import { MakeErrorType, MakeLogger } from '../utilities'
-import { Scene } from './Scene'
 
 /**
  * Queries a Scene instance for all entities associated with each of a number of specified component types

@@ -1,6 +1,6 @@
 import { Entity } from './Entity'
 import { MakeErrorType, MakeLogger } from '../utilities'
-import { Component } from './components/Component'
+import { Component } from './Component'
 
 
 /**
