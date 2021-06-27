@@ -47,7 +47,7 @@ export class Query
    */
   get entities()
   {
-    this._entities
+    return this._entities
   }
 
   /**
