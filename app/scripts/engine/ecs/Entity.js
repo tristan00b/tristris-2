@@ -28,6 +28,33 @@ export class Entity
         set: undefined
       }
     })
+
+    this._isEnabled = true
+  }
+
+  /**
+   * Signals that this entity should be included in subsequent update cycles
+   */
+  enable()
+  {
+    this._isEnabled = true
+  }
+
+  /**
+   * Signals that this entity should be excluded in subsequent update cycles
+   */
+  disable()
+  {
+    this._isEnabled = false
+  }
+
+  /**
+   * Tells the current enabled/disabled state
+   * @type {Boolean}
+   */
+  get isEnabled()
+  {
+    return this._isEnabled
   }
 }
 
