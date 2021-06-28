@@ -1,6 +1,6 @@
 import { makeTestScene } from './helpers'
 
-import { Component } from '../app/scripts/engine/ecs/components/Component'
+import { Component } from '../app/scripts/engine/ecs/Component'
 import { Entity } from '../app/scripts/engine/ecs/Entity'
 import { Query } from '../app/scripts/engine/ecs/Query'
 import { Scene } from '../app/scripts/engine/ecs/Scene'

@@ -52,7 +52,7 @@
     }
   },
   "jest": {
-    "setupFiles": ["helpers.js"]
+    "setupFiles": ["./test/helpers.js"]
   },
   "wallaby": {
     "autoDetect": true,

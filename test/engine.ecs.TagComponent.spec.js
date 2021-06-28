@@ -1,4 +1,4 @@
-import { Component } from '../app/scripts/engine/ecs/components/Component'
+import { Component } from '../app/scripts/engine/ecs/Component'
 import { TagComponent } from "../app/scripts/engine/ecs/components/TagComponent"
 
 describe('TagComponent', function () {
