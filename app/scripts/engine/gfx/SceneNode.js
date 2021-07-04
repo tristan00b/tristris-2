@@ -8,195 +8,74 @@ import { MakeErrorType, MakeLogger } from '../utilities'
  */
 export class SceneNode
 {
-  /**
-   * @param {Object}        [args={}]
-   * @param {SceneNode}     [args.parent=null] The parent node for this node
-   * @param {SceneNode[]}   [args.children=[]] An array of child nodes for this node
-   * @param {Mesh}          [args.mesh=null] The mesh to associate with this node
-   * @param {Material}      [args.material=null] The material to associate with this node
-   * @param {external:mat4} [args.localTransform=mat4.create()] The transform that orients the node within its local coordinate system (defaults to the identity matrix)
-   * @param {external:mat4} [args.worldTransform=mat4.create()] The transform that orients the node within the world coordinate system (defaults to the identity matrix)
-   * @param {ShaderProgram} [args.shader=null] The shader that will be used to draw this node and it's decendents
-   *
-   * @todo check for cycles
-   */
-  constructor({ parent, children, mesh, material, localTransform, worldTransform, shader } = {})
+  constructor()
   {
-    this._parent = parent ?? null
-    this._children = children ?? []
-    this._mesh = mesh ?? null
-    this._material = material ?? null
-    this._localTransform = localTransform ?? mat4.create()
-    this._worldTransform = worldTransform ?? mat4.create()
-    this._shader = shader ?? null
+    this._parent = null
+    this._children = []
   }
 
   /**
-   * @type {Mesh}
+   * @type {Entity}
+   * @throws {SceneNodeComponentError} Setter throws when argument is not an instance of Entity
    */
-  get mesh() { return this._mesh }
-  set mesh(mesh) { this._mesh = mesh }
-
-  /**
-   * Sets the node's mesh property and returns `this` to allow for chaining operations
-   * @param {Mesh} mesh
-   * @returns `this`
-   */
-  setMesh(mesh)
+  get parent()
   {
-    this._mesh = mesh
-    return this
+    return this._parent
+  }
+
+  set parent(parent)
+  {
+    checkSceneNodeArgument(parent)
+      ? this._parent = parent
+      : Log.warn('parent argument must be an instance of Entity')
   }
 
   /**
-   * @type {Material}
-   */
-  get material() { return this._material }
-  set material(material) { this._material = material }
-
-  /**
-   * Sets the node's material property and returns `this` to allow for chaining operations
-   * @param {Material} material
-   */
-  setMaterial(material)
-  {
-    this._material = material
-    return this
-  }
-
-  /**
-   * @type {SceneNode}
-   */
-  get parent() { return this._parent }
-  set parent(parent) { this._parent = parent }
-
-  /**
-   * Sets the node's parent property and returns `this` to allow for chaining operations
-   * @param {SceneNode} parent
-   * @returns `this`
+   * @param {Entity} parent The entity to set as parent to this component's entity
+   * @throws {SceneNodeComponentError} Setter throws when argument is not an instance of Entity
    */
   setParent(parent)
   {
-    this._parent = parent
+    checkSceneNodeArgument(parent)
+      ? this._parent = parent
+      : Log.warn('parent argument must be an instance of Entity')
     return this
   }
 
   /**
-   * @type {SceneNode[]}
+   * @type {Entity[]}
+   * @readonly
    */
-  get children() { return this._children }
-  set children(children) { this._children = children }
+  get children()
+  {
+    return this._children
+  }
 
   /**
-   * Adds a child to the list of child nodes and returns `this` to allow for chaining operations
-   * @param {SceneNode} child
-   * @returns `this`
+   * @param {...Entity} children One or more entities to set as the children for this component's entity
    */
-  addChild(child)
+  addChild(...children)
   {
-    child._parent = this
-    this._children.push(child)
+    children
+      .forEach(child => {
+        checkSceneNodeArgument(child)
+          ? this._children.push(child)
+          : Log.warn('parent argument must be an instance of Entity')
+      })
     return this
   }
-
-  /**
-   * Adds children `c0`, `c1`, ..., `cn` to the list of child nodes and returns `this` to allow for chaining operations
-   * @param  {...SceneNodes} children
-   * @returns `this`
-   */
-  addChildren(...children)
-  {
-    children.forEach(child => this.addChild(child))
-    return this
-  }
-
-  /**
-   * @type {external:mat4}
-   */
-  get localTransform() { return this._localTransform }
-  set localTranform(transform) { this._localTransform = transform }
-
-  /**
-   * Sets the node's local transform and returns `this` to allow for chaining operations
-   * @param {external:mat4} transform
-   * @returns `this`
-   */
-  setLocalTransform(transform)
-  {
-    this._localTransform = transform
-    return this
-  }
-
-  /**
-   * @type {external:mat4}
-   */
-  get worldTransform() { return this._worldTransform }
-  set worldTransform(transform) { this._worldTransform = transform }
-
-  /**
-   * Sets the node's world transform and returns `this` to allow for chaining operations
-   * @param {*} transform
-   * @returns `this`
-   */
-  setWorldTransform(transform)
-  {
-    this._worldTransform = transform
-    return this
-  }
-
-  /**
-   * Setting the shader program provided will determine the rendering of this node and all its descendents until a
-   * `SceneNode` with a different shader is encountered down the chain
-   * @type {ShaderProgram}
-   */
-  get shader() { return this._shader }
-  set shader(shader) { this._shader = shader }
-
-  /**
-   * Sets the node's shader and returns `this` to allow for chaining operations
-   * @param {ShaderProgram} shader
-   * @returns `this`
-   */
-  setShader(shader)
-  {
-    this._shader = shader
-    return this
-  }
-
-  /**
-   * Returns a function that invokes the mesh's draw method if the node's mesh property has been set
-   * @type {Mesh.draw}
-   */
-  get draw()
-  {
-    return this.mesh?.draw.bind(this.mesh)
-  }
-
-  /**
-   * Returns an iterator for stepping through all nodes from `this` through all of its successors in breadth-first order
-   *
-   * @todo Only the `generator` and `yields` tags should be needed here but, for some reason, this method's
-   * documentation is not being emitted without the extra tags (see MeshData iterator for comparison).
-   * Note also, the sidebar like to this method is also not being correctly generated. Revisit this method at a later
-   * time.
-   *
-   * @alias "Symbol.iterator"
-   * @memberof SceneNode
-   * @generator
-   * @yields {SceneNode} The next node in breadth-first order
-   */
-   *[Symbol.iterator]()
-   {
-     let nodes = [this],
-         node  = null
-
-     while (node = nodes.shift()) {
-       nodes = [...nodes, ...node._children]
-       yield node
-     }
-   }
 }
 
+/**
+ * Checks that a node is an instance of Entity
+ * @returns {Entity} Returns the argument, unchanged, if the check passes
+ * @throws {SceneNodeComponentError} Throws when node is not an instance of Entity
+ * @private
+ */
+function checkSceneNodeArgument(node)
+{
+  return node instanceof Entity
+}
 
 /**
  * @see {@link module:Engine/Utilities.MakeLogger}
