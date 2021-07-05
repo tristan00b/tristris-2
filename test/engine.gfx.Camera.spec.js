@@ -24,30 +24,30 @@ describe('Camera', function () {
 
     it('can generate a lookat matrix', function () {
       const cam = new Camera
-      cam.lookat = { eye, at, up }
+      cam.setLookat({ eye, at, up })
       expect( cam.lookat.toString() ).toEqual( lookat.toString() )
     })
 
 
     it('overwrites a lookat parameter when after already being set', function () {
       const cam = new Camera
-      cam.lookat = { eye: [1,2,3] }
-      cam.lookat = { eye: [3,2,1] }
+      cam.setLookat({ eye: [1,2,3] })
+      cam.setLookat({ eye: [3,2,1] })
       expect( cam._eye.toString() ).toEqual( [3,2,1].toString() )
     })
 
 
     it('remembers previously set values when another is modified', function () {
       const cam = new Camera
-      cam.lookat = { eye }
-      cam.lookat = { at  }
+      cam.setLookat({ eye })
+      cam.setLookat({ at  })
       expect( cam._at.toString() ).toEqual( at.toString() )
     })
   })
 
 
   //--------------------------------------------------------------------------------------------------------------------
-  describe('Camera#perspective', function () {
+  describe('Camera.perspective', function () {
 
     const near   = 0.1
     const far    = 100
@@ -64,21 +64,21 @@ describe('Camera', function () {
 
     it('cat generate a perspective matrix', function () {
       const cam = new Camera
-      cam.perspective = { near, far, fovy, aspect }
+      cam.setPerspective({ near, far, fovy, aspect })
       expect( cam.projection.toString() ).toEqual( perspective.toString() )
     })
 
     it('overwrites a perspective parameter when after already being set', function () {
       const cam = new Camera
-      cam.perspective = { near: 11 }
-      cam.perspective = { near: 22 }
+      cam.setPerspective({ near: 11 })
+      cam.setPerspective({ near: 22 })
       expect( cam._near.toString() ).toEqual( (22).toString() )
     })
 
     it('remembers previously set values when another is set', function () {
       const cam = new Camera
-      cam.perspective = { near }
-      cam.perspective = { far  }
+      cam.setPerspective({ near })
+      cam.setPerspective({ far  })
       expect(cam._near).toEqual(near)
     })
   })

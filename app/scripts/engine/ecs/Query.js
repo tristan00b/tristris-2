@@ -1,34 +1,46 @@
 import { MakeErrorType, MakeLogger } from '../utilities'
 
 /**
- * Queries a Scene instance for all entities associated with each of a number of specified component types
+ * Queries a scene for all entities having the specified component types associated
  */
 export class Query
 {
   /**
-   * @param {Scene} scene The `Scene` instance to query
    * @param  {...ComponentType} types The component types to query for
    */
-  constructor(scene, ...types)
+  constructor(...types)
   {
-    const components = scene.getComponentsOfType(...types)
-
-    if (components.length !== types.length)
-      throw new QueryError('Attempted to get components for unregistered component type')
-
     this._types = types
     this._entities = []
     this._components = []
+  }
+
+  /**
+   * Runs the query on a scene
+   * @param {Scene} scene The scene to query
+   */
+  run(scene)
+  {
+    this.types.forEach(Type => {
+      if (!scene.isComponentTypeRegistered(Type))
+        throw new QueryError(`Attempted to query for unregistered component type ${Type.name}`)
+    })
 
     scene.entities.forEach(entity => {
-      const components = scene.getEntityComponent(entity, ...types)
+      const components = this.types.map(Type => scene.getComponent(entity, Type))
 
-      if (components.length === types.length)
+      const foundAllComponents = (components.length > 0) && (components
+        .map((c, idx) => c instanceof this.types[idx])
+        .reduce((acc, found) => acc && found))
+
+      if (foundAllComponents)
       {
         this._entities.push(entity)
         this._components.push(components)
       }
     })
+
+    return this
   }
 
   /**
@@ -58,7 +70,6 @@ export class Query
     return this._components
   }
 }
-
 
 
 /**

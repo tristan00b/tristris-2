@@ -17,3 +17,4 @@ export { /** @see RenderTask           */ RenderTask          } from './RenderTa
 export { /** @see SceneGraph           */ SceneGraph          } from './SceneGraph'
 export { /** @see SceneNode            */ SceneNode           } from './SceneNode'
 export { /** @see ShaderProgram        */ ShaderProgram       } from './ShaderProgram'
+export { /** @see Transform            */ Transform           } from './Transform'

@@ -1,5 +1,6 @@
 import { mat4 } from 'gl-matrix'
 
+import { Entity } from '../ecs/Entity'
 import { MakeErrorType, MakeLogger } from '../utilities'
 
 

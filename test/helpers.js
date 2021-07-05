@@ -4,16 +4,17 @@ import { Scene } from '../app/scripts/engine/ecs/Scene'
 export function makeTestScene(entityCount, ...types)
 {
   const scene = new Scene
+
+  types.forEach(Type => {
+    scene.registerComponentType(Type)
+  })
+
   const entities = Array(entityCount).fill().map(_ => new Entity)
 
-  scene.addEntity(...entities)
-  scene.registerComponentType(...types)
-
-  for (const type of types)
-  for (const e of entities)
-  {
-    scene.setEntityComponent(e, new type)
-  }
+  entities.forEach(e => {
+    scene.addEntity(e)
+    types.forEach(Type => scene.setComponent(e, new Type))
+  })
 
   return scene
 }

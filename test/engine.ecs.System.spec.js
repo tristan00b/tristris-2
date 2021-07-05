@@ -1,22 +1,19 @@
 import { makeTestScene } from './helpers'
 
-import { Component } from '../app/scripts/engine/ecs/Component'
 import { Entity } from '../app/scripts/engine/ecs/Entity'
 import { Query } from '../app/scripts/engine/ecs/Query'
 import { Scene } from '../app/scripts/engine/ecs/Scene'
 import { System } from '../app/scripts/engine/ecs/System'
 
 
-class ComponentA extends Component {
+class ComponentA {
   constructor () {
-    super()
     this.prop = 1
   }
 }
 
-class ComponentB extends Component {
+class ComponentB {
   constructor() {
-    super()
     this.prop = 10
   }
 }
@@ -33,7 +30,7 @@ describe('System', () => {
       componentA.prop += componentB.prop
     }
 
-    const query  = new Query(scene, ComponentA, ComponentB)
+    const query  = (new Query(ComponentA, ComponentB)).run(scene)
     const system = new System(query, updateCallback)
 
     system.update()

@@ -1,6 +1,5 @@
 import { Entity } from './Entity'
 import { MakeErrorType, MakeLogger } from '../utilities'
-import { Component } from './Component'
 
 
 /**
@@ -13,30 +12,58 @@ export class Scene
    */
   constructor()
   {
-    this._isEnabled = true
     this._entities = []
     this._components = {}
     this._systems = []
   }
 
   /**
-   * Adds one or more enetities to the scene
-   * @param  {...Entity} entities
+   * The array of entities that have been added to the scene
+   *
+   * **Important**: Entities are stored in a *sparse* array, and thus the entity array's `length` property cannot be
+   * assumed to be valid. Use {@link Scene#entityCount} to get the number of stored entities.
+   * @type {Entity[]}
    */
-  addEntity(...entities)
+  get entities() { return this._entities }
+
+  /**
+   * The number of entities that have been added to the scene. Use this property instead of `scene.entities.length`,
+   * which cannot be relied upon to report the correct value (see {@link Scene#entities} for explanation).
+   * @type {Number}
+   */
+  get entityCount()
   {
-    entities.forEach(entity =>
-    {
-      if (this.hasEntity(entity))
-        Log.warn(`Entity (id: ${entity.id}) already added`)
-      else
-        this._entities[entity.id] = entity
-    })
+    this._entities.reduce((sum, e) => e ? sum+1 : sum, 0)
+  }
+
+  /**
+   * @type {ComponentType[]}
+   */
+  get components() { return Object.keys(this._components) }
+
+  /**
+   * @type {System[]}
+   */
+  get systems() { return this._systems }
+
+  /**
+   * Adds one or more enetities to the scene
+   * @param  {Entity} entity
+   */
+  addEntity(entity)
+  {
+    const hasEntity = this.hasEntity(entity)
+
+    hasEntity
+      ? Log.warn(`Entity (id: ${entity.id}) already added`)
+      : this._entities[entity.id] = entity
+
+    return !hasEntity
   }
 
   /**
    * Tells whether an entity as been added to the scene
-   * @param {Entity} entity
+   * @param {...Entity} entity
    * @returns {Boolean}
    */
   hasEntity(entity)
@@ -45,138 +72,90 @@ export class Scene
   }
 
   /**
-   * @type {Entity[]}
+   * @param {ComponentType} type The type to check
    */
-  get entities()
+  isComponentTypeRegistered(type)
   {
-    return this._entities
+    return !!this._components[type.name]
   }
 
   /**
-   * Registers subclasses of `Component` enabling instances of their respective types to be added to entities
-   * @param  {...ComponentType} types Any type that is a subclass of `Component`
-   * @returns {Number} The number of `Component` types that were successfully added
-   */
-  registerComponentType(...types)
-  {
-    return types.map(type =>
-      type?.name in this._components ? do { Log.warn(`ComponentType (${type.name}) already registered`); 0 } :
-      type?.isComponent !== true     ? do { Log.warn(`Invalid ComponentType (${type.name})`);            0 } :
-                                       do { this._components[type.name] = [];                            1 }
-    ).reduce((sum, val) => sum+val, 0)
-  }
-
-  /**
-   * Tells whether a `Component` type has been
-   * @param {ComponentType|TagComponentType} type Any type that is a subclass of `Component`
-   * @returns {Boolean}
-   * @private
-   */
-  _isComponentTypeRegistered(type)
-  {
-    return type.name in this._components
-  }
-
-  /**
-   * Tells whether a list of component types have been registered
-   * @param  {...ComponentType} types The list of types to check
-   * @returns {Boolean|Boolean[]} A single boolean value when only a single type is specified, or a list of booleans
-   *                              when multiple types are specified
-   */
-  isComponentTypeRegistered(...types)
-  {
-    return types.length == 1 ? this._isComponentTypeRegistered(types[0])
-                             : types.map(this._isComponentTypeRegistered.bind(this))
-  }
-
-  /**
-   * @param  {...ComponentType} types
-   * @returns
-   */
-  getComponentsOfType(...types)
-  {
-    return types.filter(type => this._isComponentTypeRegistered(type))
-                .map(type => this._components[type.name])
-  }
-
-  /**
-   * Sets the components on an entity that has been added to the scene, and returns a count of the number of components
-   * that were successfully set
-   *
-   * Any errors that occur in the process are printed to the console
-   * @param {Entity} entity
-   * @param  {...ComponentType} components Instances of `ComponentType` to associate with `entity`
-   * @returns {Number} The number of components that were successfully set
-   */
-  setEntityComponent(entity, ...components)
-  {
-    return components.map(c =>
-      !this.hasEntity(entity)             ? do { Log.warn(`Entity must be added prior to setting its components`); 0 } :
-      this._hasEntityComponent(c)         ? do { Log.warn(`Component already set`);                                0 } :
-      !c?.isComponent                     ? do { Log.warn(`Invalid Component type ${c?.name}`);                    0 } :
-      !this._isComponentTypeRegistered(c) ? do { Log.warn(`Component type (${c?.name}) not registered`);           0 } :
-                                            do { this._components[c.name][entity.id] = c;                          1 }
-    ).reduce((sum, val) => sum+val, 0)
-  }
-
-  /**
-   * Gets a component if it has previously been set on `entity`
-   * @param {Entity} entity
    * @param {ComponentType} type
-   * @returns {ComponentType|undefined}
-   * @private
    */
-  _getEntityComponent(entity, type)
+  registerComponentType(type)
+  {
+    const isRegistered = this.isComponentTypeRegistered(type)
+
+    isRegistered
+      ? Log.warn(`ComponentType {type.name} already registered`)
+      : this._components[type.name] = []
+
+    return !isRegistered
+  }
+
+  /**
+   * @param {Entity} entity The entity whose component to retrieve
+   * @param {ComponentType} type The type of component to retrieve
+   * @returns {ComponentType|null} The component associated with `entity`, or `null` if it does not exist
+   */
+  getComponent(entity, type)
   {
     return this._components[type?.name]?.[entity?.id]
   }
 
   /**
-   * Gets the specified list of components assocated with `entity` if they exist
-   * @param {Entity} entity The entity whose components to get
-   * @param  {...ComponentType} type The types of the components to get
-   * @returns {Array.<ComponentType|undefined>} An array of components corresponding with `...components`
+   * Sets the entity's component of type `component.constructor` to component, overwriting any previously set component
+   * of the same type
+   * @param {Entity} entity The entity whose component to set
+   * @param {ComponentType} component The component to associate with `entity`
    * @example
-   * scene.setEntityComponent(entity, c0, c1, c2)
-   * scene.getEntityComponent(entity, c1, c2, c3, c4) // => [c1, c2, undefined, undefined]
+   * const c0 = new Component(...)
+   * const c1 = new Component(...)
+   * scene.setComponent(entity, c0) // => entity now has c0 associated with it
+   * scene.setComponent(entity, c1) // => c0 has been overwritten with c1
    */
-  getEntityComponent(entity, ...types)
+  setComponent(entity, component)
   {
-    return types.map(type => this._getEntityComponent(entity, type))
+    if (!this.hasEntity(entity))
+      Log.warn(`Entity must be added prior to setting its components`)
+    else if(!this.isComponentTypeRegistered(component?.constructor))
+      Log.warn(`Component types must first be registered`)
+    else
+      this._components[component.constructor.name][entity.id] = component
   }
 
   /**
-   * Tells whether `entity` has component of type `ComponentType` associated with it
-   * @param {Entity} entity The entity to check
-   * @param {Component} type The type of component to check
-   * @returns {Boolean}
-   * @private
+   * This is a convenience function, which calls `getComponent` internally, converting its result into a boolean
+   * @param {Entity} entity The entity
+   * @param {ComponentType} type The type of component to query for
+   * @returns {Boolean} True if the entity has component of type `ComponentType` associated with it, and false otherwise
    */
-  _hasEntityComponent(entity, type)
+  hasComponent(entity, type)
   {
-    return !!this._getEntityComponent(entity, type)
+    return !!this.getComponent(entity, type)
   }
 
   /**
-   * Tells whether `entity` as components of the specified types associated with it
-   * @param {Entity} entity The entity to check
-   * @param  {...Component} types The types of components to check
-   * @returns {Boolean[]}
+   * Adds the specified systems to the scene, checking that each one is an instance of `System`, and discarding those
+   * that are not
+   * @param {System} system The system to add to the scene
    */
-  hasEntityComponent(entity, ...types)
+  addSystem(system)
   {
-    const components = this.getEntityComponent(entity, ...types)
-    return components.length == 0 ? false :
-           components.length == 1 ? !!components[0] :
-           components.map(c => !!c)
+    if (system instanceof System) this._systems.push(system)
+    else Log.warn(`Received invalid system argument ${system.name}`)
   }
 
-  /** @todo implement */
+  /**
+   * Calls `update` on all systems that have been added to this scene with the time elapsed since the previous update
+   * (Note that the time duration `dt` is expected to be provide by the JavaScript runtime, e.g. by
+   * `window.requestAnimationFrame`)
+   * @param {Number} dt The time duration (ms) since the last update
+   */
   update(dt)
   {
-    throw new SceneError('not implemented')
+    this._systems.forEach(system => system.update(dt))
   }
-
 
   /** @todo implement */
   static inflate(data)

@@ -1,213 +1,157 @@
 import { Entity } from '../app/scripts/engine/ecs/Entity'
-import { Component } from '../app/scripts/engine/ecs/Component'
 import { Scene } from '../app/scripts/engine/ecs/Scene'
 
 describe('Scene', function () {
 
-  class C0 extends Component {}
-  class C1 extends Component {}
-  class C2 extends Component {}
-  class C3 extends Component {}
+  class C0 {}
+  class C1 {}
+  class C2 {}
+  class C3 {}
 
-  describe('Scene.registerComponentType', function () {
+  describe('Scene.hasEntity', () => {
 
-    it('registers a single component type', function () {
-      const scene = new Scene
-      scene.registerComponentType(C0)
+    it('reports whether an entity has been added to the scene', () => {
+      const scene   = new Scene
+      const entity0 = new Entity
+      const entity1 = new Entity
 
-      expect(C0.name in scene._components).toBe(true)
-    })
+      scene._entities[entity0.id] = entity0
 
-    it('registers multiple component types', function () {
-      const scene = new Scene
-      const types = [C0, C1, C2, C3]
+      const expected = scene.hasEntity(entity0) && !scene.hasEntity(entity1)
 
-      scene.registerComponentType(...types)
-
-      const allRegistered = types.map(T => T.name in scene._components).reduce((acc, val) => acc && val)
-      expect(allRegistered).toBe(true)
-    })
-
-    it('returns the correct registration count', function () {
-      {
-        // Zero arguments
-        const scene = new Scene
-        const count = scene.registerComponentType()
-        expect(count).toBe(0)
-      }
-
-      {
-        // Empty array
-        const scene = new Scene
-        const empty = []
-        const count = scene.registerComponentType(...empty)
-        expect(count).toBe(0)
-      }
-
-      {
-        // Not a component
-        const scene = new Scene
-        const NotComponentType = class {}
-        const count = scene.registerComponentType(NotComponentType)
-        expect(count).toBe(0)
-      }
-
-      {
-        // Single component
-        const scene = new Scene
-        const count = scene.registerComponentType(C0)
-        expect(count).toBe(1)
-      }
-
-      {
-        // Multiple components
-        const scene = new Scene
-        const count = scene.registerComponentType(C0, C1)
-        expect(count).toBe(2)
-      }
-
-      {
-        // Component re-registration
-        const scene = new Scene
-        const count = scene.registerComponentType(C0, C0, C1, C1, C2)
-        expect(count).toBe(3)
-      }
-
-      {
-        // Mix of components and non-components
-        const scene = new Scene
-        const count = scene.registerComponentType(C0, {}, C1, {}, {}, C2, C3)
-        expect(count).toBe(4)
-      }
-    })
-
-    it ('does not re-register component types', function () {
-      const scene = new Scene
-      const count = scene.registerComponentType(C0, C0, C1, C1)
-      expect(count).toBe(2)
+      expect(expected).toBe(true)
     })
   })
 
-  describe('Scene.isComponentTypeRegistered', function () {
-    const scene = new Scene
-    scene.registerComponentType(C0, C1, C2)
+  describe('Scene.addEntity', () => {
 
-    it('tells whether a single component type has been registered', function () {
-      const results = [
-        scene.isComponentTypeRegistered(C0),
-        scene.isComponentTypeRegistered(C3)
-      ]
-
-      expect(results[0] && !results[1]).toBe(true)
-    })
-
-    it('tells whether multiple component types have been registered', function () {
-      const results = scene.isComponentTypeRegistered(C0, C1, C2, C3)
-      expect(results[0] && results[1] && results[2] && !results[3]).toBe(true)
-    })
-  })
-
-  describe('Scene.getEntityComponent', function () {
-
-    it('gets entity all components that have been set', function () {
+    it('Adds an entity to the scene', () => {
       const scene = new Scene
       const entity = new Entity
-      const types = [C0, C1, C2]
 
-      scene.registerComponentType(...types)
-      types.forEach((C, idx) => scene._components[C.name][entity.id] = new C)
+      scene.addEntity(entity)
 
-      const components = scene.getEntityComponent(entity, C0, C1, C2)
-
-      const gotAllComponents =
-        components.length == 3 &&
-        components.reduce((acc, _, index) => acc && components[index] instanceof types[index])
-
-      expect(gotAllComponents).toBe(true)
+      expect(scene.entities[entity.id]).toBeDefined()
     })
   })
 
-  describe('Scene.hasEntityComponent', function () {
+  describe('Scene.isComponentTypeRegistered', () => {
+
+    it('Reports whether a component type has been registered', () => {
+      const scene = new Scene
+
+      scene._components[C0.name] = []
+      scene._components[C2.name] = []
+
+      const expected =  scene.isComponentTypeRegistered(C0)
+                    && !scene.isComponentTypeRegistered(C1)
+                    &&  scene.isComponentTypeRegistered(C2)
+                    && !scene.isComponentTypeRegistered(C3)
+
+      expect(expected).toBe(true)
+    })
+  })
+
+  describe('Scene.registerComponentType', () => {
+
+    it('registers component types', () => {
+      const scene = new Scene
+      scene.registerComponentType(C0)
+      scene.registerComponentType(C2)
+
+      const expected =  scene._components[C0.name]
+                    && !scene._components[C1.name]
+                    &&  scene._components[C2.name]
+                    && !scene._components[C3.name]
+
+      expect(expected).toBe(true)
+    })
+
+    it ('does not re-register component types', () => {
+      const scene = new Scene
+      const success1 = scene.registerComponentType(C0)
+      const success2 = scene.registerComponentType(C0)
+
+      expect(success1 && !success2).toBe(true)
+    })
+  })
+
+  describe('Scene.getEntityComponent', () => {
+
+    it('gets entity all components that have been set', () => {
+      const scene  = new Scene
+      const entity = new Entity
+      const types  = [C0, C1, C2]
+
+      types.forEach(Type => {
+        scene.registerComponentType(Type)
+        scene._components[Type.name][entity.id] = new Type
+      })
+
+      const components = types.map(Type => scene.getComponent(entity, Type))
+
+      const expected = components
+        .reduce((acc, c, idx) => acc && scene._components[c.constructor.name][entity.id] instanceof c.constructor)
+
+      expect(expected).toBe(true)
+    })
+  })
+
+  describe('Scene.hasEntityComponent', () => {
 
     it ('tells whether and entity\'s component(s) have been set', function () {
       const scene = new Scene
       const entity = new Entity
       const types = [C0, C1, C2]
 
-      scene.registerComponentType(C0, C1, C2)
-      types.forEach((C, idx) => scene._components[C.name][entity.id] = new C)
+      types.forEach(Type => scene.registerComponentType(Type))
+      types.forEach((Type, idx) => scene._components[Type.name][entity.id] = new Type)
 
       {
-        // Zero arguments
-        expect(scene.hasEntityComponent(entity)).toBe(false)
+        // Nullish argument
+        const expected = scene.hasComponent(entity, null)
+                      && scene.hasComponent(entity, undefined)
+        expect(expected).toBe(false)
       }
 
       {
-        // Empty array
-        const empty  = []
-        expect(scene.hasEntityComponent(entity)).toBe(false)
+        // Unregistered component argument
+        expect(scene.hasComponent(entity, C3)).toBe(false)
       }
 
       {
-        // Single component
-        expect(scene.hasEntityComponent(entity, C0)).toBe(true)
-      }
-
-      { // Multiple components
-        const result = scene.hasEntityComponent(entity, ...types)
-        const allComponentsFound = result.length && result.reduce((acc, val) => acc && val)
-        expect(allComponentsFound).toBe(true)
-      }
-
-      {
-        // Not a component
-        const NotComponentType = class {}
-        const result = scene.hasEntityComponent(entity, NotComponentType)
-        expect(result).toBe(false)
-      }
-
-      {
-        // Unregistered component
-        const result = scene.hasEntityComponent(entity, C3)
-        expect(result).toBe(false)
-      }
-
-      {
-        // Mixed registered, unregistered, and non-components
-        const result = scene.hasEntityComponent(entity, C0, {}, C1, {}, C1, C2, {}, C3)
-        const allTrueOrFalse = result.length && result.reduce((acc, val) => acc && typeof val == 'boolean')
-        expect(allTrueOrFalse).toBe(true)
+        // Registered compuent argument
+        expect(scene.hasComponent(entity, C0)).toBe(true)
       }
     })
   })
 
-  describe('Scene.setEntityComponent', function () {
+  describe('Scene.setEntityComponent', () => {
 
     const scene  = new Scene
     const entity = new Entity
     const types  = [C0, C1, C2]
 
     scene.addEntity(entity)
-    scene.registerComponentType(...types)
-    scene.setEntityComponent(entity, new C0, new C1, new C2)
+    types.forEach(Type => {
+      scene.registerComponentType(Type)
+    })
 
     it('sets all components whose types have been registered', function () {
-      const components = scene.getEntityComponent(entity, ...types)
-      const allComponentsFound = components.length == types.length
-         && types.reduce((acc, type, index) => acc && (components[index] instanceof type), true)
+      types.forEach(Type => scene.setComponent(entity, new Type))
 
-      expect(allComponentsFound).toBe(true)
+      // expect(expected).toBe(true)
     })
 
     it('does not set components of unregistered types', function () {
       const c3 = new C3
-      scene.setEntityComponent(entity, c3)
+      scene.setComponent(entity, c3)
       expect(scene._components[C3.name]).toBeUndefined()
     })
 
     it('does not set components on entities that have not yet been added', function () {
       const notAdded = new Entity
-      scene.setEntityComponent(notAdded, new C0)
+      scene.setComponent(notAdded, new C0)
       expect(scene._components[C0.name][notAdded.id]).toBeUndefined()
     })
   })
