@@ -16,35 +16,28 @@ export class SceneNode
   }
 
   /**
-   * @type {Entity}
-   * @throws {SceneNodeComponentError} Setter throws when argument is not an instance of Entity
+   * @type {SceneNode}
    */
   get parent()
   {
     return this._parent
   }
 
-  set parent(parent)
-  {
-    checkSceneNodeArgument(parent)
-      ? this._parent = parent
-      : Log.warn('parent argument must be an instance of Entity')
-  }
-
   /**
-   * @param {Entity} parent The entity to set as parent to this component's entity
-   * @throws {SceneNodeComponentError} Setter throws when argument is not an instance of Entity
+   * @param {SceneNode} parent The node to amke this node a child of
    */
   setParent(parent)
   {
-    checkSceneNodeArgument(parent)
-      ? this._parent = parent
-      : Log.warn('parent argument must be an instance of Entity')
+    if (parent instanceof SceneNode)
+      this._parent = parent
+    else
+      Log.warn('parent argument must be an instance of SceneNode')
+
     return this
   }
 
   /**
-   * @type {Entity[]}
+   * @type {SceneNode[]}
    * @readonly
    */
   get children()
@@ -53,30 +46,19 @@ export class SceneNode
   }
 
   /**
-   * @param {...Entity} children One or more entities to set as the children for this component's entity
+   * @param {SceneNode} child One or more nodes to make this node the parent of
    */
-  addChild(...children)
+  addChild(child)
   {
-    children
-      .forEach(child => {
-        checkSceneNodeArgument(child)
-          ? this._children.push(child)
-          : Log.warn('parent argument must be an instance of Entity')
-      })
+    if (child instanceof SceneNode)
+      this._children.push(child)
+    else
+      Log.warn('parent argument must be an instance of SceneNode')
+
     return this
   }
 }
 
-/**
- * Checks that a node is an instance of Entity
- * @returns {Entity} Returns the argument, unchanged, if the check passes
- * @throws {SceneNodeComponentError} Throws when node is not an instance of Entity
- * @private
- */
-function checkSceneNodeArgument(node)
-{
-  return node instanceof Entity
-}
 
 /**
  * @see {@link module:Engine/Utilities.MakeLogger}
