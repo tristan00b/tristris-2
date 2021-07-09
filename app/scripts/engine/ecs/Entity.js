@@ -1,35 +1,37 @@
-import { MakeErrorType, MakeLogger } from '../utilities'
-
-
 /**
- * Wraps an ID representing a single game element (object)
+ * A class for representing in-game objects (aka entities)
  */
 export class Entity
 {
+  constructor()
+  {
+    Object.defineProperties(
+      this,
+      defineEntityPropertyDescriptors( generateUniqueId() ))
+  }
+
+  /**
+   * Creates an instance of `Entity` with an arbitrary value for its ID rather than automatically generating a unique
+   * ID. This method is intended for creating references to entities that already exist within a scene instead of
+   * creating entirely new ones.
+   * @param {Number} id The value to use for the component's ID
+   * @returns {Entity}
+   */
+  static fromId(id)
+  {
+    return Object.create(
+      Entity.prototype,
+      defineEntityPropertyDescriptors(id))
+  }
+
   /**
    * The unique ID indexing this instance
    * @type {Number}
+   * @readonly
    */
-
-  /** */
-  constructor()
+  get id()
   {
-    Object.defineProperties(this, {
-      _id: {
-        writable: false,
-        configurable: false,
-        enumerable: false,
-        value: `${ generateUniqueId() }`,
-      },
-      id: {
-        configurable: false,
-        enumerable: true,
-        get: function () { return this._id },
-        set: undefined
-      }
-    })
-
-    this._isEnabled = true
+    return this._id
   }
 
   /**
@@ -49,12 +51,33 @@ export class Entity
   }
 
   /**
-   * Tells the current enabled/disabled state
+   * Reports whether the entity is currently enabled or disabled
    * @type {Boolean}
    */
   get isEnabled()
   {
     return this._isEnabled
+  }
+}
+
+
+/**
+ * Abstracts property initialization from `Entity.constructor` to enable creation of entities with arbitrary ID's via
+ * `Entity.fromId`
+ * @private
+ */
+function defineEntityPropertyDescriptors(id)
+{
+  return {
+    _id: {
+      value: `${id}`,
+      writable: false,
+      configurable : false,
+    },
+    _isEnabled: {
+      value: true,
+      configurable: false,
+    }
   }
 }
 
@@ -74,27 +97,12 @@ export class Entity
  * generateUniqueId.next().value // => error!
  * @private
  */
- const generateUniqueId = (function()
- {
-   const gen = (function* () {
-     let uid = 0
-     while(true)
-       yield uid++
-   })()
-
-   return () => gen.next().value
- })()
-
-
-/**
- * @see {@link module:Engine/Utilities.MakeLogger}
- * @private
- */
- const Log = MakeLogger(Entity)
-
-
- /**
-  * @see {@link module:Engine/Utilities.MakeErrorType}
-  * @private
-  */
- const EntityError = MakeErrorType(Entity)
+const generateUniqueId = (function()
+{
+  const gen = (function* () {
+    let uid = 0
+    while(true)
+      yield uid++
+  })()
+  return () => gen.next().value
+})()
