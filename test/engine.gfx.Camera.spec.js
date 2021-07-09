@@ -6,8 +6,6 @@ describe('Camera', function () {
 
   const identity = mat4.create()
 
-
-  //--------------------------------------------------------------------------------------------------------------------
   describe('Camera#lookat', function () {
 
     const eye = [0, -1,  0]
@@ -46,19 +44,18 @@ describe('Camera', function () {
   })
 
 
-  //--------------------------------------------------------------------------------------------------------------------
   describe('Camera.perspective', function () {
 
     const near   = 0.1
     const far    = 100
-    const fovy   = 45 * Math.PI / 180
-    const aspect = 16/9
+    const fovy   = Math.PI / 4
+    const aspect = 1.5
     const perspective = mat4.perspective(mat4.create(), fovy, aspect, near, far)
 
 
     it('default constructs a perspective matrix', function () {
       const cam = new Camera
-      expect( cam.projection.toString() ).toEqual( identity.toString() )
+      expect( cam.projection.toString() ).toEqual( perspective.toString() )
     })
 
 
