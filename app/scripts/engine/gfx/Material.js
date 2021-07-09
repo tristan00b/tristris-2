@@ -11,13 +11,13 @@ export class Material
 {
   /**
    * @todo add constraint checking
-   * @param {Object} args
+   * @param {Object} [args]
    * @param {vec3} [args.ambient=[0,0,0]] The ambient light reflectivity
    * @param {vec3} [args.diffuse=[1,1,1]] The diffuse light reflectivity
    * @param {vec3} [args.specular=[0,0,0]] The specular light reflectivity
    * @param {number} [args.shininess=32] The shininess coefficient
    */
-  constructor({ ambient, diffuse, specular, shininess })
+  constructor({ ambient, diffuse, specular, shininess } = {})
   {
     this.ambient   = ambient   ?? vec3.create(0, 0, 0)
     this.diffuse   = diffuse   ?? vec3.create(1, 1, 1)
