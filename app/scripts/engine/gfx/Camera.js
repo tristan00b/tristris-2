@@ -158,7 +158,7 @@ export class Camera
 
   set aspect(aspect)
   {
-    if (asthis._pect !== aspect)
+    if (this._aspect !== aspect)
       this.setPerspective({ aspect })
   }
 
