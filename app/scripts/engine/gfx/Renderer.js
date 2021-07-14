@@ -1,6 +1,6 @@
 import * as WebGL from './WebGL/all'
 import { MakeErrorType, MakeLogger } from '../utilities'
-
+import { RenderTask } from './RenderTask'
 
 /**
  * Manages drawing the elements of enqueued `SceneGraph` objects
@@ -50,7 +50,8 @@ export class Renderer
    */
   enqueue(scene)
   {
-    this._task_queue.push(...scene.generateRenderTasks())
+    const tasks = RenderTask.parseScene(scene)
+    this._task_queue.push(...tasks)
   }
 
   /**
@@ -59,7 +60,9 @@ export class Renderer
   render()
   {
     this.context.clear(this.context.COLOR_BUFFER_BIT | this.context.DEPTH_BUFFER_BIT)
-    this._task_queue.forEach(task => task(this))
+    this._task_queue.forEach(task => {
+      task.run(this)
+    })
   }
 
   /**
@@ -77,8 +80,6 @@ export class Renderer
   {
     const gl = this.context
     WebGL.resizeCanvas(gl)
-
-    this._camera.setAspect(gl.canvas)
   }
 }
 

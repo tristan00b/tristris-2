@@ -1,5 +1,10 @@
+import WebGLRenderingContext from 'jest-webgl-canvas-mock/lib/classes/WebGLRenderingContext'
+
 import { Entity } from '../app/scripts/engine/ecs/Entity'
-import { Scene } from '../app/scripts/engine/ecs/Scene'
+import { Scene, keyFrom } from '../app/scripts/engine/ecs/Scene'
+import { ShaderProgram } from '../app/scripts/engine/gfx/ShaderProgram'
+import { BasicShader } from '../app/scripts/engine/gfx/shaders/BasicShader'
+
 
 describe('Scene', function () {
 
@@ -40,8 +45,8 @@ describe('Scene', function () {
     it('Reports whether a component type has been registered', () => {
       const scene = new Scene
 
-      scene._components[C0.name] = []
-      scene._components[C2.name] = []
+      scene._components[keyFrom(C0)] = []
+      scene._components[keyFrom(C2)] = []
 
       const expected =  scene.isComponentTypeRegistered(C0)
                     && !scene.isComponentTypeRegistered(C1)
@@ -59,15 +64,15 @@ describe('Scene', function () {
       scene.registerComponentType(C0)
       scene.registerComponentType(C2)
 
-      const expected =  scene._components[C0.name]
-                    && !scene._components[C1.name]
-                    &&  scene._components[C2.name]
-                    && !scene._components[C3.name]
+      const expected =  scene._components[keyFrom(C0)]
+                    && !scene._components[keyFrom(C1)]
+                    &&  scene._components[keyFrom(C2)]
+                    && !scene._components[keyFrom(C3)]
 
       expect(expected).toBe(true)
     })
 
-    it ('does not re-register component types', () => {
+    it('does not re-register component types', () => {
       const scene = new Scene
       const success1 = scene.registerComponentType(C0)
       const success2 = scene.registerComponentType(C0)
@@ -76,7 +81,40 @@ describe('Scene', function () {
     })
   })
 
-  describe('Scene.getEntityComponent', () => {
+  describe('Scene.getEntity', () => {
+
+    const ComponentType = class{}
+
+    const scene = new Scene
+    const e0 = new Entity,
+          e1 = new Entity,
+          e2 = new Entity
+    const c0 = new ComponentType,
+          c1 = new ComponentType,
+          c2 = new ComponentType
+
+    scene.registerComponentType(ComponentType)
+
+    ;[e0, e1, e2].forEach(e => scene.addEntity(e))
+
+    scene.setComponent(e0, c0)
+    /* skip e1 */
+    scene.setComponent(e2, c2)
+
+
+    it('it can retrieve entities given their respective components', () => {
+      const e0 = scene.getEntity(c0)
+      const e1 = scene.getEntity(c1)
+      const e2 = scene.getEntity(c2)
+
+      expect(e0).toBeDefined()
+      expect(e1).toBeUndefined()
+      expect(e2).toBeDefined()
+    })
+
+  })
+
+  describe('Scene.getComponent', () => {
 
     it('gets entity all components that have been set', () => {
       const scene  = new Scene
@@ -85,19 +123,19 @@ describe('Scene', function () {
 
       types.forEach(Type => {
         scene.registerComponentType(Type)
-        scene._components[Type.name][entity.id] = new Type
+        scene._components[keyFrom(Type)][entity.id] = new Type
       })
 
       const components = types.map(Type => scene.getComponent(entity, Type))
 
       const expected = components
-        .reduce((acc, c, idx) => acc && scene._components[c.constructor.name][entity.id] instanceof c.constructor)
+        .reduce((acc, c, idx) => acc && scene._components[keyFrom(c)][entity.id] instanceof c.constructor)
 
       expect(expected).toBe(true)
     })
   })
 
-  describe('Scene.hasEntityComponent', () => {
+  describe('Scene.hasComponent', () => {
 
     it ('tells whether and entity\'s component(s) have been set', function () {
       const scene = new Scene
@@ -105,28 +143,21 @@ describe('Scene', function () {
       const types = [C0, C1, C2]
 
       types.forEach(Type => scene.registerComponentType(Type))
-      types.forEach((Type, idx) => scene._components[Type.name][entity.id] = new Type)
+      types.forEach((Type, idx) => scene._components[keyFrom(Type)][entity.id] = new Type)
 
-      {
-        // Nullish argument
-        const expected = scene.hasComponent(entity, null)
-                      && scene.hasComponent(entity, undefined)
-        expect(expected).toBe(false)
-      }
+      // Nullish arguments
+      expect(scene.hasComponent(entity, null)).toBe(false)
+      expect(scene.hasComponent(entity, undefined)).toBe(false)
 
-      {
-        // Unregistered component argument
-        expect(scene.hasComponent(entity, C3)).toBe(false)
-      }
+      // Unregistered component argument
+      expect(scene.hasComponent(entity, C3)).toBe(false)
 
-      {
-        // Registered compuent argument
-        expect(scene.hasComponent(entity, C0)).toBe(true)
-      }
+      // Registered component argument
+      expect(scene.hasComponent(entity, C0)).toBe(true)
     })
   })
 
-  describe('Scene.setEntityComponent', () => {
+  describe('Scene.setComponent', () => {
 
     const scene  = new Scene
     const entity = new Entity
@@ -146,14 +177,37 @@ describe('Scene', function () {
     it('does not set components of unregistered types', function () {
       const c3 = new C3
       scene.setComponent(entity, c3)
-      expect(scene._components[C3.name]).toBeUndefined()
+      expect(scene._components[keyFrom(C3)]).toBeUndefined()
     })
 
     it('does not set components on entities that have not yet been added', function () {
       const notAdded = new Entity
       scene.setComponent(notAdded, new C0)
-      expect(scene._components[C0.name][notAdded.id]).toBeUndefined()
+      expect(scene._components[keyFrom(C0)][notAdded.id]).toBeUndefined()
     })
   })
+})
 
+describe('keyFrom', () => {
+
+  it('handles shaders correctly', () => {
+    const mockContext = new WebGLRenderingContext
+    const basicShader = new BasicShader(mockContext)
+
+    const allSame = keyFrom(BasicShader) === keyFrom(ShaderProgram)
+                 && keyFrom(basicShader) === keyFrom(ShaderProgram)
+
+    expect(allSame).toBe(true)
+
+    const scene  = new Scene
+    const entity = new Entity
+
+    scene.registerComponentType(ShaderProgram)
+    scene.addEntity(entity)
+    scene.setComponent(entity, basicShader)
+
+    expect(scene.isComponentTypeRegistered(BasicShader)).toBe(true)
+    expect(scene.getComponent(entity, BasicShader) === basicShader).toBe(true)
+    expect(scene.hasComponent(entity, BasicShader)).toBe(true)
+  })
 })

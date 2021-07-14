@@ -1,5 +1,19 @@
-import { Entity } from './Entity'
-import { MakeErrorType, MakeLogger } from '../utilities'
+import { MakeErrorType,
+         MakeLogger          } from '../utilities'
+
+import { Camera              } from '../gfx/Camera'
+import { Light               } from '../gfx/Light'
+import { Material            } from '../gfx/Material'
+import { Mesh                } from '../gfx/Mesh'
+import { SceneNode           } from '../gfx/SceneNode'
+import { ShaderProgram       } from '../gfx/ShaderProgram'
+import { Transform           } from '../gfx/Transform'
+
+import { Entity              } from './Entity'
+import { Tag                 } from './Tag'
+
+
+/** @module Engine/ecs/Scene */
 
 
 /**
@@ -33,13 +47,32 @@ export class Scene
    */
   get entityCount()
   {
-    this._entities.reduce((sum, e) => e ? sum+1 : sum, 0)
+    return this._entities.reduce((sum, e) => e ? sum+1 : sum, 0)
   }
 
   /**
-   * @type {ComponentType[]}
+   * Gets the entity associated with a given component, assuming the entity exists (via {@link Scene#addEntity}), the
+   * component's type has been registered (via {@link Scene#registerComponentType}), and the component has been
+   * associated with the entity (via {@link Scene#addEntity})
+   * @param {ComponentType} component A object whose type has been registered as a component type
+   * @returns {Entity|undefined} Returns the entity component's entity, if it exists, otherwise `undefined`
    */
-  get components() { return Object.keys(this._components) }
+  getEntity(component)
+  {
+    const key = keyFrom(component.constructor)
+    const index = this._components[key]?.findIndex(element => element === component)
+    return this._entities[index]
+  }
+
+  /**
+   * Gets all components of a single type
+   * @param {ComponentType} Type The type of components the get
+   * @returns {ComponentType[]|undefined}
+   */
+  getComponentsOfType(Type)
+  {
+    return this._components[keyFrom(Type)]
+  }
 
   /**
    * @type {System[]}
@@ -76,7 +109,7 @@ export class Scene
    */
   isComponentTypeRegistered(type)
   {
-    return !!this._components[type.name]
+    return !!this._components[keyFrom(type)]
   }
 
   /**
@@ -87,20 +120,20 @@ export class Scene
     const isRegistered = this.isComponentTypeRegistered(type)
 
     isRegistered
-      ? Log.warn(`ComponentType {type.name} already registered`)
-      : this._components[type.name] = []
+      ? Log.warn(`ComponentType ${type.name} already registered`)
+      : this._components[keyFrom(type)] = []
 
     return !isRegistered
   }
 
   /**
    * @param {Entity} entity The entity whose component to retrieve
-   * @param {ComponentType} type The type of component to retrieve
+   * @param {ComponentType} Type The type of component to retrieve
    * @returns {ComponentType|null} The component associated with `entity`, or `null` if it does not exist
    */
-  getComponent(entity, type)
+  getComponent(entity, Type)
   {
-    return this._components[type?.name]?.[entity?.id]
+    return this._components[keyFrom(Type)]?.[entity?.id]
   }
 
   /**
@@ -118,10 +151,10 @@ export class Scene
   {
     if (!this.hasEntity(entity))
       Log.warn(`Entity must be added prior to setting its components`)
-    else if(!this.isComponentTypeRegistered(component?.constructor))
-      Log.warn(`Component types must first be registered`)
+    else if(!this.isComponentTypeRegistered(component))
+      Log.warn(`Component types must be registered before use (received: ${keyFrom(component)})`)
     else
-      this._components[component.constructor.name][entity.id] = component
+      this._components[keyFrom(component)][entity.id] = component
   }
 
   /**
@@ -164,16 +197,28 @@ export class Scene
   }
 }
 
+/**
+ * Takes an object and derives a key from it
+ * @param {Object} obj The object to derive a key from
+ * @returns {String} The key derived from object
+ */
+export function keyFrom(obj)
+{
+  return ShaderProgram.isPrototypeOf(obj) ? ShaderProgram.name :
+         obj instanceof ShaderProgram     ? ShaderProgram.name :
+                                            (obj?.name || obj?.constructor?.name || String(obj))
+}
+
 
 /**
  * @see {@link module:Engine/Utilities.MakeLogger}
  * @private
  */
- const Log = MakeLogger(Scene)
+const Log = MakeLogger(Scene)
 
 
  /**
   * @see {@link module:Engine/Utilities.MakeErrorType}
   * @private
   */
- const SceneError = MakeErrorType(Scene)
+const SceneError = MakeErrorType(Scene)
