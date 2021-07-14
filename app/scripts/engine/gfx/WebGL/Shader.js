@@ -1,4 +1,3 @@
-import { createUniformSetters, createAttributeSetters, setParams } from './ShaderTypeSetters'
 import { MakeErrorType, MakeLogger } from "../../utilities"
 
 
