@@ -4,7 +4,52 @@
  */
 
 
-/* Data Types -------------------------------------------------------------------------------------------------------- */
+/* Primitive Types -------------------------------------------------------------------------------------------------- */
+
+/**
+ * @constant {Number}
+ * @default 0x0000
+ */
+export const POINTS                                         = 0x0000
+
+/**
+ * @constant {Number}
+ * @default 0x0001
+ */
+export const LINES                                          = 0x0001
+
+/**
+ * @constant {Number}
+ * @default 0x0002
+ */
+export const LINE_LOOP                                      = 0x0002
+
+/**
+ * @constant {Number}
+ * @default 0x0003
+ */
+export const LINE_STRIP                                     = 0x0003
+
+/**
+ * @constant {Number}
+ * @default 0x0004
+ */
+export const TRIANGLES                                      = 0x0004
+
+/**
+ * @constant {Number}
+ * @default 0x0005
+ */
+export const TRIANGLE_STRIP                                 = 0x0005
+
+/**
+ * @constant {Number}
+ * @default 0x0006
+ */
+export const TRIANGLE_FAN                                   = 0x0006
+
+
+/* Data Types ------------------------------------------------------------------------------------------------------- */
 
 /**
  * @constant {Number}
