@@ -24,10 +24,6 @@ export class ShaderProgram
     this.program.attachShaders(gl, ...(this.shaders))
     this.program.linkProgram(gl)
 
-    this.attributes = {
-      position: gl.getAttribLocation(this.program.location, 'vertex_position')
-    }
-
     this.setters = {}
     this.setters.uniforms   = createShaderUniformSetters(gl, this.program.location)
     this.setters.attributes = createShaderAttributeSetters(gl, this.program.location)
