@@ -17,7 +17,7 @@ export class Camera
      this.setPerspective({
       near:   0.1,
       far:    100.0,
-      fovy:   Math.PI / 4.0,
+      fovy:   Math.PI / 2,
       aspect: 1.5,
      })
   }
