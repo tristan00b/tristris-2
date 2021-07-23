@@ -42,7 +42,7 @@ export class Transform
   setTranslation(translation)
   {
     this._isDirty = true
-    this._translation
+    this._translation = translation
     return this
   }
 
