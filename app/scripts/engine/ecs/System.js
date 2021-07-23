@@ -1,3 +1,5 @@
+/** @module Engine/ecs/System */
+
 /**
  * @typedef ComponentUpdateCallback
  * @param {Number} dt The amount of time that has elapsed since the previous call to this function
