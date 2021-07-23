@@ -213,7 +213,7 @@ function createShaderSetters(gl, program, type)
     const paramInfo = paramGetter.call(gl, program, index)
     const location  = paramLocationGetter.call(gl, program, paramInfo.name)
 
-    if (isBuiltin(paramInfo) || !location) continue
+    if (isBuiltin(paramInfo) || location == -1) continue
 
     const name = paramInfo.name.endsWith('[0]')
                ? paramInfo.name.size(0, -3)
