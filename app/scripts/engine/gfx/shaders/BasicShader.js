@@ -13,7 +13,6 @@ export class BasicShader extends ShaderProgram
       {
         type:     gl.VERTEX_SHADER,
         source:  `#version 300 es
-
                   uniform mat4 model_matrix;
                   uniform mat4 view_matrix;
                   uniform mat4 projection_matrix;
@@ -23,8 +22,8 @@ export class BasicShader extends ShaderProgram
                     vec3 colour;
                   } light;
 
-                  in vec4 vertex_position;
-                  in vec4 vertex_normal;
+                  in vec3 vertex_position;
+                  in vec3 vertex_normal;
 
                   out vec4 pass_position;
                   out vec4 pass_normal;
@@ -37,8 +36,8 @@ export class BasicShader extends ShaderProgram
                     pass_light_pos = modelView * vec4(light.position, 1.0);
                     pass_light_col = vec4(light.colour, 1.0);
 
-                    pass_position  = modelView * vertex_position;
-                    pass_normal    = modelView * vertex_normal;
+                    pass_position  = modelView * vec4(vertex_position, 1.0);
+                    pass_normal    = modelView * vec4(vertex_normal, 1.0);
                     gl_Position    = projection_matrix * pass_position;
                   }`
       },
@@ -62,11 +61,6 @@ export class BasicShader extends ShaderProgram
                   out vec4 out_color;
 
                   void main() {
-                    vec4  material_ambient   = vec4(0.0f, 0.f, 0.4f, 1.f);
-                    vec4  material_diffuse   = normalize(gl_FragCoord);
-                    vec4  material_specular  = vec4(1.f, 0.f, 1.f, 1.f);
-                    float material_shininess = 100.0f;
-
                     vec4  N  = normalize(pass_normal);
                     vec4  L  = normalize(pass_light_pos - pass_position);
                     vec4  V  = normalize(-pass_position);
