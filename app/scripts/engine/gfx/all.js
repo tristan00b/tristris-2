@@ -14,7 +14,5 @@ export { /** @see MeshData             */ MeshData,
          /** @see VertexAttributeType  */ VertexAttributeType } from './MeshData'
 export { /** @see Renderer             */ Renderer            } from './Renderer'
 export { /** @see RenderTask           */ RenderTask          } from './RenderTask'
-export { /** @see SceneGraph           */ SceneGraph          } from './SceneGraph'
-export { /** @see SceneNode            */ SceneNode           } from './SceneNode'
 export { /** @see ShaderProgram        */ ShaderProgram       } from './ShaderProgram'
 export { /** @see Transform            */ Transform           } from './Transform'
