@@ -31,13 +31,13 @@ export class BasicShader extends ShaderProgram
                   out vec4 pass_light_col;
 
                   void main() {
-                    mat4 modelView = view_matrix * model_matrix;
-
-                    pass_light_pos = modelView * vec4(light.position, 1.0);
+                    pass_light_pos = view_matrix * vec4(light.position, 1.0);
                     pass_light_col = vec4(light.colour, 1.0);
 
+                    mat4 modelView = view_matrix * model_matrix;
                     pass_position  = modelView * vec4(vertex_position, 1.0);
                     pass_normal    = modelView * vec4(vertex_normal, 1.0);
+
                     gl_Position    = projection_matrix * pass_position;
                   }`
       },
