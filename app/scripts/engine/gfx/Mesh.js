@@ -3,24 +3,28 @@ import { mat4 } from 'gl-matrix'
 import { MeshData, VertexAttributeType } from './MeshData'
 import { MakeConstEnumerator, MakeErrorType, MakeLogger } from '../utilities'
 
-
 /**
- * Enumerates the types of WebGL Array Buffers
+ * Enumerates the types of attribute buffers (note the correspondence to `VertexAttributeType` is exploited when saving
+ * WebGL buffer objects to `Mesh._buffers`)
  * @enum {Number}
- * @property {Number} VERTEX_BUFFER
- * @property {Number} INDEX_BUFFER
+ * @property {Number} POSITIONS
+ * @property {Number} NORMALS
+ * @property {Number} COLOURS
+ * @property {Number} TEXELS
+ * @property {Number} UVCOORDS
+ * @property {Number} INDEX
  * @property {Number} NUM_BUFFER_TYPES
  * @readonly
  * @private
  */
 const BufferType = MakeConstEnumerator('BufferType', [
-  'VERTEX_BUFFER',
-  'INDEX_BUFFER',
+  ...Object.keys(VertexAttributeType).filter(key => key !== 'NUM_ATTRIBUTE_TYPES'),
+  'INDEX',
   'NUM_BUFFER_TYPES'
 ])
 
 
-/**
+/**`
  * Acquires and configures buffers on the graphics card for drawing the specified `MeshData`, and provides a generic
  * draw method for the renderer to call
  */
@@ -36,18 +40,33 @@ export class Mesh
   {
     this._vao = new WebGL.VertexArray(gl)
     this._vao.bind(gl)
-    this._vbo = []
+    this._buffers = []
 
-    ;[...data].forEach(vertexArrayData => {
-      const { vertices, indices, primtype, attrib } = vertexArrayData
+    ;[...VertexAttributeType].forEach(type => {
 
-      this._vbo[attrib.type] = makeVertexBuffers({ gl, vertices, indices })
-
-      enableVertexAttribute({ gl, vao: this._vao, attrib })
+      const attribute = data.at(type)
+      if (attribute)
+      {
+        this._buffers[attribute.type] = makeVertexAttributeBuffer(gl, attribute.data)
+        this._vao.enableAttribute(gl, attribute.type)
+        this._vao.defineAttributePointer(gl, attribute.type, attribute.size, attribute.format)
+      }
     })
 
-    const positions = data.at(VertexAttributeType.POSITION)
-    this._draw = gl => gl.drawElements(gl.TRIANGLES, positions.indices.length, gl.UNSIGNED_INT, 0)
+    const { primtype, indices } = data
+
+    if (indices)
+    {
+      this._buffers[BufferType.INDEX_BUFFER] = makeIndexBuffer(gl, data.indices)
+
+      const drawCount = indices.length
+      this._draw = gl => gl.drawElements(primtype, drawCount, gl.UNSIGNED_INT, 0)
+    }
+    else
+    {
+      const drawCount = data.attributes[0].data.length
+      this._draw = gl => gl.drawArrays(primtype, 0, drawCount)
+    }
 
     this._vao.unbind(gl)
   }
@@ -65,26 +84,29 @@ export class Mesh
 }
 
 
-function makeVertexBuffers({ gl, vertices, indices })
+/**
+ * @todo document
+ * @private
+ */
+function makeVertexAttributeBuffer(gl, data)
 {
-  const buffers = []
-  buffers[BufferType.VERTEX_BUFFER] = new WebGL.ArrayBuffer(gl)
-  buffers[BufferType.VERTEX_BUFFER].bind(gl)
-  buffers[BufferType.VERTEX_BUFFER].data(gl, new Float32Array(vertices), gl.STATIC_DRAW)
-
-  if (indices)
-  {
-    buffers[BufferType.INDEX_BUFFER] = new WebGL.ElementArrayBuffer(gl)
-    buffers[BufferType.INDEX_BUFFER].bind(gl)
-    buffers[BufferType.INDEX_BUFFER].data(gl, new Uint32Array(indices), gl.STATIC_DRAW)
-  }
+  const buf = new WebGL.ArrayBuffer(gl)
+  buf.bind(gl)
+  buf.data(gl, new Float32Array(data), gl.STATIC_DRAW)
+  return buf
 }
 
 
-function enableVertexAttribute({ gl, vao, attrib })
+/**
+ * @todo document
+ * @private
+ */
+function makeIndexBuffer(gl, data)
 {
-  vao.enableAttribute(gl, attrib.type)
-  vao.defineAttributePointer(gl, attrib.type, attrib.size, attrib.format)
+  const buf = new WebGL.ElementArrayBuffer(gl)
+  buf.bind(gl)
+  buf.data(gl, new Uint32Array(data), gl.STATIC_DRAW)
+  return buf
 }
 
 

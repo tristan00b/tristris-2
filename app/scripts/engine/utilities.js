@@ -83,8 +83,16 @@ export function MakeConstEnumerator(clsname, properties)
   const enumerable  = true
   const writable    = false
   const name        = [ 'name', { value: clsname } ]
+  const iterator    = [
+    Symbol.iterator, { value: function* () {
+      for (const key in this)
+      {
+        yield this[key]
+      }
+    }}
+  ]
   const rest        = Object.entries(properties).map(([_, key], idx) => [key, { value: idx, enumerable, writable }])
-  const descriptors = Object.fromEntries([name, ...rest])
+  const descriptors = Object.fromEntries([name, iterator, ...rest])
 
   return Object.defineProperties({}, descriptors)
 }

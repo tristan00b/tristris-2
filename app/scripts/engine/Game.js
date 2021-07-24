@@ -3,31 +3,23 @@ import { Renderer } from '../engine/gfx/all'
 
 
 /**
- * @typedef SceneConstructor
- * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
- * @returns {Scene}
- */
-
-
-/**
  * Creates an instance of the game
  */
 export class Game
 {
   /**
-   *
    * @param {external:HTMLCanvasElement} canvas The canvas to render to
-   * @param {SceneConstructor} EntryScene A constructor callback for initialising the entry scene
+   * @param {SceneConstructor} MakeEntryScene A constructor callback for initialising the entry scene
    */
-  constructor(canvas, EntryScene) {
+  constructor(canvas, MakeEntryScene) {
     this.canvas  = canvas
     this.context = this.canvas.getContext('webgl2')
     // this.input  = new InputHandler
     this.renderer = new Renderer(this)
     // this.audio  = new AudioServer(this)
 
-    const scene = new EntryScene(this.context)
-    this.renderer.enqueue(scene)
+    this.scene = MakeEntryScene(this.context)
+    this.renderer.enqueue(this.scene)
   }
 
   /**
@@ -35,7 +27,7 @@ export class Game
    */
   loop(t0, t1)
   {
-    // this.scene.update(t1 - t2)
+    this.scene.update(t1 - t0)
     this.renderer.render()
     this.running && window.requestAnimationFrame(t2 => this.loop(t1, t2))
   }

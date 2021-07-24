@@ -1,12 +1,12 @@
 import { Game } from '../engine/all'
 
 import config from './config'
-import { JustSpheresScene } from './scenes/just-balls'
+import { MakeScene } from './scenes/MovingSpheres'
 
 export class Tristris extends Game
 {
   constructor() {
     const canvas = document.getElementById(config.canvas.id)
-    super(canvas, JustSpheresScene)
+    super(canvas, MakeScene)
   }
 }

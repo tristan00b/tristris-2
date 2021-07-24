@@ -5,15 +5,23 @@ import { Camera              } from '../gfx/Camera'
 import { Light               } from '../gfx/Light'
 import { Material            } from '../gfx/Material'
 import { Mesh                } from '../gfx/Mesh'
-import { SceneNode           } from '../gfx/SceneNode'
 import { ShaderProgram       } from '../gfx/ShaderProgram'
 import { Transform           } from '../gfx/Transform'
 
 import { Entity              } from './Entity'
+import { SceneNode           } from './SceneNode'
+import { System              } from './System'
 import { Tag                 } from './Tag'
 
 
 /** @module Engine/ecs/Scene */
+
+
+/**
+ * Any method or constructor that returns an instance of {@link module:Engine/ecs/Scene.Scene}
+ * @typedef SceneConstructor
+ * @returns {Scene}
+ */
 
 
 /**

@@ -7,43 +7,43 @@ import * as gl from './WebGL/constants'
 
 /**
  * Enumerates the types of vertex attributes
- * @enum {Number}
- * @property {Number} POSITION
- * @property {Number} COLOUR
- * @property {Number} NORMAL
- * @property {Number} TEXTURE
+ * @type {enum}
+ * @property {Number} POSITIONS
+ * @property {Number} NORMALS
+ * @property {Number} COLOURS
+ * @property {Number} TEXELS
+ * @property {Number} UVCOORDS
  * @property {Number} NUM_ATTRIBUTE_TYPES
  * @readonly
  */
 export const VertexAttributeType = MakeConstEnumerator('VertexAttributeType', [
-  'POSITION',
-  'COLOUR',
-  'NORMAL',
-  'TEXTURE',
+  'POSITIONS',
+  'NORMALS',
+  'COLOURS',
+  'TEXELS',
+  'UVCOORDS',
   'NUM_ATTRIBUTE_TYPES',
 ])
 
 
 /**
- * This type is for documentation purpostes. An `AttributeDescriptor` describes how to interpret mesh vertex array data
- * provided to an instance of `MeshData`. An `AttributeDescriptor` object does not need to be instantiated, rather a
- * any object containing the properties described below can be used.
- * @typedef AttributeDescriptor
- * @property {VertexAttributeType} type The type of attribute (e.g. `VertexAttributeType.POSITION`)
- * @property {Number} size The number of components per attribute (between 1-4 inclusive)
- * @property {Number} format Specifies how to interpret the components' data type (e.g. gl.FLOAT)
- */
-
-
-/**
- * This type is for documentation purposes. A `VertexData` object describes the data provided to an instance of
- * `MeshData` so that memory on the graphics card can be correctly allocated when later on. A `VertexData object does
- * not need to be instantiated, rather any object containing the properties described below can be used.
- * @typedef VertexArrayData
- * @property {Number[]} vertices Vertex data (1-4 components) placed sequentially into a 1D array
- * @property {Number[]} [indices] Indices into the vertex data array
- * @property {Number} [args.primtype=gl.TRIANGLES] The type of primitive used to interpret the mesh data
- * @property {AttributeDescriptor} attrib The vertex attributes specified by the mesh data
+ * Provides the specification for a single vertex attribute, e.g. positions, normals, or texels, etc. (For a compplete
+ * list of attribute types, see {@link module:Engine/gfx/MeshData.VertexAttributeType}).
+ * @typedef VertexAttributeDescriptor
+ * @property {VertexAttributeType} type The type of the vertex attribtue
+ * @property {Number} size The number of components per vertex (1-4 inclusive)
+ * @property {Number} format A constant value specifying how to interpret the data (currently only `gl.FLOAT` and `gl.UNSIGNED_INT` are supported)
+ * @property {Number[]} data A 1D buffer containing the data corresponding to `type` (e.g. `[x0, y0, z0, x1, y1, z1, ...]`)
+ *
+ * @example
+ * // VertexAttributeDescriptor does not have a dedicated constructor.
+ * // Simply create object including the above properties.
+ * const positionsAttribute = {
+ *   type:   VertexAttributeType.POSITIONS,
+ *   size:   3, // components per vertex
+ *   data:   buffer,
+ *   format: gl.FLOAT
+ * }
  */
 
 
@@ -53,108 +53,100 @@ export const VertexAttributeType = MakeConstEnumerator('VertexAttributeType', [
 export class MeshData
 {
   /**
-   * @param {...VertexArrayData} data
+   * @param {Object} args
+   * @param {VertexAttributeDescriptor[]} args.attributes The specification for all attribute data associated with each
+   * @param {Number[]} [args.indices] Array of indices for indexing into vertex attributes at draw time
+   * @param {Number} [args.primtype=gl.TRIANGLES] The primitive type used to draw the mesh (e.g. gl.TRIANGLES)
+   *                                      vertex of a {@link Mesh}
+   * @throws {MeshDataError} Throws on malformed attributes
    */
-  constructor(...data)
+  constructor({ attributes, indices, primtype})
   {
-    this._data = []
-    data.forEach(d => {
+    this._attrs = []
 
-      const { vertices, indices, primtype, attrib } = d
-
-      this.checkVertices(vertices)
-      this.checkAttribute(attrib)
-
-      this._data[attrib.type] = {
-        vertices,
-        indices,
-        primtype,
-        attrib,
-      }
+    attributes.map(checkAttribute).forEach(attribute => {
+      this._attrs[attribute.type] = attribute
     })
 
-    //this[Symbol.iterator] = this._data[Symbol.iterator].bind(this._data)
+    this._indices  = indices
+    this._primtype = primtype ?? gl.TRIANGLES
   }
 
   /**
-   *
-   * @param {Number} index Integer index into the arrayof VertexArrayData objects
+   * The array of attribute descriptors contained by this `MeshData` instance
+   * @type {VertexAttributeDescriptor[]}
    */
-  at(index)
+  get attributes()
   {
-    return this._data[index]
+    return this._attrs.filter(a => !!a)
   }
 
   /**
-   * Description
-   * @generator
-   * @yields {VertexArrayData} The next VertexArrayData
+   * Returns the indices if they were provided to the constructor
+   * @type {Number[]}
    */
-  *[Symbol.iterator]()
+  get indices()
   {
-    let elements = [...this._data],
-        elem = null
-
-    while (elem = elements.shift())
-    {
-      yield elem
-    }
+    return this._indices
   }
 
   /**
-   * Checks the vertices and returns them if they are found to be well-formed (`vertices` is neither `null|undefined` nor empty)
-   * @param {Number[]} vertices
-   * @throws {MeshDataError} Throws when `vertices` is undefined or empty
+   * Returns the primitive type that will be used to draw the mesh (see
+   *   {@link https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Constants#rendering_primitives})
+   * @type {Number}
    */
-  checkVertices(vertices)
+  get primtype()
   {
-    vertices?.length ?? throw new MeshDataError('requires vertex data')
+    return this._primtype
   }
 
   /**
-   * Checks the attribute, returning if is it found to be well-formed:
-   * - The attribute specifies both a `type` and a `size` attribute
-   * - The `type` corresponds to an attribute of the `VertexAttributeType` enum
-   * - The `size` specifies a number of components from 1 to 4 inclusive
-   * @param {{ type: VertexAttributeType, size: Number }} attrib
+   * Gets the `VertexAttributeDescriptor` corresponding to `type`
+   * @param {VertexAttributeType} type The type of the attribute to get
+   * @returns {VertexAttributeDescriptor} Returns the value at `type` if it exist on this `MeshData` instance
    */
-  checkAttribute(attrib)
+  at(type)
   {
-    attrib?.type ?? throw new MeshDataError('attributes require a type to be defined')
-    attrib?.type >= 0 && attrib?.type < VertexAttributeType.NUM_ATTRIBUTE_TYPES ||
-      throw new MeshDataError(`invalid attribute type specified (received type: ${attrib?.type})`)
-
-    attrib?.size ?? throw new MeshDataError('attributes require a size to be defined')
-    attrib?.size > 0 && attrib?.size <= 4 ||
-      throw new MeshDataError(`attribute size limited to between 1 and 4 components (received size: ${attrib?.size}`)
+    return this._attrs[type]
   }
+}
 
-  // /**
-  //  * Checks the attributes and returns them if they are found to be well-formed:
-  //  * - Each attribute specifies a `type` and a `size` attribute
-  //  * - The `type` corresponds to an attribute of the `VertexAttributeType` enum
-  //  * - The `size` specifies a number of components from 1 to 4 inclusive
-  //  * @param {Array.<{ type: VertexAttributeType, size: Number}>} attribs
-  //  * @returns {Array.<{ type: VertexAttributeType, size: Number}>} attribs
-  //  * @throws {MeshDataError} Throws when the attribute check has failed
-  //  */
-  // checkAttributes(attribs)
-  // {
-  //   attribs?.length || throw new MeshDataError('vertex attributes must be specified')
 
-  //   attribs.forEach(({ type, size }) => {
-  //     type ?? throw new MeshDataError('attributes require a type to be defined')
-  //     size ?? throw new MeshDataError('attributes require a size to be defined')
+/**
+ * Checks the attribute, returning if is it found to be well-formed:
+ * - The attribute specifies both a `type` and a `size` attribute
+ * - The `type` corresponds to an attribute of the `VertexAttributeType` enum
+ * - The `size` specifies a number of components from 1 to 4 inclusive
+ * @param {VertexAttributeDescriptor} attribute
+ * @returns {VertexAttributeDescriptor} Returns the attribute descriptor if the check passes
+ * @throws {MeshDataError} Throws when the check has failed
+ * @private
+ */
+function checkAttribute(attribute)
+{
+  const { type, size, format, data } = attribute
 
-  //     type >= 0 && type < VertexAttributeType.NUM_ATTRIBUTE_TYPES ||
-  //       throw new MeshDataError(`invalid attribute type specified (received type: ${type})`)
+  type ?? throw new MeshDataError('attributes require a type property to be defined')
+  type >= 0 && type < VertexAttributeType.NUM_ATTRIBUTE_TYPES ||
+    throw new MeshDataError(`attribute type must be a type specified by VertexAttributeType (received: ${type})`)
 
-  //     size > 0 && size <= 4 ||
-  //       throw new MeshDataError(`attribute size limited to between 1 and 4 components (received size: ${size}`)
-  //   })
+  size ?? throw new MeshDataError('attributes require a size property (number of components) to be defined')
+  size > 0 && size <= 4 ||
+    throw new MeshDataError(`attribute size must be between 1 and 4 components (received: ${size}`)
 
-  //   return attribs
-  // }
+  format == gl.FLOAT || format == gl.UNSIGNED_INT ||
+    throw new MeshDataError(`attribute format must be either gl.FLOAT or gl.UNSIGNED_INT`)
+
+  Array.isArray(data) ||
+    throw new MeshDataError('attributes require a data property to be defined')
+
+  Array.isArray(data) && data.length !== 0 ||
+    throw new MeshDataError(`attribute data must be a non-empty array`)
+
+  data.length % size === 0 ||
+    throw new MeshDataError(`attribute data must contain a multiple of size elements (got [data.length: ${data?.length}, size: ${size}])`)
+
+  return attribute
 }
 
 

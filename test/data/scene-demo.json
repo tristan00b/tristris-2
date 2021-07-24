@@ -1,0 +1,20 @@
+{
+  "lights":     [ { "type": "PointSource", "position": [0.2, 0.3, -1], "colour": [1, 1, 1] }  ],
+  "cameras":    [ { "type": "Perspective", "lookat": { "eye": [0, 0, 10], "at": [0, 0, 0] } } ],
+  "models":     [ { "name": "Sphere", "mesh": 0 } ],
+  "meshes":     [ "Sphere"       ],
+  "shaders":    [ "BasicShader"  ],
+  "materials":  [
+    { "type": "SolidColour", "diffuse": [1, 0, 0], "ambient": [0.05, 0.05, 0.05], "specular": [0.7, 0.7, 0.7], "shininess": 64 },
+    { "type": "SolidColour", "diffuse": [0, 1, 0], "ambient": [0.05, 0.05, 0.05], "specular": [0.7, 0.7, 0.7], "shininess": 64 },
+    { "type": "SolidColour", "diffuse": [0, 0, 1], "ambient": [0.05, 0.05, 0.05], "specular": [0.7, 0.7, 0.7], "shininess": 64 },
+    { "type": "SolidColour", "diffuse": [1, 1, 0], "ambient": [0.05, 0.05, 0.05], "specular": [0.7, 0.7, 0.7], "shininess": 64 }
+  ],
+  "components": [ "Orbit" ],
+  "entities":   [
+    { "model": 0,  "transform": { "T": [ 0,      1,      0], "R": [0,0,0], "S": 1 }, "material": 0, "shader": 0, "components": [ { "axis": [ 1,      0,      0], "center": [0, 0, 0] } ] },
+    { "model": 0,  "transform": { "T": [ 1,      0,      0], "R": [0,0,0], "S": 1 }, "material": 1, "shader": 0, "components": [ { "axis": [ 0,      1,      0], "center": [0, 0, 0] } ] },
+    { "model": 0,  "transform": { "T": [ 0.7071, 0.7071, 0], "R": [0,0,0], "S": 1 }, "material": 2, "shader": 0, "components": [ { "axis": [-0.7071, 0.7071, 0], "center": [0, 0, 0] } ] },
+    { "model": 0,  "transform": { "T": [-0.7071, 0.7071, 0], "R": [0,0,0], "S": 1 }, "material": 3, "shader": 0, "components": [ { "axis": [ 0.7071, 0.7071, 0], "center": [0, 0, 0] } ] }
+  ]
+}
