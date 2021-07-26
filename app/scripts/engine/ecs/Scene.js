@@ -184,7 +184,7 @@ export class Scene
   addSystem(system)
   {
     if (system instanceof System) this._systems.push(system)
-    else Log.warn(`Received invalid system argument ${system.name}`)
+    else Log.warn(`Received invalid system argument: ${system.name}`)
   }
 
   /**
