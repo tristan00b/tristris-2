@@ -2,7 +2,7 @@ import { mat4,
          quat,
          vec3,
          vec4                } from 'gl-matrix'
-import { model               } from '../meshes/CubeMesh'
+import { model               } from '../meshes/SphereMesh'
 import { BasicShader,
          Camera,
          Light,
@@ -22,6 +22,9 @@ import { Entity,
 import   * as WebGL            from '../../engine/gfx/WebGL/utilities'
 
 
+class SphereTag extends Tag {}
+
+
 export function MakeScene(gl)
 {
   const scene  = new Scene
@@ -33,6 +36,7 @@ export function MakeScene(gl)
     Mesh,
     SceneNode,
     ShaderProgram,
+    SphereTag,
     Transform,
   ].forEach(scene.registerComponentType.bind(scene))
 
@@ -41,18 +45,19 @@ export function MakeScene(gl)
   // Scene Root
   //
   const e0 = new Entity
+  scene.addEntity(e0)
+
   const n0 = new SceneNode
   const shader = new BasicShader(gl)
 
-  const camera = new Camera()
-  camera.setLookat({ eye: [0, 0, 5], up: [0, 1, 0], at: [0, 0, 0] })
-        .setPerspective({ aspect: gl.canvas.width/gl.canvas.height })
+  const camera = new Camera
+  camera.setLookat({ eye: [0, 0, 25], up: [0, 1, 0], at: [0, 0, 0] })
+        .setPerspective({ aspect: gl.canvas.width/gl.canvas.height  })
 
   const light = new Light
-  light.setPosition([0, 3, 0])
+  light.setPosition([0, 10, -20])
        .setColour([1, 1, 1])
 
-  scene.addEntity(e0)
   scene.setComponent(e0, n0)
   scene.setComponent(e0, shader)
   scene.setComponent(e0, camera)
@@ -63,72 +68,142 @@ export function MakeScene(gl)
   // Spheres Nodes
   //
 
-  //{ // loop n times
-    const s0 = new Entity
-    scene.addEntity(s0)
-
-    const n1 = new SceneNode
-    n0.addChild(n1)
-
-    const data = new MeshData(
-      {
-        indices: model.indices,
-        primtype: gl.TRIANGLES,
-        attributes: [
-          {
-            type: VertexAttributeType.POSITIONS,
-            size: 3,
-            format: gl.FLOAT,
-            data: model.positions,
-          },
-          {
-            type: VertexAttributeType.NORMALS,
-            size: 3,
-            format: gl.FLOAT,
-            data: model.normals,
-          },
-        ]
-      }
-    )
-
-    const material = new Material
-    material.setAmbient([0, 0, 0, 1])
-            .setDiffuse([0.9, 0, 0, 1])
-            .setSpecular([0.7, 0.7, 0.7, 1])
-            .setShininess(64)
-
-    const mesh = new Mesh({ gl, data, shader })
-
-    const transform = new Transform
-
-    const rotation  = quat.fromEuler(quat.create(),
-      180/Math.PI * Math.PI/3,
-      180/Math.PI * Math.PI/4,
-      180/Math.PI * Math.PI/5)
-
-    transform.setTranslation([0, 0, 0]).setRotation(rotation)
-    transform.worldTransform = transform.localTransform
-
-    scene.setComponent(s0, n1)
-    scene.setComponent(s0, material)
-    scene.setComponent(s0, mesh)
-    scene.setComponent(s0, transform)
-  //}
-
-  const update = (dt, node, transform) =>
-  {
-    if (node.parent)
+  const data = new MeshData(
     {
-      const parent = scene.getComponent(node.parent, Transform)
-      transform.worldTransform =
-        mat4.mul(mat4.create(), parent.worldTransform, transform.localTransform)
+      indices: model.indices,
+      primtype: gl.TRIANGLES,
+      attributes: [
+        {
+          type: VertexAttributeType.POSITIONS,
+          size: 3,
+          format: gl.FLOAT,
+          data: model.positions,
+        },
+        {
+          type: VertexAttributeType.NORMALS,
+          size: 3,
+          format: gl.FLOAT,
+          data: model.normals,
+        },
+      ]
     }
+  )
+  const mesh = new Mesh({ gl, data, shader })
+
+  const colours = [
+    { // red
+      ambient:  [0.0, 0.0, 0.0, 1.0],
+      diffuse:  [0.9, 0.0, 0.0, 1.0],
+      specular: [0.7, 0.7, 0.7, 1.0],
+      shininess: 64,
+    },
+    { // green
+      ambient:  [0.0, 0.0, 0.0, 1.0],
+      diffuse:  [0.0, 0.9, 0.0, 1.0],
+      specular: [0.7, 0.7, 0.7, 1.0],
+      shininess: 64,
+    },
+    { // blue
+      ambient:  [0.0, 0.0, 0.0, 1.0],
+      diffuse:  [0.0, 0.0, 0.9, 1.0],
+      specular: [0.7, 0.7, 0.7, 1.0],
+      shininess: 64,
+    },
+  ]
+
+  const sphereCount = [1, 4, 6, 8, 6, 4, 1]
+  const levelCount  = sphereCount.length
+  const TWO_PI      = Math.PI * 2
+  const R           = 10
+
+  const h   = 2*R / (levelCount - 1)
+
+  Array(levelCount).fill().forEach((_, j) => {
+
+    const c = colours[j % colours.length]
+    const m = new Material
+    m.setAmbient(c.ambient)
+     .setDiffuse(c.diffuse)
+     .setSpecular(c.specular)
+     .setShininess(c.shininess)
+
+    const sphereTag = new SphereTag
+    sphereTag.level = j
+
+    const theta = TWO_PI / sphereCount[j]
+
+    const y     = R - j * h
+    const phi   = Math.acos(y/R)
+    const r     = R * Math.sin(phi)
+
+    Array(sphereCount[j]).fill().forEach((_, i) => {
+
+      const s = new Entity
+      scene.addEntity(s)
+
+      const n = new SceneNode
+      n0.addChild(n)
+
+      const t = new Transform
+      const x = r * Math.cos(i * theta)
+      const z = r * Math.sin(i * theta)
+      t.setTranslation([x, y, z])
+
+      scene.setComponent(s, n)
+      scene.setComponent(s, t)
+      scene.setComponent(s, m)
+      scene.setComponent(s, mesh)
+      scene.setComponent(s, sphereTag)
+    })
+
+  })
+
+
+  // -------------------------------------------------------------------------------------------------------------------
+  // System updates
+  //
+
+  { // Update local transforms
+    const w = Math.PI/8
+
+    const update = (dt, transform, tag) =>
+    {
+      const angle = Math.pow(-1, tag.level) * w*dt/1000
+      transform.translation = vec3.rotateY([], transform.translation, [0,0,0], angle)
+      // transform.rotation = quat.rotateY([], transform.rotation, angle)
+    }
+
+    const query  = new Query(Transform, SphereTag).run(scene)
+    const system = new System(query, update)
+
+    scene.addSystem(system)
   }
 
-  const query  = new Query(scene, SceneNode, Transform)
-  const system = new System(query, update)
 
-  scene.addSystem(system)
+  { // Update world transforms
+    const update = (dt, node, transform) =>
+    {
+      if (node.parent)
+      {
+        const parent = scene.getComponent(node.parent, Transform)
+        transform.worldTransform = mat4.mul(mat4.create(), parent.worldTransform, transform.localTransform)
+      }
+      else
+      {
+        transform.worldTransform = transform.localTransform
+      }
+    }
+
+    const query  = new Query(SceneNode, Transform).run(scene)
+    const system = new System(query, update)
+
+    scene.addSystem(system)
+  }
+
+
+  // -------------------------------------------------------------------------------------------------------------------
+  // Done
+  //
 
   return scene
 }
