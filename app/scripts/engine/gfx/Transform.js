@@ -6,20 +6,15 @@ import {
 } from 'gl-matrix'
 
 /**
+ * Generates 4x4 a matrix (M=RTS) for represening an object's 3D orientation
  */
 export class Transform
 {
-  /**
-   * @param {Object} [args]
-   * @param {extern:vec3} [args.translation=[0,0,0]]
-   * @param {extern:quat} [args.rotation=quat.identity]
-   * @param {extern:vec3} [args.scale=[1,1,1]]
-   */
-  constructor({ enabled, translation, rotation, scale } = {})
+  constructor()
   {
-    this._translation    = translation ?? vec3.fromValues(0,0,0)
-    this._rotation       = rotation    ?? quat.create()
-    this._scale          = scale       ?? vec3.fromValues(1,1,1)
+    this._translation    = [0,0,0]
+    this._rotation       = quat.create()
+    this._scale          = [1,1,1]
     this._localTransform = mat4.create()
     this._worldTransform = mat4.create()
     this._isDirty        = false
@@ -27,6 +22,7 @@ export class Transform
 
   /**
    * @type {external:vec3}
+   * @default [0,0,0]
    */
   get translation()
   {
@@ -39,10 +35,13 @@ export class Transform
     this._translation = translation
   }
 
+  /**
+   * @param {external:vec3} translation
+   * @returns {Transform} The `this` object referece
+   */
   setTranslation(translation)
   {
-    this._isDirty = true
-    this._translation = translation
+    this.translation = translation
     return this
   }
 
@@ -62,12 +61,11 @@ export class Transform
 
   /**
    * @param {external:quat} rotation
-   * @returns {Object} this
+   * @returns {Transform} The `this` object referece
    */
   setRotation(rotation)
   {
-    this._isDirty = true
-    this._rotation = rotation
+    this.rotation = rotation
     return this
   }
 
@@ -87,17 +85,17 @@ export class Transform
 
   /**
    * @param {external:vec3} scale
-   * @returns {this}
+   * @returns {Transform} The `this` object referece
    */
   setScale(scale)
   {
-    this._isDirty = true
-    this._scale = scale
+    this.scale = scale
     return this
   }
 
   /**
    * @type {external:mat4}
+   * @readonly
    */
   get localTransform()
   {

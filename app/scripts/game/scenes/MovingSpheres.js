@@ -41,22 +41,21 @@ export function MakeScene(gl)
   // Scene Root
   //
   const e0 = new Entity
-  scene.addEntity(e0)
-
   const n0 = new SceneNode
-  scene.setComponent(e0, n0)
-
   const shader = new BasicShader(gl)
+
+  const camera = new Camera()
+  camera.setLookat({ eye: [0, 0, 5], up: [0, 1, 0], at: [0, 0, 0] })
+        .setPerspective({ aspect: gl.canvas.width/gl.canvas.height })
+
+  const light = new Light
+  light.setPosition([0, 3, 0])
+       .setColour([1, 1, 1])
+
+  scene.addEntity(e0)
+  scene.setComponent(e0, n0)
   scene.setComponent(e0, shader)
-
-  const camera = new Camera({
-    lookat:      { eye: [0, 0, 10], up: [0, 1, 0], at: [0, 0, 0] },
-    perspective: { aspect: gl.canvas.width/gl.canvas.height      }
-  })
-
   scene.setComponent(e0, camera)
-
-  const light = new Light({ position: [3, 2, -2], colour: [1, 1, 1] })
   scene.setComponent(e0, light)
 
 
@@ -92,15 +91,14 @@ export function MakeScene(gl)
       }
     )
 
-    const colour = {
-      ambient:  [0.0, 0.0, 0.0, 1.0],
-      diffuse:  [0.9, 0.0, 0.0, 1.0],
-      specular: [0.7, 0.7, 0.7, 1.0],
-      shininess: 64,
-    }
+    const material = new Material
+    material.setAmbient([0, 0, 0, 1])
+            .setDiffuse([0.9, 0, 0, 1])
+            .setSpecular([0.7, 0.7, 0.7, 1])
+            .setShininess(64)
 
-    const mesh      = new Mesh({ gl, data, shader })
-    const material  = new Material(colour)
+    const mesh = new Mesh({ gl, data, shader })
+
     const transform = new Transform
 
     const rotation  = quat.fromEuler(quat.create(),
@@ -108,7 +106,7 @@ export function MakeScene(gl)
       180/Math.PI * Math.PI/4,
       180/Math.PI * Math.PI/5)
 
-    transform.setTranslation([0, 0, -5]).setRotation(rotation)//.setScale([0.5, 0.5, 0.5])
+    transform.setTranslation([0, 0, 0]).setRotation(rotation)
     transform.worldTransform = transform.localTransform
 
     scene.setComponent(s0, n1)

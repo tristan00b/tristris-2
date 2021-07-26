@@ -7,26 +7,62 @@ import { MakeErrorType, MakeLogger } from '../utilities'
  */
 export class Light
 {
-  constructor({ position, colour } = {})
+  constructor()
   {
-    this._position = position ? position : [0,  0, -1]
-    this._colour   = colour   ? colour   : [1,  1,  1]
+    this._position = [0, 1, 1]
+    this._colour   = [1, 1, 1]
   }
 
   /**
+   * Gets the position of the light
    * @type {external:vec3}
+   * @default [0,1,1]
    */
   get position()
   {
     return this._position
   }
 
+  set position(position)
+  {
+    this._position = position
+  }
+
   /**
+   * Sets the position of the light
+   * @param {external:vec3} position
+   * @returns {Light} The `this` object reference
+   */
+  setPosition(position)
+  {
+    this.position = position
+    return this
+  }
+
+  /**
+   * Gets the colour of the light
    * @type {external:vec3}
+   * @default [1,1,1]
    */
   get colour()
   {
     return this._colour
+  }
+
+  set colour(colour)
+  {
+    this._colour = colour
+  }
+
+  /**
+   * Sets the colour of the light
+   * @param {external:vec3} colour
+   * @returns {Light} The `this` object reference
+   */
+  setColour(colour)
+  {
+    this.colour = colour
+    return this
   }
 }
 
