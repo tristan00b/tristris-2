@@ -3,6 +3,7 @@ import {
   keyFrom,
   Query,
   Scene,
+  SceneNode,
   System,
 } from '../app/scripts/engine/ecs/all'
 
@@ -11,7 +12,6 @@ import {
   Light,
   Material,
   RenderTask,
-  SceneNode,
   Transform
 } from '../app/scripts/engine/gfx/all'
 
@@ -119,8 +119,8 @@ describe('RenderTask', () => {
 
       // n0
       expect(tasks[ 0].type).toBe(RenderTaskType.USE_SHADER)
-      expect(tasks[ 1].type).toBe(RenderTaskType.USE_CAMERA)
-      expect(tasks[ 2].type).toBe(RenderTaskType.USE_LIGHT)
+      expect(tasks[ 1].type).toBe(RenderTaskType.SET_CAMERA)
+      expect(tasks[ 2].type).toBe(RenderTaskType.SET_LIGHT)
       expect(tasks[ 3].type).toBe(RenderTaskType.SET_TRANSFORM)
 
       // n1
