@@ -3,8 +3,8 @@
 import * as fs from 'fs/promises'
 import { constants } from 'fs'
 
-const usage =
-`obj2js
+
+const usage = `obj2js
 
 usage: obj2js inFile outFile
 
@@ -14,14 +14,8 @@ usage: obj2js inFile outFile
 A tool for converting Wavefront (OBJ) files into JavaScript modules that are more convenient for use with to WebGL.
 `
 
-;(_ => {
+main(process.argv.slice(2)).catch(console.error)
 
-  main(process.argv.slice(2))
-  .catch(e => {
-    console.log(`\n${e.message}\n`)
-  })
-
-})()
 
 async function main(args)
 {
@@ -42,9 +36,8 @@ function parseWavefrontObject(objFileStr)
   const _positions = []
   const _normals   = []
   const _colours   = []
-  const _texels    = []
+  const _uvcoords  = []
   const _faces     = []
-  const _size      = 3
 
   const vertices =
   {
@@ -53,36 +46,45 @@ function parseWavefrontObject(objFileStr)
     positions: [],
     normals:   [],
     colours:   [],
-    texels:    [],
+    uvcoords:  [],
     indices:   [],
   }
 
   objFileStr.split('\n').forEach(line => {
-    if      (line.startsWith('v '))
+    if (line.startsWith('v '))
     {
-      _positions.push(parseVertex({ str: line, size: _size }))
+      _positions.push(parseVertex(line))
     }
     else if (line.startsWith('vn '))
     {
-      _normals.push(parseNormal({ str: line, size: _size }))
+      _normals.push(parseNormal(line))
+    }
+    else if (line.startsWith('vt '))
+    {
+      _uvcoords.push(parseUVCoord(line))
     }
     else if (line.startsWith('f '))
     {
-      _faces.push(parseFace({ str: line, size: _size }))
+      _faces.push(parseFace(line))
     }
     else if (line.startsWith('o '))
     {
-      vertices.name = parseName({ str: line })
+      vertices.name = parseName(line, 'o ')
+    }
+    else if (line.startsWith('usemtl '))
+    {
+      vertices.material = parseName(line, 'usemtl ')
     }
   })
 
   _faces.forEach(face => {
     face.forEach(component => {
-      const [pIdx, _, nIdx] = component
+      const [pIdx, uIdx, nIdx] = component
 
       const position = _positions[pIdx]
       const normal   = _normals  [nIdx]
-      const index    = findPositionNormalPair({ vertices, position, normal })
+      const uvcoord  = _uvcoords [uIdx]
+      const index    = findIndex(vertices, position, normal, uvcoord)
 
       if (index !== -1) {
         // pair already added to data structure
@@ -92,10 +94,11 @@ function parseWavefrontObject(objFileStr)
         // pair not yet added => we need a new index
         vertices.positions.push(position)
         vertices.normals  .push(normal)
+        vertices.uvcoords .push(uvcoord)
         vertices.indices  .push(vertices.positions.length - 1)
       }
 
-      // @todo handle colours, texels, etc
+      // @todo handle colours, etc
     })
   })
 
@@ -103,11 +106,12 @@ function parseWavefrontObject(objFileStr)
 }
 
 
-function findPositionNormalPair({ vertices, position, normal })
+function findIndex(vertices, position, normal, uvcoord)
 {
   const pCount  = vertices.positions.length
   const pString = JSON.stringify(position)
   const nString = JSON.stringify(normal)
+  const uString = JSON.stringify(uvcoord)
 
   let result = -1
 
@@ -115,6 +119,7 @@ function findPositionNormalPair({ vertices, position, normal })
   {
     const found = JSON.stringify(vertices.positions[pIdx]) == pString
                && JSON.stringify(vertices.normals  [pIdx]) == nString
+               && JSON.stringify(vertices.uvcoords [pIdx]) == uString
 
     if (found)
     {
@@ -127,18 +132,14 @@ function findPositionNormalPair({ vertices, position, normal })
 }
 
 
-function parseName({ str, prefix='o ' })
+function parseName(str, prefix)
 {
-  const name = str.substring(2)
-
-  if (name.length === 0)
-    console.warn('object does not have a name')
-
+  const name = str.substring(prefix.length)
   return name
 }
 
 
-function parseVertex({ str, size, prefix='v '})
+function parseComponents({ str, size, prefix })
 {
   const components = str
     .substring(prefix.length)
@@ -146,7 +147,7 @@ function parseVertex({ str, size, prefix='v '})
     .map(parseFloat)
 
   if (components.length !== size)
-    throw `vetex size != ${size}, got: ${components.length}`
+    throw `vertex size != ${size}, got: ${components.length}`
 
   if (!components.every(c => typeof c === 'number'))
     throw `vertex component parsing failed, got:\n\n\t${components.map(c => typeof c)}`
@@ -155,24 +156,12 @@ function parseVertex({ str, size, prefix='v '})
 }
 
 
-function parseNormal({ str, size, prefix='vn ' })
-{
-  const components = str
-    .substring(prefix.length)
-    .split(' ')
-    .map(parseFloat)
-
-  if (components.length !== size)
-    throw new Error(`normal size != ${size}, got: ${components.length}`)
-
-  if (!components.every(c => typeof c === 'number'))
-    throw new Error(`normal component parsing failed, got:\n\n\t${components.map(c => typeof c)}`)
-
-  return components
-}
+const parseVertex  = str => parseComponents({ str, size: 3, prefix: 'v '  })
+const parseNormal  = str => parseComponents({ str, size: 3, prefix: 'vn ' })
+const parseUVCoord = str => parseComponents({ str, size: 2, prefix: 'vt ' })
 
 
-function parseFace({ str, size, prefix='f ' })
+function parseFace(str, size, prefix='f ')
 {
   const components = str
     .substring(prefix.length)
@@ -195,31 +184,33 @@ function convertToFileString(vertices)
 {
   const {
     name,
+    material,
     positions,
     normals,
     colours,
-    texels,
+    uvcoords,
     indices,
     size,
   } = vertices
 
-  const lenStrs = [positions.length, normals.length, indices.length].map(String)
+  const lenStrs = [positions.length, normals.length, uvcoords.length, indices.length].map(String)
   const maxlen  = Math.max(...lenStrs.map(e => e.length), name.length)
-  const [vlenStr, nlenStr, ilenStr] = lenStrs.map(str => `${ ' '.repeat(maxlen - str.length) }${ str }`)
-
+  const [vlenStr, nlenStr, ulenStr, ilenStr] = lenStrs.map(str => `${ ' '.repeat(maxlen - str.length) }${ str }`)
 
   const output = `/*
  * name:     ${ name    }
  * vertices: ${ vlenStr }
  * normals:  ${ nlenStr }
+ * uvcoords: ${ ulenStr }
  * indices:  ${ ilenStr }
  */
 export const model = {
-  name:       "${ name }",
+  name:       "${ name     }",
+  material:   "${ material }",
   positions:  [${ positions.flat().join(', ') }],
   normals:    [${ normals  .flat().join(', ') }],
   colours:    [${ colours  .flat().join(', ') }],
-  texels:     [${ texels   .flat().join(', ') }],
+  uvcoords:   [${ uvcoords .flat().join(', ') }],
   indices:    [${ indices  .flat().join(', ') }],
   components: ${ size }
 }
