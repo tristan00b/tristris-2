@@ -25,20 +25,20 @@ export class BasicShader extends ShaderProgram
                   in vec3 vertex_position;
                   in vec3 vertex_normal;
 
-                  out vec4 pass_position;
-                  out vec4 pass_normal;
-                  out vec4 pass_light_pos;
-                  out vec4 pass_light_col;
+                  out vec3 pass_vertex_position;
+                  out vec3 pass_vertex_normal;
+                  out vec3 pass_light_position;
+                  out vec3 pass_light_colour;
 
                   void main() {
-                    pass_light_pos = view_matrix * vec4(light.position, 1.0);
-                    pass_light_col = vec4(light.colour, 1.0);
+                    pass_light_position   = (view_matrix * vec4(light.position, 1.0)).xyz;
+                    pass_light_colour     = light.colour;
 
-                    mat4 modelView = view_matrix * model_matrix;
-                    pass_position  = modelView * vec4(vertex_position, 1.0);
-                    pass_normal    = modelView * vec4(vertex_normal, 1.0);
+                    mat4 modelView        = view_matrix * model_matrix;
+                    pass_vertex_position  = (modelView * vec4(vertex_position, 1.0)).xyz;
+                    pass_vertex_normal    = (modelView * vec4(vertex_normal, 1.0)).xyz;
 
-                    gl_Position    = projection_matrix * pass_position;
+                    gl_Position    = projection_matrix * vec4(pass_vertex_position, 1.0);
                   }`
       },
       {
@@ -47,33 +47,33 @@ export class BasicShader extends ShaderProgram
                   precision highp float;
 
                   uniform struct Material {
-                    vec4  ambient;
-                    vec4  diffuse;
-                    vec4  specular;
+                    vec3  ambient;
+                    vec3  diffuse;
+                    vec3  specular;
                     float shininess;
                   } material;
 
-                  in vec4 pass_position;
-                  in vec4 pass_normal;
-                  in vec4 pass_light_pos;
-                  in vec4 pass_light_col;
+                  in vec3 pass_vertex_position;
+                  in vec3 pass_vertex_normal;
+                  in vec3 pass_light_position;
+                  in vec3 pass_light_colour;
 
-                  out vec4 out_color;
+                  out vec4 out_colour;
 
                   void main() {
-                    vec4  N  = normalize(pass_normal);
-                    vec4  L  = normalize(pass_light_pos - pass_position);
-                    vec4  V  = normalize(-pass_position);
-                    vec4  H  = normalize(L + V);
-                    vec4  R  = reflect(L, N);
+                    vec3  N  = normalize(pass_vertex_normal);
+                    vec3  L  = normalize(pass_light_position - pass_vertex_position);
+                    vec3  V  = normalize(-pass_vertex_position);
+                    vec3  H  = normalize(L + V);
+                    vec3  R  = reflect(L, N);
                     float kd = max(dot(N, L), 0.f);
                     float ks = pow(max(dot(R, V), 0.0), material.shininess);
 
-                    vec4 ambient  =      pass_light_col * material.ambient;
-                    vec4 diffuse  = kd * pass_light_col * material.diffuse;
-                    vec4 specular = ks * pass_light_col * material.specular;
+                    vec3 ambient  =      pass_light_colour * material.ambient;
+                    vec3 diffuse  = kd * pass_light_colour * material.diffuse;
+                    vec3 specular = ks * pass_light_colour * material.specular;
 
-                    out_color = diffuse + specular + ambient;
+                    out_colour = vec4(diffuse + specular + ambient, 1.0);
                   }`
       })
   }

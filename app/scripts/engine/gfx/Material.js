@@ -11,15 +11,15 @@ export class Material
 {
   constructor()
   {
-    this._ambient   = [0,   0,   0,   1]
-    this._diffuse   = [0.9, 0.9, 0.9, 1]
-    this._specular  = [0,   0,   0,   1]
+    this._ambient   = [0,   0,   0, ]
+    this._diffuse   = [0.9, 0.9, 0.9]
+    this._specular  = [0,   0,   0, ]
     this._shininess = 64
   }
 
   /**
-   * @type {external:vec4}
-   * @default [0,0,0,1]
+   * @type {external:vec3}
+   * @default [0,0,0]
    */
   get ambient()
   {
@@ -33,7 +33,7 @@ export class Material
 
   /**
    * Sets the material's ambient reflectivity
-   * @param {external:vec4} ambient
+   * @param {external:vec3} ambient
    * @returns {Material} The `this` object reference
    */
   setAmbient(ambient)
@@ -43,8 +43,8 @@ export class Material
   }
 
   /**
-   * @type {external:vec4}
-   * @default [0.9,0.9,0.9,1]
+   * @type {external:vec3}
+   * @default [0.9,0.9,0.9]
    */
   get diffuse()
   {
@@ -58,7 +58,7 @@ export class Material
 
   /**
    * Sets the material's diffuse reflectivity
-   * @param {external:vec4} diffuse
+   * @param {external:vec3} diffuse
    * @returns {Material} The `this` object reference
    */
   setDiffuse(diffuse)
@@ -68,8 +68,8 @@ export class Material
   }
 
   /**
-   * @type {external:vec4}
-   * @default [0,0,0,1]
+   * @type {external:vec3}
+   * @default [0,0,0]
    */
   get specular()
   {
@@ -83,7 +83,7 @@ export class Material
 
   /**
    * Sets the material's specular reflectivity
-   * @param {external:vec4} specular
+   * @param {external:vec3} specular
    * @returns {Material} The `this` object reference
    */
   setSpecular(specular)

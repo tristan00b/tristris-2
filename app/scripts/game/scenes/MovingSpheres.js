@@ -92,21 +92,21 @@ export function MakeScene(gl)
 
   const colours = [
     { // red
-      ambient:  [0.0, 0.0, 0.0, 1.0],
-      diffuse:  [0.9, 0.0, 0.0, 1.0],
-      specular: [0.7, 0.7, 0.7, 1.0],
+      ambient:  [0.0, 0.0, 0.0],
+      diffuse:  [0.9, 0.0, 0.0],
+      specular: [0.7, 0.7, 0.7],
       shininess: 64,
     },
     { // green
-      ambient:  [0.0, 0.0, 0.0, 1.0],
-      diffuse:  [0.0, 0.9, 0.0, 1.0],
-      specular: [0.7, 0.7, 0.7, 1.0],
+      ambient:  [0.0, 0.0, 0.0],
+      diffuse:  [0.0, 0.9, 0.0],
+      specular: [0.7, 0.7, 0.7],
       shininess: 64,
     },
     { // blue
-      ambient:  [0.0, 0.0, 0.0, 1.0],
-      diffuse:  [0.0, 0.0, 0.9, 1.0],
-      specular: [0.7, 0.7, 0.7, 1.0],
+      ambient:  [0.0, 0.0, 0.0],
+      diffuse:  [0.0, 0.0, 0.9],
+      specular: [0.7, 0.7, 0.7],
       shininess: 64,
     },
   ]
