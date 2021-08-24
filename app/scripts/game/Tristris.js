@@ -1,7 +1,7 @@
 import { Game } from '../engine/all'
 
 import config from './config'
-import { MakeScene } from './scenes/MovingSpheres'
+import { MakeScene } from './scenes/Textures'
 
 export class Tristris extends Game
 {
