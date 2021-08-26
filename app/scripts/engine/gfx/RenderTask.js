@@ -14,6 +14,8 @@ import { Query               } from '../ecs/Query'
 import { keyFrom, Scene      } from '../ecs/Scene'
 import { SceneNode           } from '../ecs/SceneNode'
 
+import { Texture2D           } from './WebGL/Texture2D'
+
 
 /** @module Engine/gfx/RenderTask */
 
@@ -24,37 +26,34 @@ const types = [
   Material,
   Mesh,
   ShaderProgram,
+  Texture2D,
   Transform,
 ]
 
 
+const taskType = [
+  'USE_SHADER',
+  'SET_CAMERA',
+  'SET_LIGHT',
+  'SET_TRANSFORM',
+  'USE_TEXTURE_2D',
+  'SET_MATERIAL',
+  'DRAW_MESH'
+]
+const RenderTaskDescription = Object.freeze(taskType)
+
 /**
  * Enumerator for types of {@link module:Engine/gfx/RenderTask.RenderTask} operations (intended for debugging puprposes)
  * @type {enum}
- * @property {Number} USE_SHADER    `== 0`
- * @property {Number} SET_CAMERA    `== 1`
- * @property {Number} SET_LIGHT     `== 2`
- * @property {Number} SET_TRANSFORM `== 3`
- * @property {Number} SET_MATERIAL  `== 4`
- * @property {Number} DRAW_MESH     `== 5`
+ * @property {Number} USE_SHADER
+ * @property {Number} SET_CAMERA
+ * @property {Number} SET_LIGHT
+ * @property {Number} SET_TRANSFORM
+ * @property {Number} USE_TEXTURE_2D
+ * @property {Number} SET_MATERIAL
+ * @property {Number} DRAW_MESH
  */
-export const RenderTaskType = MakeConstEnumerator('RenderTaskType', [
-  'USE_SHADER',
-  'SET_CAMERA',
-  'SET_LIGHT',
-  'SET_TRANSFORM',
-  'SET_MATERIAL',
-  'DRAW_MESH'
-])
-
-const RenderTaskDescription = Object.freeze([
-  'USE_SHADER',
-  'SET_CAMERA',
-  'SET_LIGHT',
-  'SET_TRANSFORM',
-  'SET_MATERIAL',
-  'DRAW_MESH'
-])
+export const RenderTaskType = MakeConstEnumerator('RenderTaskType', taskType)
 
 
 /**
@@ -151,6 +150,7 @@ function getNodeTasks(nodeState)
   const camera    = nodeState[keyFrom(Camera)]
   const light     = nodeState[keyFrom(Light)]
   const transform = nodeState[keyFrom(Transform)]
+  const texture2D = nodeState[keyFrom(Texture2D)]
   const material  = nodeState[keyFrom(Material)]
   const mesh      = nodeState[keyFrom(Mesh)]
 
@@ -201,6 +201,12 @@ function getNodeTasks(nodeState)
     }
 
     tasks.push(new RenderTask(cb, RenderTaskType.SET_TRANSFORM))
+  }
+
+  if (texture2D)
+  {
+    const cb = renderer => texture2D.bind(renderer.context)
+    tasks.push(new RenderTask(cb, RenderTaskType.USE_TEXTURE_2D))
   }
 
   if (material)

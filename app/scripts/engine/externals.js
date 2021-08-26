@@ -45,6 +45,11 @@
  */
 
 /**
+ * @external WebGL.WebGLTexture
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/WebGLTexture}
+ */
+
+/**
  * @external WebGL.WebGL2RenderingContext
  * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext}
  */

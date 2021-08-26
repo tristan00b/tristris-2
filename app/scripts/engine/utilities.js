@@ -5,6 +5,21 @@
 
 
 /**
+ * Loads the image located at a specified URL
+ * @param {String} url The location of the image to load
+ * @param {Function} callback a zero-argument function to call when the image has loaded (assigned to Image.onload)
+ * @returns {Image}
+ */
+ export function loadImage(url, callback)
+ {
+   const image  = new Image
+   image.onload = callback
+   image.src    = url
+   return image
+ }
+
+
+/**
  * Returns a new type `T` derived from of `Error`
  * @param {Type} T The type to derive an error type from
  * @returns {*} A new error type `${T.name}Error`

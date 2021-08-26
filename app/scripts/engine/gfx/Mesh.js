@@ -10,7 +10,6 @@ import { MakeConstEnumerator, MakeErrorType, MakeLogger } from '../utilities'
  * @property {Number} POSITIONS
  * @property {Number} NORMALS
  * @property {Number} COLOURS
- * @property {Number} TEXELS
  * @property {Number} UVCOORDS
  * @property {Number} INDEX
  * @property {Number} NUM_BUFFER_TYPES

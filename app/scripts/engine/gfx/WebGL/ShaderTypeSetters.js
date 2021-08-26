@@ -68,6 +68,7 @@ const ShaderTypeSetterMap = Object.freeze({
   [c.FLOAT_MAT2]                    : { setter: 'floatMatrix2Setter', type: Float32Array,   },
   [c.FLOAT_MAT3]                    : { setter: 'floatMatrix3Setter', type: Float32Array,   },
   [c.FLOAT_MAT4]                    : { setter: 'floatMatrix4Setter', type: Float32Array,   },
+  [c.SAMPLER_2D]                    : { setter: 'floatVec2Setter',    type: Float32Array,   },
 })
 
 

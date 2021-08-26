@@ -3,6 +3,7 @@ import { mat4,
          vec3,
          vec4                } from 'gl-matrix'
 import { BasicShader,
+         BasicTextureShader,
          Camera,
          Light,
          Material,
@@ -12,6 +13,7 @@ import { BasicShader,
          ShaderProgram,
          Transform,
          VertexAttributeType } from '../../engine/gfx/all'
+import { Texture2D           } from '../../engine/gfx/WebGL/Texture2D'
 import { Entity,
          Query,
          Scene,
@@ -42,6 +44,7 @@ export function MakeScene(gl)
     SceneNode,
     ShaderProgram,
     SphereTag,
+    Texture2D,
     Transform,
   ].forEach(scene.registerComponentType.bind(scene))
 
@@ -60,7 +63,7 @@ export function MakeScene(gl)
         .setPerspective({ aspect: gl.canvas.width/gl.canvas.height  })
 
   const light = new Light
-  light.setPosition([0, 10, -20])
+  light.setPosition([0, 4, -20])
        .setColour([1, 1, 1])
 
   scene.setComponent(e0, n0)
@@ -72,6 +75,16 @@ export function MakeScene(gl)
   // Plane Node
   //
   {
+    const e = new Entity
+    scene.addEntity(e)
+
+    const n = new SceneNode
+    n0.addChild(n)
+
+    const t = new Transform
+
+    const shader = new BasicTextureShader(gl)
+
     const data = new MeshData({
       indices: plane.indices,
       primtype: gl.TRIANGLES,
@@ -86,13 +99,13 @@ export function MakeScene(gl)
           type: VertexAttributeType.NORMALS,
           size: 3,
           format: gl.FLOAT,
-          data: plane.positions,
+          data: plane.normals,
         },
         {
           type: VertexAttributeType.UVCOORDS,
-          size: 3,
+          size: 2,
           format: gl.FLOAT,
-          data: plane.positions,
+          data: plane.uvcoords,
         },
       ],
     })
@@ -100,7 +113,7 @@ export function MakeScene(gl)
 
     const c = {
       ambient:  [0.0, 0.0, 0.0],
-      diffuse:  [0.9, 0.9, 0.9],
+      diffuse:  [1.0, 1.0, 1.0],
       specular: [0.7, 0.7, 0.7],
       shininess: 64,
     }
@@ -111,19 +124,17 @@ export function MakeScene(gl)
      .setSpecular  (c.specular )
      .setShininess (c.shininess)
 
-    const e = new Entity
-    scene.addEntity(e)
+    const texture = new Texture2D(gl, '/assets/textures/uvgrid.png')
 
-    const n = new SceneNode
-    n0.addChild(n)
-
-    const t = new Transform
+    scene.setComponent(e, shader)
+    scene.setComponent(e, camera)
+    scene.setComponent(e, light)
 
     scene.setComponent(e, n)
     scene.setComponent(e, t)
     scene.setComponent(e, m)
+    scene.setComponent(e, texture)
     scene.setComponent(e, mesh)
-    scene.setComponent(e, new PlaneTag)
   }
 
   // -------------------------------------------------------------------------------------------------------------------
@@ -173,8 +184,8 @@ export function MakeScene(gl)
 
     Array(sphereCount).fill().forEach((_, i) => {
 
-      const s = new Entity
-      scene.addEntity(s)
+      const e = new Entity
+      scene.addEntity(e)
 
       const n = new SceneNode
       n0.addChild(n)
@@ -184,12 +195,15 @@ export function MakeScene(gl)
       const z = radius * Math.sin(i * theta)
       t.setTranslation([x, 1, z])
 
-      scene.setComponent(s, n)
-      scene.setComponent(s, t)
-      scene.setComponent(s, m)
-      scene.setComponent(s, mesh)
-      scene.setComponent(s, sphereTag)
+      scene.setComponent(e, shader)
+      scene.setComponent(e, camera)
+      scene.setComponent(e, light)
 
+      scene.setComponent(e, n)
+      scene.setComponent(e, t)
+      scene.setComponent(e, m)
+      scene.setComponent(e, mesh)
+      scene.setComponent(e, sphereTag)
     })
   }
 

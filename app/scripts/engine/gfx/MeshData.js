@@ -11,7 +11,6 @@ import * as gl from './WebGL/constants'
  * @property {Number} POSITIONS
  * @property {Number} NORMALS
  * @property {Number} COLOURS
- * @property {Number} TEXELS
  * @property {Number} UVCOORDS
  * @property {Number} NUM_ATTRIBUTE_TYPES
  * @readonly
@@ -19,9 +18,8 @@ import * as gl from './WebGL/constants'
 export const VertexAttributeType = MakeConstEnumerator('VertexAttributeType', [
   'POSITIONS',
   'NORMALS',
-  'COLOURS',
-  'TEXELS',
   'UVCOORDS',
+  'COLOURS',
   'NUM_ATTRIBUTE_TYPES',
 ])
 
