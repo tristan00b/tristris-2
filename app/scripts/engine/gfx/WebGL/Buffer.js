@@ -16,7 +16,7 @@ export class Buffer
 
   /**
    * Returns a WebGL reference to the buffer
-   * @type {WebGLBuffer}
+   * @type {external:WebGLBuffer}
    */
   get location()
   {

@@ -40,6 +40,11 @@
  */
 
 /**
+ * @external WebGL.WebGLBuffer
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/WebGLBuffer}
+ */
+
+/**
  * @external WebGL.WebGLProgram
  * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/WebGLProgram}
  */
