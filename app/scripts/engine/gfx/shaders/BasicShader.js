@@ -13,6 +13,7 @@ export class BasicShader extends ShaderProgram
       {
         type:     gl.VERTEX_SHADER,
         source:  `#version 300 es
+
                   uniform mat4 model_matrix;
                   uniform mat4 view_matrix;
                   uniform mat4 projection_matrix;
@@ -38,7 +39,7 @@ export class BasicShader extends ShaderProgram
                     pass_vertex_position  = (modelView * vec4(vertex_position, 1.0)).xyz;
                     pass_vertex_normal    = (modelView * vec4(vertex_normal, 1.0)).xyz;
 
-                    gl_Position    = projection_matrix * vec4(pass_vertex_position, 1.0);
+                    gl_Position = projection_matrix * vec4(pass_vertex_position, 1.0);
                   }`
       },
       {
