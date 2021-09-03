@@ -33,24 +33,25 @@ export class Shader
   }
 
   /**
+   * Returns information about the shader
+   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
+   * @param {external:WebGLShader} shader The WebGL shader to query
+   * @param {Number} pname A GLenum specifying paramter to be retrieved
+   * @returns {*} Return value depends on the parameter is queried for
+   */
+  static getParameter(gl, shader, pname)
+  {
+    return gl.getShaderParameter(gl, shader, pname)
+  }
+
+  /**
    * Returns a WebGL reference to the shader
-   * @type {WebGLShader}
+   * @type {external:WebGLShader}
    * @readonly
    */
   get location()
   {
     return this._location
-  }
-
-  /**
-   * Returns information about the shader
-   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
-   * @param {String} name The name of the shader parameter to retrieve
-   * @returns {String}
-   */
-  getParameter(gl, name)
-  {
-    return gl.getShaderParameter(gl, this.location, name)
   }
 
   /**

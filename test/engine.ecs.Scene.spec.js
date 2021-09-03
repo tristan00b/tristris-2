@@ -191,8 +191,7 @@ describe('Scene', function () {
 describe('keyFrom', () => {
 
   it('handles shaders correctly', () => {
-    const mockContext = new WebGLRenderingContext
-    const basicShader = new BasicShader(mockContext)
+    const basicShader = BasicShader.prototype
 
     const allSame = keyFrom(BasicShader) === keyFrom(ShaderProgram)
                  && keyFrom(basicShader) === keyFrom(ShaderProgram)

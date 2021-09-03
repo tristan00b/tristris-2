@@ -14,14 +14,17 @@ export class BasicShader extends ShaderProgram
         type:     gl.VERTEX_SHADER,
         source:  `#version 300 es
 
-                  uniform mat4 model_matrix;
-                  uniform mat4 view_matrix;
-                  uniform mat4 projection_matrix;
-
-                  uniform struct Light {
+                  layout (std140) uniform Light {
                     vec3 position;
                     vec3 colour;
-                  } light;
+                  } l;
+
+                  layout (std140) uniform Matrix {
+                    mat4 view;
+                    mat4 projection;
+                  } m;
+
+                  uniform mat4 model_matrix;
 
                   in vec3 vertex_position;
                   in vec3 vertex_normal;
@@ -32,14 +35,14 @@ export class BasicShader extends ShaderProgram
                   out vec3 pass_light_colour;
 
                   void main() {
-                    pass_light_position   = (view_matrix * vec4(light.position, 1.0)).xyz;
-                    pass_light_colour     = light.colour;
+                    pass_light_position   = (m.view * vec4(l.position, 1.0)).xyz;
+                    pass_light_colour     = l.colour;
 
-                    mat4 modelView        = view_matrix * model_matrix;
+                    mat4 modelView        = m.view * model_matrix;
                     pass_vertex_position  = (modelView * vec4(vertex_position, 1.0)).xyz;
                     pass_vertex_normal    = (modelView * vec4(vertex_normal, 1.0)).xyz;
 
-                    gl_Position = projection_matrix * vec4(pass_vertex_position, 1.0);
+                    gl_Position = m.projection * vec4(pass_vertex_position, 1.0);
                   }`
       },
       {

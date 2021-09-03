@@ -165,15 +165,12 @@ function getNodeTasks(nodeState)
   if (camera)
   {
     const cb = renderer => {
-
       const gl = renderer.context
       camera.aspect = gl.canvas.width / gl.canvas.height
 
-      const perspective = mat4.perspective(mat4.create(), Math.PI/2, camera.aspect, 0.1, 100)
-
-      renderer.shader.setUniforms(renderer.context, {
-        'view_matrix'       : camera.lookat,
-        'projection_matrix' : camera.perspective,
+      renderer.shader.setBlockUniforms(renderer.context, {
+        'Matrix.view'       : camera.lookat,
+        'Matrix.projection' : camera.perspective,
       })
     }
 
@@ -183,9 +180,9 @@ function getNodeTasks(nodeState)
   if (light)
   {
     const cb = renderer => {
-      renderer.shader.setUniforms(renderer.context, {
-        'light.position' : light.position,
-        'light.colour'   : light.colour,
+      renderer.shader.setBlockUniforms(renderer.context, {
+        'Light.position' : light.position,
+        'Light.colour'   : light.colour,
       })
     }
 

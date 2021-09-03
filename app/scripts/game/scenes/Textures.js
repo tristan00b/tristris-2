@@ -48,15 +48,25 @@ export function MakeScene(gl)
     Transform,
   ].forEach(scene.registerComponentType.bind(scene))
 
+  // -------------------------------------------------------------------------------------------------------------------
+  // Shader Init & Config
+  //
 
-  //--------------------------------------------------------------------------------------------------------------------
+  const basicShader   = new BasicShader(gl)
+  const textureShader = new BasicTextureShader(gl)
+
+  // We'll choose basicShader to be the 'designated' shader, and handle shared (uniform block) buffer managment
+  // See documentation for further explanation
+  basicShader.createUniformBlockSetters(gl)
+  textureShader.updateUniformBlockSetters(gl, basicShader)
+
+  // -------------------------------------------------------------------------------------------------------------------
   // Scene Root
   //
   const e0 = new Entity
   scene.addEntity(e0)
 
   const n0 = new SceneNode
-  const shader = new BasicShader(gl)
 
   const camera = new Camera
   camera.setLookat({ eye: [0, 15, 25], up: [0, 1, 0], at: [0, 0, 0] })
@@ -67,7 +77,7 @@ export function MakeScene(gl)
        .setColour([1, 1, 1])
 
   scene.setComponent(e0, n0)
-  scene.setComponent(e0, shader)
+  scene.setComponent(e0, basicShader)
   scene.setComponent(e0, camera)
   scene.setComponent(e0, light)
 
@@ -82,8 +92,6 @@ export function MakeScene(gl)
     n0.addChild(n)
 
     const t = new Transform
-
-    const shader = new BasicTextureShader(gl)
 
     const data = new MeshData({
       indices: plane.indices,
@@ -109,7 +117,7 @@ export function MakeScene(gl)
         },
       ],
     })
-    const mesh = new Mesh({ gl, data, shader })
+    const mesh = new Mesh({ gl, data, textureShader })
 
     const c = {
       ambient:  [0.0, 0.0, 0.0],
@@ -126,10 +134,7 @@ export function MakeScene(gl)
 
     const texture = new Texture2D(gl, '/assets/textures/uvgrid.png')
 
-    scene.setComponent(e, shader)
-    scene.setComponent(e, camera)
-    scene.setComponent(e, light)
-
+    scene.setComponent(e, textureShader)
     scene.setComponent(e, n)
     scene.setComponent(e, t)
     scene.setComponent(e, m)
@@ -162,7 +167,7 @@ export function MakeScene(gl)
       ]
     })
 
-    const mesh = new Mesh({ gl, data, shader })
+    const mesh = new Mesh({ gl, data, basicShader })
 
     const colour = {
       ambient:  [0.0, 0.0, 0.0],
@@ -195,9 +200,7 @@ export function MakeScene(gl)
       const z = radius * Math.sin(i * theta)
       t.setTranslation([x, 1, z])
 
-      scene.setComponent(e, shader)
-      scene.setComponent(e, camera)
-      scene.setComponent(e, light)
+      scene.setComponent(e, basicShader)
 
       scene.setComponent(e, n)
       scene.setComponent(e, t)

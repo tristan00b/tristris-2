@@ -38,10 +38,28 @@ export class Buffer
   /**
    * Unbinds the buffer from `target`
    * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
+   * @param {external:GLenum} target The binding point (e.g. gl.ARRAY_BUFFER)
+   * @throws {BufferError} Throws on encountering a WebGL error
    */
-  unbind(gl)
+  unbind(gl, target)
   {
-    gl.bindBuffer(type, null)
+    gl.bindBuffer(target, null)
+    onErrorThrowAs(gl, BufferError)
+  }
+
+  /**
+   * Queries for a the specified buffer parameter
+   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
+   * @param {external:GLenum} target The binding point (e.g. gl.ARRAY_BUFFER)
+   * @param {Number} pname A GLenum specifying paramter to be retrieved
+   * @throws {BufferError} Throws on encountering a WebGL error
+   * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/getBufferParameter}
+   */
+  getBufferParameter(gl, target, pname)
+  {
+    const result = gl.getBufferParameter(target, pname)
+    onErrorThrowAs(gl, BufferError)
+    return result
   }
 
   /**
@@ -55,6 +73,31 @@ export class Buffer
   data(gl, target, data, usage)
   {
     gl.bufferData(target, data, usage)
+    onErrorThrowAs(gl, BufferError)
+  }
+
+  /**
+   * Creates and initializes the buffer's data store
+   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
+   * @param {external:GLenum} target The binding point (e.g. gl.ARRAY_BUFFER)
+   * @param {Number} offset The offset in bytes of the first byte to write the data to
+   * @param {ArrayBuffer|SharedArrayBuffer|ArrayBufferView|null} data The data to copy to the data store. If `null`, a data store is still be created but will be uninitialized.
+   * @throws {BufferError} Throws on encountering a WebGL error
+   */
+  subData(gl, target, offset, data)
+  {
+    gl.bufferSubData(target, offset, data)
+    onErrorThrowAs(gl, BufferError)
+  }
+
+  /**
+   * Deletes the `WebGLBuffer`
+   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
+   * @throws {BufferError} Throws on encountering a WebGL error
+   */
+  delete(gl)
+  {
+    gl.deleteBuffer(this.location)
     onErrorThrowAs(gl, BufferError)
   }
 }

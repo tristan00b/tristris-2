@@ -3,7 +3,7 @@ import { Buffer } from './Buffer'
 
 
 /**
- * A specialization of WebGLBuffer
+ * A specialization of WebGL/Buffer for storing vertex indices
  * @extends WebGL.Buffer
  */
 export class ElementArrayBuffer extends Buffer

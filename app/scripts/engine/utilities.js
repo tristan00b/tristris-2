@@ -180,3 +180,14 @@ export function defineImmutableProperty({ object, name, value, enumerable = fals
  * @returns {Object} Returns `object` after its name property has been set
  */
 export const setNameProperty = ({ object, name }) => defineImmutableProperty({ object, name: 'name', value: name })
+
+
+/**
+ * An extended isArray function that can be used on typed arrays in addition to plain arrays
+ * @param {*} obj
+ * @returns {Boolean}
+ */
+export function isArray(obj)
+{
+  return /array/i.test(Object.prototype.toString.call(obj))
+}

@@ -3,7 +3,7 @@ import { MakeErrorType, MakeLogger } from '../../utilities'
 
 
 /**
- * A specialization of WebGL.Buffer
+ * A specialization of WebGL/Buffer for storing vertex data
  * @extends Buffer
  */
 export class ArrayBuffer extends Buffer
