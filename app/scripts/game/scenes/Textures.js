@@ -52,8 +52,8 @@ export function MakeScene(gl)
   // Shader Init & Config
   //
 
-  const basicShader   = new BasicShader(gl)
-  const textureShader = new BasicTextureShader(gl)
+  const basicShader   = new BasicShader(gl, 3)
+  const textureShader = new BasicTextureShader(gl, 3)
 
   // We'll choose basicShader to be the 'designated' shader, and handle shared (uniform block) buffer managment
   // See documentation for further explanation
@@ -72,14 +72,22 @@ export function MakeScene(gl)
   camera.setLookat({ eye: [0, 15, 25], up: [0, 1, 0], at: [0, 0, 0] })
         .setPerspective({ aspect: gl.canvas.width/gl.canvas.height  })
 
-  const light = new Light
-  light.setPosition([0, 4, -20])
-       .setColour([1, 1, 1])
+  const l0 = new Light
+  l0.setPosition([-10, 2, 10])
+    .setColour([1, 0, 0])
+
+  const l1 = new Light
+  l1.setPosition([0, 2, 0])
+    .setColour([0, 1, 0])
+
+  const l2 = new Light
+  l2.setPosition([10, 2, -10])
+    .setColour([0, 0, 1])
 
   scene.setComponent(e0, n0)
   scene.setComponent(e0, basicShader)
   scene.setComponent(e0, camera)
-  scene.setComponent(e0, light)
+  scene.setComponent(e0, [l0, l1, l2])
 
   // -------------------------------------------------------------------------------------------------------------------
   // Plane Node
@@ -123,7 +131,7 @@ export function MakeScene(gl)
       ambient:  [0.0, 0.0, 0.0],
       diffuse:  [1.0, 1.0, 1.0],
       specular: [0.7, 0.7, 0.7],
-      shininess: 64,
+      shininess: 5,
     }
 
     const m = new Material
@@ -132,7 +140,7 @@ export function MakeScene(gl)
      .setSpecular  (c.specular )
      .setShininess (c.shininess)
 
-    const texture = new Texture2D(gl, '/assets/textures/uvgrid.png')
+    const texture = new Texture2D(gl, '/assets/textures/checkerboard.png')
 
     scene.setComponent(e, textureShader)
     scene.setComponent(e, n)
@@ -171,7 +179,7 @@ export function MakeScene(gl)
 
     const colour = {
       ambient:  [0.0, 0.0, 0.0],
-      diffuse:  [0.0, 0.0, 0.9],
+      diffuse:  [0.9, 0.9, 0.9],
       specular: [0.7, 0.7, 0.7],
       shininess: 64,
     }
@@ -201,7 +209,6 @@ export function MakeScene(gl)
       t.setTranslation([x, 1, z])
 
       scene.setComponent(e, basicShader)
-
       scene.setComponent(e, n)
       scene.setComponent(e, t)
       scene.setComponent(e, m)

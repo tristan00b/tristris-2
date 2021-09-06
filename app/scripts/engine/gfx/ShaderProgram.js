@@ -1,5 +1,6 @@
 import { createAttributeSetter,
          createUniformSetter,
+         createUniformBlockSetter,
          createBlockUniformSetter   } from './WebGL/ShaderTypeSetters'
 import { MakeErrorType, MakeLogger  } from '../utilities'
 import { Program                    } from './WebGL/Program'
@@ -132,10 +133,14 @@ export class ShaderProgram
     // 6. Create binding map
     const bindings = createUniformBlockBindings(blockInfoArr, buffers)
 
-    // 7. Create Block Uniform Setters
-    const setters = createBlockUniformSetters(gl, this.location, blockInfoArr, buffers)
+    // 7. Create Uniform Block Setters
+    const ubSetters = _createUniformBlockSetters(gl, this.location, blockInfoArr, buffers)
 
-    this._setters.blockUniforms = setters
+    // 7. Create Block Uniform Setters
+    const buSetters = createBlockUniformSetters(gl, this.location, blockInfoArr, buffers)
+
+    this._setters.uniformBlocks = ubSetters
+    this._setters.blockUniforms = buSetters
     this._uniformBuffers = buffers
     this._uniformBlockBindings = bindings
 
@@ -201,6 +206,12 @@ export class ShaderProgram
     return this
   }
 
+  setUniformBlocks(gl, uniforms)
+  {
+    setShaderParams(gl, this._setters.uniformBlocks, uniforms)
+    return this
+  }
+
   /**
    * Sets the values of shader block uniforms
    * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
@@ -239,6 +250,21 @@ export class ShaderProgram
     this._shaders.forEach(s => s.destroy(gl))
     this._program.destroy(gl)
   }
+
+  getAllUniformNames(gl)
+  {
+    return [...Object.keys(this._setters.uniforms)]
+  }
+
+  getAllUniformBlockNames(gl)
+  {
+    return [...Object.keys(this._setters.uniformBlocks)]
+  }
+
+  getAllBlockUniformNames(gl)
+  {
+    return [...Object.keys(this._setters.blockUniforms)]
+  }
 }
 
 
@@ -257,10 +283,10 @@ function createAttributeSetters(gl, program)
   ;[...Array(attributeCount)].forEach(index => {
     const info     = gl.getActiveAttrib(program, index)
     const location = gl.getAttribLocation(program, info.name)
-    const name     = parseName(info)
+    const name     = parseName(info.name)
 
     // This check may not be needed...
-    if (!location || isBuiltin(info)) return
+    if (!location || isBuiltin(info.name)) return
 
     setters[name] = createAttributeSetter(gl, attributeInfo, location)
   })
@@ -305,10 +331,10 @@ function createUniformSetters(gl, program)
   {
     const info     = gl.getActiveUniform(program, index)
     const location = gl.getUniformLocation(program, info.name)
-    const name     = parseName(info)
+    const name     = parseName(info.name)
 
     // This check may not be needed...
-    if (!location || isBuiltin(info)) return
+    if (!location || isBuiltin(info.name)) return
 
     setters[name] = createUniformSetter(gl, info, location)
   })
@@ -316,6 +342,21 @@ function createUniformSetters(gl, program)
   return setters
 }
 
+
+function _createUniformBlockSetters(gl, program, blockInfoArr, buffers)
+{
+  const setters = {}
+
+  blockInfoArr.forEach((info, i) => {
+    const buffer = buffers[i]
+    info.blockSize <= buffer.size || throw new ShaderProgramError(`failed to create uniform block setters (buffer undersized, got buffer(${buffer.size})/block(${info.blockSize}))`)
+
+    const name = parseName(info.blockName)
+    setters[name] = createUniformBlockSetter(program, buffer)
+  })
+
+  return setters
+}
 
 /**
  * Creates setter callbacks for all block uniforms associated with a given shader program
@@ -333,7 +374,7 @@ function createBlockUniformSetters(gl, program, blockInfoArr, buffers)
 
     const buffer = buffers[i]
 
-    info.blockSize === buffer.size || throw new ShaderTypeSetterError(`failed to create uniform block setters (block-buffer size mismatch)`)
+    info.blockSize <= buffer.size || throw new ShaderProgramError(`failed to create block uniform setters (buffer undersized, got buffer(${buffer.size})/block(${info.blockSize}))`)
 
     info.uniformOffsets.forEach((offset, j) => {
       const name = info.uniformNames[j]
@@ -383,7 +424,7 @@ function createUniformBlockBindings(blockInfoArr, buffers)
   const bindings = blockInfoArr.map((info, i) => {
     const buffer = buffers[i]
 
-    info.blockSize === buffer.size || throw new ShaderProgramError(`failed to create uniform block bindings (block-buffer size mismatch)`)
+    info.blockSize <= buffer.size || throw new ShaderProgramError(`failed to create uniform block bindings (buffer undersized, got buffer(${buffer.size})/block(${info.blockSize}))`)
     buffer.bindPoint ?? throw new ShaderProgramError(`failed to create uniform block bindings (buffer bind point not set)`)
 
     return {
@@ -416,7 +457,7 @@ function getUniformBlockInfo(gl, program)
     const uniformSizes   = Program.getBlockUniformSizes(gl, program, uniformIndices)
     const uniformTypes   = Program.getBlockUniformTypes(gl, program, uniformIndices)
 
-    return {
+    const info = {
       blockIndex,
       blockName,
       blockSize,
@@ -428,6 +469,10 @@ function getUniformBlockInfo(gl, program)
       uniformSizes,
       uniformTypes,
     }
+
+    // console.log(info)
+
+    return info
   })
 }
 
@@ -439,7 +484,7 @@ function getUniformBlockInfo(gl, program)
  */
 function createUniformBlockBuffers(gl, blockInfoArr)
 {
-  return blockInfoArr.map(info => new UniformBuffer(gl, info.blockSize))
+  return blockInfoArr.map(info => new UniformBuffer(gl, info.blockSize * 3))
 }
 
 
@@ -468,9 +513,9 @@ function setShaderParams(gl, setters, nameDataPairs)
  * @return {bool} true if attribute/uniform is reserved
  * @private
  */
-function isBuiltin(info)
+function isBuiltin(name)
 {
-  return info.name.startsWith('gl_') || info.name.startsWith('webgl_')
+  return name.startsWith('gl_') || name.startsWith('webgl_')
 }
 
 
@@ -480,11 +525,11 @@ function isBuiltin(info)
  * @returns {String}
  * @private
  */
-function parseName(info)
+function parseName(name)
 {
-  return info.name.endsWith('[0]')
-       ? info.name.slice(0, -3)
-       : info.name
+  return name.endsWith('[0]')
+       ? name.slice(0, -3)
+       : name
 }
 
 

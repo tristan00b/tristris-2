@@ -89,7 +89,7 @@ export class Program
   /**
    * Reports whether a block is referenced by a WebGLProgram's associated vertex shader
    * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
-   * @param {external:WebGLProgram} program The WebGL shader program to which the uniform block belongs
+   * @param {external:WebGLProgram} program The WebGL shader program to which the un124iform block belongs
    * @param {Number} blockIndex The index of the block to query
    * @returns {Boolean}
    */
@@ -244,7 +244,7 @@ export class Program
   /**
    * Links the program, completing the process of preparing the GPU for using the program's shaders
    * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
-   * @throws {ShaderProgramError} Throws on program link failure
+   * @throws {ProgramError} Throws on program link failure
    */
   linkProgram(gl)
   {
@@ -253,7 +253,7 @@ export class Program
     Program.getParameter(gl, this.location, gl.LINK_STATUS) || do {
       const programLog = gl.getProgramInfoLog(this.location)
 
-      throw new ShaderProgramError(`shader linking failed:\t\n${programLog}`)
+      throw new ProgramError(`shader linking failed:\t\n${programLog}`)
     }
   }
 

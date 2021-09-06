@@ -173,6 +173,22 @@ export const createAttributeSetter = (gl, info, location) => createShaderSetter(
 export const createUniformSetter = (gl, info, location) => createShaderSetter(gl, info, location, ShaderUniformSetters)
 
 
+export function createUniformBlockSetter(program, buffer, offset=0)
+{
+  return (context, blockName, data) => {
+
+    // console.log(`block name:  ${blockName}`)
+    // console.log(`buffer size: ${buffer.size}`)
+    // console.log(`data length: ${data.length}`)
+    // console.log(`data size:   ${data.length * Float32Array.BYTES_PER_ELEMENT}`)
+    // console.log(`data offset: ${offset}`)
+
+    buffer.bind(context)
+    buffer.subData(context, offset, data)
+    buffer.unbind(context)
+  }
+}
+
 /**
  * Creates a setter callback for a given block uniform
  * @param {Number} type A GLenum indicating the type of the block uniform

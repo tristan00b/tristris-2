@@ -34,7 +34,7 @@ const types = [
 const taskType = [
   'USE_SHADER',
   'SET_CAMERA',
-  'SET_LIGHT',
+  'SET_LIGHTS',
   'SET_TRANSFORM',
   'USE_TEXTURE_2D',
   'SET_MATERIAL',
@@ -148,7 +148,7 @@ function getNodeTasks(nodeState)
 {
   const shader    = nodeState[keyFrom(ShaderProgram)]
   const camera    = nodeState[keyFrom(Camera)]
-  const light     = nodeState[keyFrom(Light)]
+  const lights    = nodeState[keyFrom(Light)]
   const transform = nodeState[keyFrom(Transform)]
   const texture2D = nodeState[keyFrom(Texture2D)]
   const material  = nodeState[keyFrom(Material)]
@@ -177,16 +177,18 @@ function getNodeTasks(nodeState)
     tasks.push(new RenderTask(cb, RenderTaskType.SET_CAMERA))
   }
 
-  if (light)
+  if (lights)
   {
+    const lightData = lights.flatMap(l => [...l.position, 0.0, ...l.colour, 0.0])
+    const data = new Float32Array(lightData)
+
     const cb = renderer => {
-      renderer.shader.setBlockUniforms(renderer.context, {
-        'Light.position' : light.position,
-        'Light.colour'   : light.colour,
+      renderer.shader.setUniformBlocks(renderer.context, {
+        'LightSources' : data
       })
     }
 
-    tasks.push(new RenderTask(cb, RenderTaskType.SET_LIGHT))
+    tasks.push(new RenderTask(cb, RenderTaskType.SET_LIGHTS))
   }
 
   if (transform)

@@ -1,4 +1,5 @@
-import { MakeErrorType,
+import { isArray,
+         MakeErrorType,
          MakeLogger          } from '../utilities'
 
 import { Camera              } from '../gfx/Camera'
@@ -212,9 +213,11 @@ export class Scene
  */
 export function keyFrom(obj)
 {
-  return ShaderProgram.isPrototypeOf(obj) ? ShaderProgram.name :
-         obj instanceof ShaderProgram     ? ShaderProgram.name :
-                                            (obj?.name || obj?.constructor?.name || String(obj))
+  const _keyFrom = (obj) => ShaderProgram.isPrototypeOf(obj) ? ShaderProgram.name
+                          : obj instanceof ShaderProgram     ? ShaderProgram.name
+                          : (obj?.name || obj?.constructor?.name || String(obj))
+
+  return isArray(obj) ? _keyFrom(obj[0]) : _keyFrom(obj)
 }
 
 
