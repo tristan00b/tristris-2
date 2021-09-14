@@ -11,8 +11,6 @@ export class BasicTextureShader extends ShaderProgram
   {
     lightCount ??= 1
 
-    // console.log(`BasicTextureShader.lightCount: ${lightCount}`)
-
     super(gl,
       {
         type:     gl.VERTEX_SHADER,
@@ -95,10 +93,10 @@ export class BasicTextureShader extends ShaderProgram
                       vec3 light_pos = vec3(m.view * vec4(lights[i].position, 1.0));
 
                       vec3 L = normalize(light_pos - pass_vertex_position);
-                      vec3 R = reflect(-L, N);
+                      vec3 H = normalize(L + V);
 
                       float kd = max(dot(N, L), 0.0);
-                      float ks = pow(max(dot(V, R), 0.0), material.shininess);
+                      float ks = pow(max(dot(N, H), 0.0), material.shininess);
 
                       vec3 ambient  =       lights[i].colour * material.ambient;
                       vec3 diffuse  = kd  * lights[i].colour * texture(sampler, UV).xyz;
