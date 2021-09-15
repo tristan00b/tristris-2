@@ -100,11 +100,20 @@ export function MakeConstEnumerator(clsname, properties)
   const name        = [ 'name', { value: clsname } ]
   const haveArray   = isArray(properties)
 
-  const keys = haveArray ? Object.values(properties) : Object.keys(properties)
-  const vals = haveArray ? Object.keys(properties)   : Object.values(properties)
+  const keys =  haveArray ? Object.values(properties) : Object.keys(properties)
+  const vals = (haveArray ? Object.keys(properties)   : Object.values(properties)).map(k => parseInt(k))
+
+  const iterator = [
+    Symbol.iterator, { value: function* () {
+      for (const key in this)
+      {
+        yield this[key]
+      }
+    }}
+  ]
 
   const entries = keys.map((key, idx) => [key, { value: vals[idx], enumerable, writable }])
-  const descriptors = Object.fromEntries([name, ...entries])
+  const descriptors = Object.fromEntries([name, iterator, ...entries])
   return Object.defineProperties({}, descriptors)
 }
 

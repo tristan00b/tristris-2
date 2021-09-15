@@ -1,9 +1,10 @@
+import { Texture   } from './Texture'
 import { loadImage } from '../../utilities'
 
 /**
  * An interface for WebGLTexture2D objects
  */
-export class Texture2D
+export class Texture2D extends Texture
 {
   /**
    * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
@@ -12,26 +13,18 @@ export class Texture2D
    */
   constructor(gl, url)
   {
-    const textureID = gl.createTexture()
-    const image     = loadImage(url, () => {
-      gl.bindTexture(gl.TEXTURE_2D, textureID)
+    super(gl)
+
+    const image = loadImage(url, () => {
+      gl.bindTexture(gl.TEXTURE_2D, this.location)
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image)
       gl.generateMipmap(gl.TEXTURE_2D)
       gl.bindTexture(gl.TEXTURE_2D, null)
     })
 
-    this._location = textureID
-    this._image    = image
+    this._image = image
   }
 
-  /**
-   * Returns a WebGL reference to the image
-   * @type {external:WebGLTexture}
-   */
-  get location()
-  {
-    return this._location
-  }
 
   /**
    * Binds the texture to the `gl.TEXTURE_2D` target
@@ -39,7 +32,7 @@ export class Texture2D
    */
   bind(gl)
   {
-    gl.bindTexture(gl.TEXTURE_2D, this._location)
+    super.bind(gl, gl.TEXTURE_2D)
   }
 
   /**
@@ -48,6 +41,6 @@ export class Texture2D
    */
   unbind(gl)
   {
-    gl.bindTexture(gl.TEXTURE_2D, null)
+    super.unbind(gl, gl.TEXTURE_2D)
   }
 }
