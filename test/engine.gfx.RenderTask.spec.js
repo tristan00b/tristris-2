@@ -120,7 +120,7 @@ describe('RenderTask', () => {
       // n0
       expect(tasks[ 0].type).toBe(RenderTaskType.USE_SHADER)
       expect(tasks[ 1].type).toBe(RenderTaskType.SET_CAMERA)
-      expect(tasks[ 2].type).toBe(RenderTaskType.SET_LIGHT)
+      expect(tasks[ 2].type).toBe(RenderTaskType.SET_LIGHTS)
       expect(tasks[ 3].type).toBe(RenderTaskType.SET_TRANSFORM)
 
       // n1

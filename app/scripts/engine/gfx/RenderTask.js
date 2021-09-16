@@ -179,7 +179,7 @@ function getNodeTasks(nodeState)
 
   if (lights)
   {
-    const lightData = lights.flatMap(l => [...l.position, 0.0, ...l.colour, 0.0])
+    const lightData = Array.from(lights).flatMap(l => [...l.position, 0.0, ...l.colour, 0.0])
     const data = new Float32Array(lightData)
 
     const cb = renderer => {
