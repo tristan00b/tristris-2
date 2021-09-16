@@ -91,24 +91,20 @@ export function MakeLogger(T) {
 /**
  * Given a name and array of property names, creates constant enumerator of type `enum.<Number>`
  * @param {String}   clsname The name for the new enum type
- * @param {String[]} properties An array of property names
+ * @param {String[]|Object<String, Number>} properties An array of property names or an object with name-value pairs
  */
 export function MakeConstEnumerator(clsname, properties)
 {
   const enumerable  = true
   const writable    = false
   const name        = [ 'name', { value: clsname } ]
-  const iterator    = [
-    Symbol.iterator, { value: function* () {
-      for (const key in this)
-      {
-        yield this[key]
-      }
-    }}
-  ]
-  const rest        = Object.entries(properties).map(([_, key], idx) => [key, { value: idx, enumerable, writable }])
-  const descriptors = Object.fromEntries([name, iterator, ...rest])
+  const haveArray   = isArray(properties)
 
+  const keys = haveArray ? Object.values(properties) : Object.keys(properties)
+  const vals = haveArray ? Object.keys(properties)   : Object.values(properties)
+
+  const entries = keys.map((key, idx) => [key, { value: vals[idx], enumerable, writable }])
+  const descriptors = Object.fromEntries([name, ...entries])
   return Object.defineProperties({}, descriptors)
 }
 
