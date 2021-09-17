@@ -140,7 +140,7 @@ export function MakeScene(gl)
      .setSpecular  (c.specular )
      .setShininess (c.shininess)
 
-    const texture = new Texture2D(gl, '/assets/textures/checkerboard.png')
+    const texture = Texture2D.fromURL(gl, '/assets/textures/checkerboard.png')
 
     scene.setComponent(e, textureShader)
     scene.setComponent(e, n)
