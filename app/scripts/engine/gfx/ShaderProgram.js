@@ -288,7 +288,7 @@ function createAttributeSetters(gl, program)
     // This check may not be needed...
     if (!location || isBuiltin(info.name)) return
 
-    setters[name] = createAttributeSetter(gl, attributeInfo, location)
+    setters[name] = createAttributeSetter(gl, info, location)
   })
 
   return setters
@@ -501,6 +501,7 @@ function setShaderParams(gl, setters, nameDataPairs)
 {
   Object.entries(nameDataPairs).forEach(([name, data]) => {
     if (name in setters) {
+      // console.log(`setting: ${name}`)
       setters[name](gl, name, data)
     }
   })
