@@ -16,6 +16,17 @@ export class Program
   }
 
   /**
+   * Given a WebGL shader program and an attribute name, queries the program for the index of the attribute.
+   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
+   * @param {external:WebGLProgram} program The WebGL shader program to query
+   * @param {*} name The name of the vertex attribute variable to query `program` for
+   */
+  static getAttributeIndex(gl, program, name)
+  {
+    return gl.getAttribLocation(program, name)
+  }
+
+  /**
    * Returns information about the program
    * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
    * @param {external:WebGLProgram} program The WebGL shader program to query

@@ -7,12 +7,13 @@ import { BasicShader,
          Camera,
          Light,
          Material,
-         Mesh,
          MeshData,
+         Renderable,
          Renderer,
          ShaderProgram,
          Transform,
          VertexAttributeType } from '../../engine/gfx/all'
+import { quad                } from '../../engine/gfx/meshes/quad'
 import { Texture2D           } from '../../engine/gfx/WebGL/Texture2D'
 import { Entity,
          Query,
@@ -39,8 +40,8 @@ export function MakeScene(gl)
     Camera,
     Light,
     Material,
-    Mesh,
     PlaneTag,
+    Renderable,
     SceneNode,
     ShaderProgram,
     SphereTag,
@@ -51,9 +52,9 @@ export function MakeScene(gl)
   // -------------------------------------------------------------------------------------------------------------------
   // Shader Init & Config
   //
-
-  const basicShader   = new BasicShader(gl, 3)
-  const textureShader = new BasicTextureShader(gl, 3)
+  const lightCount    = 3
+  const basicShader   = new BasicShader(gl, lightCount)
+  const textureShader = new BasicTextureShader(gl, lightCount)
 
   // We'll choose basicShader to be the 'designated' shader, and handle shared (uniform block) buffer managment
   // See documentation for further explanation
@@ -100,54 +101,28 @@ export function MakeScene(gl)
     n0.addChild(n)
 
     const t = new Transform
+    t.setRotation(quat.fromEuler([], -90, 0, 0))
+     .setScale([10, 10, 1])
 
-    const data = new MeshData({
-      indices: plane.indices,
-      primtype: gl.TRIANGLES,
-      attributes: [
-        {
-          type: VertexAttributeType.POSITIONS,
-          size: 3,
-          format: gl.FLOAT,
-          data: plane.positions,
-        },
-        {
-          type: VertexAttributeType.NORMALS,
-          size: 3,
-          format: gl.FLOAT,
-          data: plane.normals,
-        },
-        {
-          type: VertexAttributeType.UVCOORDS,
-          size: 2,
-          format: gl.FLOAT,
-          data: plane.uvcoords,
-        },
-      ],
-    })
-    const mesh = new Mesh({ gl, data, textureShader })
-
-    const c = {
-      ambient:  [0.0, 0.0, 0.0],
-      diffuse:  [1.0, 1.0, 1.0],
-      specular: [0.7, 0.7, 0.7],
-      shininess: 6,
-    }
+    // t.worldTransform = t.localTransform
 
     const m = new Material
-    m.setAmbient   (c.ambient  )
-     .setDiffuse   (c.diffuse  )
-     .setSpecular  (c.specular )
-     .setShininess (c.shininess)
+    m.setAmbient   ([0.0, 0.0, 0.0])
+     .setDiffuse   ([1.0, 1.0, 1.0])
+     .setSpecular  ([0.7, 0.7, 0.7])
+     .setShininess (6)
+
+     const r = new Renderable(gl, quad(-1, -1, 2, 2), textureShader)
 
     const texture = Texture2D.fromURL(gl, '/assets/textures/checkerboard.png')
+    WebGL.onErrorThrowAs(gl, Error)
 
     scene.setComponent(e, textureShader)
     scene.setComponent(e, n)
     scene.setComponent(e, t)
     scene.setComponent(e, m)
+    scene.setComponent(e, r)
     scene.setComponent(e, texture)
-    scene.setComponent(e, mesh)
   }
 
   // -------------------------------------------------------------------------------------------------------------------
@@ -175,7 +150,7 @@ export function MakeScene(gl)
       ]
     })
 
-    const mesh = new Mesh({ gl, data, basicShader })
+    const r = new Renderable(gl, data, basicShader)
 
     const colour = {
       ambient:  [0.0, 0.0, 0.0],
@@ -210,9 +185,9 @@ export function MakeScene(gl)
 
       scene.setComponent(e, basicShader)
       scene.setComponent(e, n)
-      scene.setComponent(e, t)
       scene.setComponent(e, m)
-      scene.setComponent(e, mesh)
+      scene.setComponent(e, r)
+      scene.setComponent(e, t)
       scene.setComponent(e, sphereTag)
     })
   }

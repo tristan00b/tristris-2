@@ -7,8 +7,9 @@
 /**
  * Loads the image located at a specified URL
  * @param {String} url The location of the image to load
- * @param {Function} callback a zero-argument function to call when the image has loaded (assigned to Image.onload)
+ * @param {Function(event)} callback a callback to apply when the image has loaded (assigned to Image.onload)
  * @returns {Image}
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Window/load_event}
  */
  export function loadImage(url, callback)
  {

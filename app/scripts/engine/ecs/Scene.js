@@ -5,7 +5,6 @@ import { isArray,
 import { Camera              } from '../gfx/Camera'
 import { Light               } from '../gfx/Light'
 import { Material            } from '../gfx/Material'
-import { Mesh                } from '../gfx/Mesh'
 import { ShaderProgram       } from '../gfx/ShaderProgram'
 import { Transform           } from '../gfx/Transform'
 

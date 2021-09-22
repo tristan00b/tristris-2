@@ -20,8 +20,8 @@ import { RenderTaskType } from '../app/scripts/engine/gfx/RenderTask'
 import { ShaderProgram } from '../app/scripts/engine/gfx/ShaderProgram'
 jest.mock('../app/scripts/engine/gfx/ShaderProgram')
 
-import { Mesh } from '../app/scripts/engine/gfx/Mesh'
-jest.mock('../app/scripts/engine/gfx/Mesh')
+import { Renderable } from '../app/scripts/engine/gfx/Renderable'
+jest.mock('../app/scripts/engine/gfx/Renderable')
 
 
 describe('RenderTask', () => {
@@ -37,10 +37,10 @@ describe('RenderTask', () => {
          1       2     <--- (tx), (tx)
         / \     / \
        /   \   /   \
-      3     4 5     6  <--- (tx, mat, mesh), (tx, mat, mesh), (tx mat, mesh), (tx, mat, mesh)
+      3     4 5     6  <--- (tx, mat, renderable), (tx, mat, renderable), (tx mat, renderable), (tx, mat, renderable)
 
-    *Does not represent typical usage (E.G. Meshes are not restricted to being included in leaf nodes, nor shaders to
-    the root node. It also does not necessarilly make sense to have nodes with just transforms)
+    *Does not represent typical usage (E.G. Renderables are not restricted to being included in leaf nodes, nor shaders
+    to the root node. It also does not necessarilly make sense to have nodes with just transforms)
 
   \* ---------------------------------------------------------------------------------------------------------------- */
 
@@ -50,7 +50,7 @@ describe('RenderTask', () => {
     Camera,
     Light,
     Material,
-    Mesh,
+    Renderable,
     RenderTask,
     SceneNode,
     ShaderProgram,
@@ -91,25 +91,25 @@ describe('RenderTask', () => {
   // Set entity 2 components (tx)
   scene.setComponent(e[2], new Transform)
 
-  // Set entity 3 components (tx, mat, mesh)
+  // Set entity 3 components (tx, mat, renderable)
   scene.setComponent(e[3], new Transform)
   scene.setComponent(e[3], new Material)
-  scene.setComponent(e[3], new Mesh)
+  scene.setComponent(e[3], new Renderable)
 
-  // Set entity 4 components (tx, mat, mesh)
+  // Set entity 4 components (tx, mat, renderable)
   scene.setComponent(e[4], new Transform)
   scene.setComponent(e[4], new Material)
-  scene.setComponent(e[4], new Mesh)
+  scene.setComponent(e[4], new Renderable)
 
-  // Set entity 5 components (tx mat, mesh)
+  // Set entity 5 components (tx mat, renderable)
   scene.setComponent(e[5], new Transform)
   scene.setComponent(e[5], new Material)
-  scene.setComponent(e[5], new Mesh)
+  scene.setComponent(e[5], new Renderable)
 
-  // Set entity 6 components (tx, mat, mesh)
+  // Set entity 6 components (tx, mat, renderable)
   scene.setComponent(e[6], new Transform)
   scene.setComponent(e[6], new Material)
-  scene.setComponent(e[6], new Mesh)
+  scene.setComponent(e[6], new Renderable)
 
 
   describe('RenderTask.parseScene', () => {
@@ -132,22 +132,22 @@ describe('RenderTask', () => {
       // n3
       expect(tasks[ 6].type).toBe(RenderTaskType.SET_TRANSFORM)
       expect(tasks[ 7].type).toBe(RenderTaskType.SET_MATERIAL)
-      expect(tasks[ 8].type).toBe(RenderTaskType.DRAW_MESH)
+      expect(tasks[ 8].type).toBe(RenderTaskType.DRAW)
 
       // n4
       expect(tasks[ 9].type).toBe(RenderTaskType.SET_TRANSFORM)
       expect(tasks[10].type).toBe(RenderTaskType.SET_MATERIAL)
-      expect(tasks[11].type).toBe(RenderTaskType.DRAW_MESH)
+      expect(tasks[11].type).toBe(RenderTaskType.DRAW)
 
       // n5
       expect(tasks[12].type).toBe(RenderTaskType.SET_TRANSFORM)
       expect(tasks[13].type).toBe(RenderTaskType.SET_MATERIAL)
-      expect(tasks[14].type).toBe(RenderTaskType.DRAW_MESH)
+      expect(tasks[14].type).toBe(RenderTaskType.DRAW)
 
       // n6
       expect(tasks[15].type).toBe(RenderTaskType.SET_TRANSFORM)
       expect(tasks[16].type).toBe(RenderTaskType.SET_MATERIAL)
-      expect(tasks[17].type).toBe(RenderTaskType.DRAW_MESH)
+      expect(tasks[17].type).toBe(RenderTaskType.DRAW)
     })
   })
 })

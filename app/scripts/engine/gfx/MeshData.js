@@ -10,8 +10,8 @@ import * as gl from './WebGL/constants'
  * @type {enum}
  * @property {Number} POSITIONS
  * @property {Number} NORMALS
- * @property {Number} COLOURS
  * @property {Number} UVCOORDS
+ * @property {Number} COLOURS
  * @property {Number} NUM_ATTRIBUTE_TYPES
  * @readonly
  */
@@ -22,7 +22,6 @@ export const VertexAttributeType = MakeConstEnumerator('VertexAttributeType', [
   'COLOURS',
   'NUM_ATTRIBUTE_TYPES',
 ])
-
 
 /**
  * Provides the specification for a single vertex attribute, e.g. positions, normals, or texels, etc. (For a compplete
@@ -45,38 +44,39 @@ export const VertexAttributeType = MakeConstEnumerator('VertexAttributeType', [
  */
 
 
+
 /**
  * Container class for specifying mesh data
  */
 export class MeshData
 {
   /**
+   * @private
+   */
+  defaultAttributeDescriptor = {
+    enabled : false,
+    size    : 0,
+    data    : [],
+    format  : gl.FLOAT,
+  }
+
+  /**
    * @param {Object} args
    * @param {VertexAttributeDescriptor[]} args.attributes The specification for all attribute data associated with each
    * @param {Number[]} [args.indices] Array of indices for indexing into vertex attributes at draw time
    * @param {Number} [args.primtype=gl.TRIANGLES] The primitive type used to draw the mesh (e.g. gl.TRIANGLES)
-   *                                      vertex of a {@link Mesh}
+   *   vertex of a {@link Mesh}
    * @throws {MeshDataError} Throws on malformed attributes
    */
   constructor({ attributes, indices, primtype})
   {
     this._attrs = []
-
-    attributes.map(checkAttribute).forEach(attribute => {
-      this._attrs[attribute.type] = attribute
-    })
-
     this._indices  = indices
     this._primtype = primtype ?? gl.TRIANGLES
-  }
 
-  /**
-   * The array of attribute descriptors contained by this `MeshData` instance
-   * @type {VertexAttributeDescriptor[]}
-   */
-  get attributes()
-  {
-    return this._attrs.filter(a => !!a)
+    attributes.map(checkAttribute).forEach(attribute => {
+      this._attrs[attribute.type] = Object.assign({ enabled: true }, attribute)
+    })
   }
 
   /**
@@ -106,6 +106,49 @@ export class MeshData
   at(type)
   {
     return this._attrs[type]
+  }
+
+  /**
+   * Disables the attribute for rendering if it exists on this instance
+   * @param {VertexAttributeType} type
+   */
+  disableAttribute(type)
+  {
+    if (this.isAttributeDefined(type))
+    {
+      this.at(type).enabled = false
+    }
+    else
+    {
+      Log.warn(`Attempted to disable undefined attribute`)
+    }
+  }
+
+  /**
+   * Enables the attribute for rendering if it exists on this instance
+   * @param {VertexAttributeType} type
+   */
+  enableAttribute(type)
+  {
+    if (this.isAttributeDefined(type))
+    {
+      this.at(type).enabled = true
+    }
+    else
+    {
+      Log.warn(`Attempted to enable undefined attribute`)
+    }
+  }
+
+  /**
+   * Reports whether this instance contains the vertex attributed data for a given vertex attribute type
+   * @param {VertexAttributeType} type
+   * @returns {Boolean}
+   */
+  isAttributeDefined(type)
+  {
+
+    return !!this.at(type)
   }
 }
 

@@ -4,7 +4,7 @@ import { MakeErrorType,
 
 
 /**
- * A specialization of WebGL/Buffer
+ * A specialization of WebGL/Buffer for storing uniform block data
  * @extends Buffer
  */
 export class UniformBuffer extends Buffer

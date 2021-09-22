@@ -169,8 +169,6 @@ export class ShaderProgram
     })
   }
 
-
-
   /**
    * Sets the shader program as part of the current rendering state
    * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context

@@ -7,8 +7,8 @@ import { BasicShader,
          Camera,
          Light,
          Material,
-         Mesh,
          MeshData,
+         Renderable,
          Renderer,
          ShaderProgram,
          Transform,
@@ -33,7 +33,7 @@ export function MakeScene(gl)
     Camera,
     Light,
     Material,
-    Mesh,
+    Renderable,
     SceneNode,
     ShaderProgram,
     SphereTag,
@@ -48,20 +48,23 @@ export function MakeScene(gl)
   scene.addEntity(e0)
 
   const n0 = new SceneNode
-  const shader = new BasicShader(gl)
+
+  const lightCount = 1
+  const shader = new BasicShader(gl, 1)
+  shader.createUniformBlockSetters(gl)
 
   const camera = new Camera
   camera.setLookat({ eye: [0, 0, 25], up: [0, 1, 0], at: [0, 0, 0] })
         .setPerspective({ aspect: gl.canvas.width/gl.canvas.height  })
 
   const light = new Light
-  light.setPosition([0, 10, -20])
-       .setColour([1, 1, 1])
+  light.setPosition([0, 10, 20])
+       .setColour([0.9, 0.5, 0.9])
 
   scene.setComponent(e0, n0)
   scene.setComponent(e0, shader)
   scene.setComponent(e0, camera)
-  scene.setComponent(e0, light)
+  scene.setComponent(e0, [light])
 
 
   // -------------------------------------------------------------------------------------------------------------------
@@ -88,28 +91,18 @@ export function MakeScene(gl)
       ]
     }
   )
-  const mesh = new Mesh({ gl, data, shader })
+  const sphere = new Renderable(gl, data, shader)
 
-  const colours = [
-    { // red
-      ambient:  [0.0, 0.0, 0.0],
-      diffuse:  [0.9, 0.0, 0.0],
-      specular: [0.7, 0.7, 0.7],
-      shininess: 64,
-    },
-    { // green
-      ambient:  [0.0, 0.0, 0.0],
-      diffuse:  [0.0, 0.9, 0.0],
-      specular: [0.7, 0.7, 0.7],
-      shininess: 64,
-    },
-    { // blue
-      ambient:  [0.0, 0.0, 0.0],
-      diffuse:  [0.0, 0.0, 0.9],
-      specular: [0.7, 0.7, 0.7],
-      shininess: 64,
-    },
-  ]
+  const c = {
+    ambient:  [0.05, 0.05, 0.05],
+    diffuse:  [
+      [0.9, 0.0, 0.0],
+      [0.0, 0.9, 0.0],
+      [0.0, 0.0, 0.9],
+    ],
+    specular: [0.9, 0.9, 0.9],
+    shininess: 64,
+  }
 
   const sphereCount = [1, 4, 6, 8, 6, 4, 1]
   const levelCount  = sphereCount.length
@@ -120,10 +113,9 @@ export function MakeScene(gl)
 
   Array(levelCount).fill().forEach((_, j) => {
 
-    const c = colours[j % colours.length]
     const m = new Material
     m.setAmbient(c.ambient)
-     .setDiffuse(c.diffuse)
+     .setDiffuse(c.diffuse[[j % c.diffuse.length]])
      .setSpecular(c.specular)
      .setShininess(c.shininess)
 
@@ -152,7 +144,7 @@ export function MakeScene(gl)
       scene.setComponent(s, n)
       scene.setComponent(s, t)
       scene.setComponent(s, m)
-      scene.setComponent(s, mesh)
+      scene.setComponent(s, sphere)
       scene.setComponent(s, sphereTag)
     })
 

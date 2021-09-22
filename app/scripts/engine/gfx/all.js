@@ -10,9 +10,9 @@ export { /** @see BasicTextureShader   */ BasicTextureShader  } from './shaders/
 export { /** @see Camera               */ Camera              } from './Camera'
 export { /** @see Light                */ Light               } from './Light'
 export { /** @see Material             */ Material            } from './Material'
-export { /** @see Mesh                 */ Mesh                } from './Mesh'
 export { /** @see MeshData             */ MeshData,
          /** @see VertexAttributeType  */ VertexAttributeType } from './MeshData'
+export { /** @see Renderable           */ Renderable          } from './Renderable'
 export { /** @see Renderer             */ Renderer            } from './Renderer'
 export { /** @see RenderTask           */ RenderTask          } from './RenderTask'
 export { /** @see ShaderProgram        */ ShaderProgram       } from './ShaderProgram'

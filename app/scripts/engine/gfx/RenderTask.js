@@ -5,7 +5,8 @@ import { MakeConstEnumerator } from '../utilities'
 import { Camera              } from './Camera'
 import { Light               } from './Light'
 import { Material            } from './Material'
-import { Mesh                } from './Mesh'
+import { MeshData            } from './MeshData'
+import { Renderable          } from './Renderable'
 import { ShaderProgram       } from './ShaderProgram'
 import { Transform           } from './Transform'
 
@@ -14,7 +15,12 @@ import { Query               } from '../ecs/Query'
 import { keyFrom, Scene      } from '../ecs/Scene'
 import { SceneNode           } from '../ecs/SceneNode'
 
+import { MakeErrorType,
+         MakeLogger          } from '../utilities'
+
+
 import { Texture2D           } from './WebGL/Texture2D'
+import { onErrorThrowAs } from './WebGL/utilities'
 
 
 /** @module Engine/gfx/RenderTask */
@@ -24,7 +30,7 @@ const types = [
   Camera,
   Light,
   Material,
-  Mesh,
+  Renderable,
   ShaderProgram,
   Texture2D,
   Transform,
@@ -47,11 +53,11 @@ const RenderTaskDescription = Object.freeze(taskType)
  * @type {enum}
  * @property {Number} USE_SHADER
  * @property {Number} SET_CAMERA
- * @property {Number} SET_LIGHT
+ * @property {Number} SET_LIGHTS
  * @property {Number} SET_TRANSFORM
- * @property {Number} USE_TEXTURE_2D
+ * @property {Number} USE_TEXTURE
  * @property {Number} SET_MATERIAL
- * @property {Number} DRAW_MESH
+ * @property {Number} DRAW
  */
 export const RenderTaskType = MakeConstEnumerator('RenderTaskType', taskType)
 
@@ -101,6 +107,7 @@ export class RenderTask
    */
   run(renderer)
   {
+    // console.log(`performing task: ${this.description}`)
     this._task(renderer)
   }
 
@@ -146,13 +153,13 @@ function getEntityState(scene, entity)
  */
 function getNodeTasks(nodeState)
 {
-  const shader    = nodeState[keyFrom(ShaderProgram)]
-  const camera    = nodeState[keyFrom(Camera)]
-  const lights    = nodeState[keyFrom(Light)]
-  const transform = nodeState[keyFrom(Transform)]
-  const texture2D = nodeState[keyFrom(Texture2D)]
-  const material  = nodeState[keyFrom(Material)]
-  const mesh      = nodeState[keyFrom(Mesh)]
+  const shader     = nodeState[keyFrom(ShaderProgram)]
+  const camera     = nodeState[keyFrom(Camera)]
+  const lights     = nodeState[keyFrom(Light)]
+  const transform  = nodeState[keyFrom(Transform)]
+  const texture    = nodeState[keyFrom(Texture2D)]
+  const material   = nodeState[keyFrom(Material)]
+  const renderable = nodeState[keyFrom(Renderable)]
 
   const tasks = []
 
@@ -202,9 +209,14 @@ function getNodeTasks(nodeState)
     tasks.push(new RenderTask(cb, RenderTaskType.SET_TRANSFORM))
   }
 
-  if (texture2D)
+  if (texture)
   {
-    const cb = renderer => texture2D.bind(renderer.context)
+    const cb = renderer => {
+      renderer.setActiveTexture(0)
+      renderer.shader.setUniforms(renderer.context, { "sampler": [0] })
+      texture.bind(renderer.context)
+      onErrorThrowAs(renderer.context, RenderTaskError)
+    }
     tasks.push(new RenderTask(cb, RenderTaskType.USE_TEXTURE_2D))
   }
 
@@ -222,11 +234,25 @@ function getNodeTasks(nodeState)
     tasks.push(new RenderTask(cb, RenderTaskType.SET_MATERIAL))
   }
 
-  if (mesh)
+  if (renderable)
   {
-    const cb = renderer => mesh.draw(renderer.context)
-    tasks.push(new RenderTask(cb, RenderTaskType.DRAW_MESH))
+    const cb = renderer => renderable.draw(renderer.context)
+    tasks.push(new RenderTask(cb, RenderTaskType.DRAW))
   }
 
   return tasks
 }
+
+
+/**
+ * @see {@link module:Engine/Utilities.MakeLogger}
+ * @private
+ */
+ var Log = MakeLogger(RenderTask)
+
+
+ /**
+  * @see {@link module:Engine/Utilities.MakeErrorType}
+  * @private
+  */
+ const RenderTaskError = MakeErrorType(RenderTask)

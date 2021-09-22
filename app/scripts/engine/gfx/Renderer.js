@@ -1,6 +1,15 @@
-import * as WebGL from './WebGL/all'
-import { MakeErrorType, MakeLogger } from '../utilities'
-import { RenderTask } from './RenderTask'
+import { Renderable          } from './Renderable'
+import { RenderTask          } from './RenderTask'
+import { MeshData,
+         VertexAttributeType } from './MeshData'
+import { quad                } from './meshes/quad'
+import { ScreenShader        } from './shaders/ScreenShader'
+import { FrameBuffer         } from './WebGL/FrameBuffer'
+import { Texture2D           } from './WebGL/Texture2D'
+import { onErrorThrowAs,
+         resizeCanvas        } from './WebGL/utilities'
+import { MakeErrorType,
+         MakeLogger          } from '../utilities'
 
 /**
  * Manages drawing the elements of enqueued `SceneGraph` objects
@@ -8,32 +17,94 @@ import { RenderTask } from './RenderTask'
 export class Renderer
 {
   /**
-   * @param {{ config:Object, canvas:Object }} args
-   * @param {Object} args.canvas The canvas object to target
    * @param {external:WebGL2RenderingContext} context The rendering context
    * @throws {RendererError} Throws a if either the `canvas` or `context` argument is not provided
    */
-  constructor({ canvas, context })
+  constructor(context)
   {
-    this.canvas = canvas ?? throw new RendererError('reference to canvas object not supplied')
+    // this.canvas = canvas ?? throw new RendererError('reference to canvas object not supplied')
     this.context = context ?? throw new RendererError('reference to the context not supplied')
-    this._task_queue = []
-    this._shader = null
+
+    window.addEventListener('resize', this.resizeCanvas.bind(this))
+    window.dispatchEvent(new Event('resize'))
+
+    const gl = this.context
+    const { width, height } = gl.canvas
 
     /** @todo wrap into configuration scheme */
     {
-      const gl = this.context
       gl.enable(gl.CULL_FACE)
       gl.enable(gl.DEPTH_TEST)
       gl.frontFace(gl.CCW)
       gl.cullFace(gl.BACK)
       gl.clearDepth(1.0)
-
-      WebGL.onErrorThrowAs(this.context, RendererError)
     }
 
-    window.addEventListener('resize', this.resizeCanvas.bind(this))
-    window.dispatchEvent(new Event('resize'))
+    this._maxActiveTextureUnits = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS)
+    this._task_queue = []
+    this._shader = null
+
+    this.screen = {}
+    this.screen.shader = new ScreenShader(gl)
+    this.screen.quad = new Renderable(gl, quad(-1, -1, 2, 2), this.screen.shader)
+
+    { // Configure colour texture ------------------------------------------------------------------------------------
+      const texture = new Texture2D(gl)
+      texture.bind(gl)
+      texture.setIntegerParam(gl, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+      texture.setIntegerParam(gl, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+      texture.setIntegerParam(gl, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+      texture.setIntegerParam(gl, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+      texture.setData(gl, 0, gl.RGB, width, height, gl.RGB, gl.UNSIGNED_BYTE, null)
+      this.screen.colourTexture = texture
+    }
+
+    { // Configure depth texture -------------------------------------------------------------------------------------
+      const texture = new Texture2D(gl)
+      texture.bind(gl)
+      texture.setIntegerParam(gl, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+      texture.setIntegerParam(gl, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+      texture.setIntegerParam(gl, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+      texture.setIntegerParam(gl, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+      texture.setData(gl, 0, gl.DEPTH_COMPONENT24, width, height, gl.DEPTH_COMPONENT, gl.UNSIGNED_INT, null)
+      this.screen.depthTexture = texture
+    }
+
+    { // Configure the framebuffer -----------------------------------------------------------------------------------
+      this.framebuffer = new FrameBuffer(gl)
+      this.framebuffer.bind(gl)
+      this.framebuffer.setTextureAttachment(gl, gl.COLOR_ATTACHMENT0, this.screen.colourTexture);
+      this.framebuffer.setTextureAttachment(gl, gl.DEPTH_ATTACHMENT,  this.screen.depthTexture );
+
+      // Check framebuffer status
+      onErrorThrowAs(gl, RendererError)
+      const status = this.framebuffer.getStatus(gl)
+      status === gl.FRAMEBUFFER_COMPLETE || throw new RendererError(`framebuffer incomplete (status: ${status})`)
+
+      this.framebuffer.unbind(gl)
+    }
+  }
+
+  /**
+   * @type {Number}
+   */
+  get maxActiveTextureUnits()
+  {
+    return this._maxActiveTextureUnits
+  }
+
+  /**
+   * Specifies which texture unit to make active
+   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
+   * @param {Number} index
+   * @throws {RendererError}
+   * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/activeTexture}
+   */
+  setActiveTexture(index)
+  {
+    const gl = this.context
+    gl.activeTexture(gl.TEXTURE0 + index)
+    onErrorThrowAs(gl, RendererError)
   }
 
   /**
@@ -104,6 +175,7 @@ export class Renderer
   enqueue(scene)
   {
     const tasks = RenderTask.parseScene(scene)
+    // tasks.forEach(t => console.log(t.description))
     this._task_queue.push(...tasks)
   }
 
@@ -112,10 +184,31 @@ export class Renderer
    */
   render()
   {
-    this.context.clear(this.context.COLOR_BUFFER_BIT | this.context.DEPTH_BUFFER_BIT)
-    this._task_queue.forEach(task => {
-      task.run(this)
-    })
+    const gl = this.context
+    const [width, height] = [gl.drawingBufferWidth, gl.drawingBufferHeight]
+
+    gl.enable(gl.CULL_FACE )
+    gl.enable(gl.DEPTH_TEST)
+    gl.clearColor(0.1, 0.1, 0.1, 1.0)
+
+    // First pass ------------------------------------------------------------------------------------------------------
+    this.framebuffer.bind(gl)
+
+    gl.viewport(0, 0, width, height)
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+
+    // Draw the scene into the bound framebuffer
+    this._task_queue.forEach(task => task.run(this))
+
+    // Second pass -----------------------------------------------------------------------------------------------------
+    this.framebuffer.unbind(gl)
+    this.screen.colourTexture.bind(gl)
+
+    gl.viewport(0, 0, width, height)
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+
+    this.screen.shader.use(gl)
+    this.screen.quad.draw(gl)
   }
 
   /**
@@ -131,8 +224,7 @@ export class Renderer
    */
   resizeCanvas()
   {
-    const gl = this.context
-    WebGL.resizeCanvas(gl)
+    resizeCanvas(this.context)
   }
 }
 

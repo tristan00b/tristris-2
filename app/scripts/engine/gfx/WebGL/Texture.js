@@ -29,6 +29,26 @@ export class Texture
   }
 
   /**
+   * The width of the texture in pixels
+   * @type {Number}
+   * @readonly
+   */
+  get width()
+  {
+    return this._width ?? 0
+  }
+
+  /**
+   * The height of the texture in pixels
+   * @type {Number}
+   * @readonly
+   */
+  get height()
+  {
+    return this._height ?? 0
+  }
+
+  /**
    * Binds the texture to a given target
    * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
    * @param {external:GLenum} target The binding point (e.g. `gl.TEXTURE_2D`)
@@ -60,16 +80,26 @@ export class Texture
   }
 
   /**
-   * Initializes the texture's internal data store
+   * Initializes the texture's data store
    * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
    * @param {external:GLenum} target Specifies the texture's binding point
-   * @param  {...any} args see complete list {@link https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texImage2D|here}
+   * @param {external:GLint} level The level of detail (level n is the nth mipmap, n=0 is the base mimmap)
+   * @param {external:GLenum} intlfmt Specifies the colour format for the texture (see links for complete list)
+   * @param {external:GLsizei} width The width of the texture image
+   * @param {external:GLsizei} height The height of the texture image
+   * @param {external:GLenum} fmt Specifies the format of the pixel data source (see links for complete list)
+   * @param {external:GLenum} type Specifies the data type of the pixel data (see links for complete list)
+   * @param {*|null} data The pixel data source (see MDN link for complete list of types)
+   * @param {Boolean} [flipY=true] Flips the source data along its vertical axis if true
    * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texImage2D}
    * @see {@link https://www.khronos.org/registry/webgl/specs/latest/2.0/#TEXTURE_TYPES_FORMATS_FROM_DOM_ELEMENTS_TABLE}
    */
-  static setData2D(gl, target, ...args)
+  setData2D(gl, target, level, intlfmt, width, height, fmt, type, data, flipY=true)
   {
-    gl.texImage2D(target, ...args)
+    this._width = width
+    this._height = height
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY)
+    gl.texImage2D(target, level, intlfmt, width, height, /* border = */0, fmt, type, data)
   }
 
   /**

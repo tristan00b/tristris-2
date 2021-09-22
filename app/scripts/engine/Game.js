@@ -12,10 +12,13 @@ export class Game
    * @param {SceneConstructor} MakeEntryScene A constructor callback for initialising the entry scene
    */
   constructor(canvas, MakeEntryScene) {
-    this.canvas  = canvas
-    this.context = this.canvas.getContext('webgl2')
+
+    const gl = canvas.getContext('webgl2')
+    if (!gl) throw new GameError('failed to obtain webgl2 context')
+
+    this.context = gl
     // this.input  = new InputHandler
-    this.renderer = new Renderer(this)
+    this.renderer = new Renderer(this.context)
     // this.audio  = new AudioServer(this)
 
     this.scene = MakeEntryScene(this.context)
