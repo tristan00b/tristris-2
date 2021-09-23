@@ -15,6 +15,7 @@ import { BasicTextureShader,
          VertexAttributeType } from '../../engine/gfx/all'
 import { Texture2D           } from '../../engine/gfx/WebGL/Texture2D'
 import { quad                } from '../../engine/gfx/meshes/quad'
+import { PlayerController    } from '../../engine/PlayerController'
 
 export function MakeScene(gl)
 {
@@ -29,11 +30,14 @@ export function MakeScene(gl)
     ShaderProgram,
     Texture2D,
     Transform,
+    PlayerController,
   ].forEach(scene.registerComponentType.bind(scene))
 
   const lightCount = 1
   const s = new BasicTextureShader(gl, lightCount)
   s.createUniformBlockSetters(gl)
+
+  const player = new PlayerController()
 
   const c = new Camera
   c.setLookat({ eye: [0, 15, 25], up: [0, 1, 0], at: [0, 0, 0] })
@@ -73,6 +77,7 @@ export function MakeScene(gl)
   scene.setComponent(e, m)
   scene.setComponent(e, r)
   scene.setComponent(e, texture)
+  scene.setComponent(e, player)
 
   return scene
 }

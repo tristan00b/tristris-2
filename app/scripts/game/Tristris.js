@@ -9,6 +9,6 @@ export class Tristris extends Game
 {
   constructor() {
     const canvas = document.getElementById(config.canvas.id)
-    super(canvas, MakeScene)
+    super(canvas, config, MakeScene)
   }
 }

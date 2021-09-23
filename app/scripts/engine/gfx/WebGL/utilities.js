@@ -23,7 +23,9 @@ export function needCanvasResize(gl)
  * Resizes the canvas to fill the window
  * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
  */
-export function resizeCanvas(gl) {
+export function resizeCanvas(gl)
+{
+  const rect = gl.canvas.getBoundingClientRect()
   gl.canvas.width  = gl.canvas.clientWidth
   gl.canvas.height = gl.canvas.clientHeight
   gl.viewport(0, 0, gl.canvas.width, gl.canvas.height)

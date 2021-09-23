@@ -1,5 +1,7 @@
-import { MakeErrorType, MakeLogger } from '../engine/utilities'
-import { Renderer } from '../engine/gfx/all'
+import { InputHandler   } from './InputHandler'
+import { Renderer       } from './gfx/all'
+import { MakeErrorType,
+         MakeLogger     } from './utilities'
 
 
 /**
@@ -11,13 +13,14 @@ export class Game
    * @param {external:HTMLCanvasElement} canvas The canvas to render to
    * @param {SceneConstructor} MakeEntryScene A constructor callback for initialising the entry scene
    */
-  constructor(canvas, MakeEntryScene) {
+  constructor(canvas, config, MakeEntryScene) {
 
     const gl = canvas.getContext('webgl2')
     if (!gl) throw new GameError('failed to obtain webgl2 context')
 
-    this.context = gl
-    // this.input  = new InputHandler
+    this.context  = gl
+    this.cfg      = config
+    this.input    = new InputHandler(this.cfg?.input)
     this.renderer = new Renderer(this.context)
     // this.audio  = new AudioServer(this)
 
