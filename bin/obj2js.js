@@ -29,7 +29,7 @@ async function main(args)
 
   const flipY = args[0] === '--flip-y' || args[0] === '-y'
 
-  const [ipath, opath] = args.slice(1)
+  const [ipath, opath] = flipY ? args.slice(1) : args
 
   const input  = await fs.readFile(ipath, 'utf8')
   const parsed = parseWavefrontObject(input, flipY)
