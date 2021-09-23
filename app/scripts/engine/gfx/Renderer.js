@@ -1,15 +1,15 @@
-import { Renderable          } from './Renderable'
-import { RenderTask          } from './RenderTask'
+import { Renderable           } from './Renderable'
+import { RenderTask           } from './RenderTask'
 import { MeshData,
-         VertexAttributeType } from './MeshData'
-import { quad                } from './meshes/quad'
-import { ScreenShader        } from './shaders/ScreenShader'
-import { FrameBuffer         } from './WebGL/FrameBuffer'
-import { Texture2D           } from './WebGL/Texture2D'
+         VertexAttributeType  } from './MeshData'
+import { quad                 } from './meshes/quad'
+import { ScreenHDRShader      } from './shaders/ScreenHDRShader'
+import { FrameBuffer          } from './WebGL/FrameBuffer'
+import { Texture2D            } from './WebGL/Texture2D'
 import { onErrorThrowAs,
-         resizeCanvas        } from './WebGL/utilities'
+         resizeCanvas         } from './WebGL/utilities'
 import { MakeErrorType,
-         MakeLogger          } from '../utilities'
+         MakeLogger           } from '../utilities'
 
 /**
  * Manages drawing the elements of enqueued `SceneGraph` objects
@@ -35,6 +35,20 @@ export class Renderer
       gl.frontFace(gl.CCW)
       gl.cullFace(gl.BACK)
       gl.clearDepth(1.0)
+
+      this._extensions = {}
+      const extensions = gl.getSupportedExtensions()
+
+      const floatColourBufferExt = 'EXT_color_buffer_float'
+      if (extensions.includes(floatColourBufferExt))
+      {
+        const ext = gl.getExtension(floatColourBufferExt)
+        this._extensions[floatColourBufferExt] = ext
+      }
+      else
+      {
+        throw new RendererError('Floating point colour buffer extension not available!')
+      }
     }
 
     this._maxActiveTextureUnits = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS)
@@ -42,7 +56,7 @@ export class Renderer
     this._shader = null
 
     this.screen = {}
-    this.screen.shader = new ScreenShader(gl)
+    this.screen.shader = new ScreenHDRShader(gl)
     this.screen.quad = new Renderable(gl, quad(-1, -1, 2, 2), this.screen.shader)
 
     { // Configure colour texture ------------------------------------------------------------------------------------
@@ -52,7 +66,7 @@ export class Renderer
       texture.setIntegerParam(gl, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
       texture.setIntegerParam(gl, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
       texture.setIntegerParam(gl, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-      texture.setData(gl, 0, gl.RGB, width, height, gl.RGB, gl.UNSIGNED_BYTE, null)
+      texture.setData(gl, 0, gl.RGBA16F, width, height, gl.RGBA, gl.FLOAT, null)
       texture.unbind(gl)
       this.screen.colourTexture = texture
     }
@@ -210,6 +224,11 @@ export class Renderer
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
     this.screen.shader.use(gl)
+    this.screen.shader.setUniforms(gl, {
+      'exposure': [1.0],
+      'gamma':    [1.0],
+    })
+
     this.screen.quad.draw(gl)
   }
 

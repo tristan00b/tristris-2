@@ -5,7 +5,7 @@ import { ShaderProgram } from '../ShaderProgram'
  * @extends ShaderProgram
  * @todo improve documentation
  */
-export class ScreenShader extends ShaderProgram
+export class ScreenPassThruShader extends ShaderProgram
 {
   constructor(gl)
   {
@@ -36,17 +36,7 @@ export class ScreenShader extends ShaderProgram
 
                   void main()
                   {
-                    vec4 c = texture(sampler, pass_vertex_uvcoord);
-
-                    // if ( c == vec4(vec3(0.0), 1.0) )
-                    // {
-                    //   out_colour = vec4(1.0, 0.0, 0.0, 1.0);
-                    // }
-                    // else
-                    // {
-                      out_colour = texture(sampler, pass_vertex_uvcoord);
-                    // }
-
+                    out_colour = texture(sampler, pass_vertex_uvcoord);
                   }`
       })
   }
