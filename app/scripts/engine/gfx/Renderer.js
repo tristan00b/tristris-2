@@ -25,11 +25,8 @@ export class Renderer
     // this.canvas = canvas ?? throw new RendererError('reference to canvas object not supplied')
     this.context = context ?? throw new RendererError('reference to the context not supplied')
 
-    window.addEventListener('resize', this.resizeCanvas.bind(this))
-    window.dispatchEvent(new Event('resize'))
-
     const gl = this.context
-    const { width, height } = gl.canvas
+    const [ width, height ] = [gl.canvas.clientWidth, gl.canvas.clientHeight]
 
     /** @todo wrap into configuration scheme */
     {
@@ -56,6 +53,7 @@ export class Renderer
       texture.setIntegerParam(gl, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
       texture.setIntegerParam(gl, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
       texture.setData(gl, 0, gl.RGB, width, height, gl.RGB, gl.UNSIGNED_BYTE, null)
+      texture.unbind(gl)
       this.screen.colourTexture = texture
     }
 
@@ -67,6 +65,7 @@ export class Renderer
       texture.setIntegerParam(gl, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
       texture.setIntegerParam(gl, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
       texture.setData(gl, 0, gl.DEPTH_COMPONENT24, width, height, gl.DEPTH_COMPONENT, gl.UNSIGNED_INT, null)
+      texture.unbind(gl)
       this.screen.depthTexture = texture
     }
 
@@ -83,6 +82,9 @@ export class Renderer
 
       this.framebuffer.unbind(gl)
     }
+
+    window.addEventListener('resize', this.handleResize.bind(this))
+    window.dispatchEvent(new Event('resize'))
   }
 
   /**
@@ -220,11 +222,40 @@ export class Renderer
   }
 
   /**
-   * Sets the canvas dimensions to match the client dimensions. Called automatically when the window is resized.
+   * A callback for handling window resize events
+   * @private
+   */
+  handleResize()
+  {
+    this.resizeCanvas()
+    this.resizeFrameBuffer()
+  }
+
+  /**
+   * Updates canvas width and height dimensions to match client with and height dimensions
+   * @private
    */
   resizeCanvas()
   {
     resizeCanvas(this.context)
+  }
+
+  /**
+   * Updates the framebuffer's texture width and height dimensions to match drawing buffer width and height dimensions
+   * @private
+   */
+  resizeFrameBuffer()
+  {
+    const gl = this.context
+    const [width, height] = [gl.drawingBufferWidth, gl.drawingBufferHeight]
+
+    this.screen.colourTexture.bind(gl)
+    this.screen.colourTexture.setData(gl, 0, gl.RGBA16F, width, height, gl.RGBA, gl.FLOAT, null)
+    this.screen.colourTexture.unbind(gl)
+
+    this.screen.depthTexture.bind(gl)
+    this.screen.depthTexture.setData(gl, 0, gl.DEPTH_COMPONENT24, width, height, gl.DEPTH_COMPONENT, gl.UNSIGNED_INT, null)
+    this.screen.depthTexture.unbind(gl)
   }
 }
 
