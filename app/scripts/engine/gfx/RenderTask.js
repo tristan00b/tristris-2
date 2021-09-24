@@ -186,12 +186,11 @@ function getNodeTasks(nodeState)
 
   if (lights)
   {
-    const lightData = Array.from(lights).flatMap(l => [...l.position, 0.0, ...l.colour, 0.0])
-    const data = new Float32Array(lightData)
-
     const cb = renderer => {
+      // N.B. vectors are zero-padded to conform to GLSL std140 layout
+      const data = Array.from(lights).flatMap(l => [...l.position, 0.0, ...l.colour, 0.0])
       renderer.shader.setUniformBlocks(renderer.context, {
-        'LightSources' : data
+        'LightSources' : new Float32Array(data)
       })
     }
 
