@@ -18,6 +18,7 @@ export class Query
   /**
    * Runs the query on a scene
    * @param {Scene} scene The scene to query
+   * @todo Simplify code and make easier to understand, lol!
    */
   run(scene)
   {
@@ -30,7 +31,9 @@ export class Query
       const components = this.types.map(Type => scene.getComponent(entity, Type))
 
       const foundAllComponents = (components.length > 0) && (components
-        .map((c, idx) => c instanceof this.types[idx])
+        .map((c, idx) => Array.isArray(c) && c[0]
+            ? c[0] instanceof this.types[idx]
+            : c    instanceof this.types[idx])
         .reduce((acc, found) => acc && found))
 
       if (foundAllComponents)
