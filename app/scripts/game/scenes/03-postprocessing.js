@@ -1,14 +1,13 @@
 import { mat4,
-         quat                } from 'gl-matrix'
+         quat,
+         vec3                } from 'gl-matrix'
 import { Entity,
          Query,
          Scene,
          SceneNode,
          System,
          Tag                 } from '../../engine/ecs/all'
-import { BasicShader,
-         BasicTextureShader,
-         Camera,
+import { Camera,
          Light,
          Material,
          MeshData,
@@ -19,6 +18,9 @@ import { BasicShader,
          VertexAttributeType } from '../../engine/gfx/all'
 import { Texture2D           } from '../../engine/gfx/WebGL/Texture2D'
 import { quad                } from '../../engine/gfx/meshes/quad'
+
+import { BasicMRTShader        } from '../../engine/gfx/shaders/BasicMRTShader'
+import { BasicTextureMRTShader } from '../../engine/gfx/shaders/BasicTextureMRTShader'
 
 import { model as cubeModel   } from '../meshes/CubeMesh'
 import { model as sphereModel } from '../meshes/SphereMesh'
@@ -46,8 +48,8 @@ export function MakeScene(gl)
   ].forEach(scene.registerComponentType.bind(scene))
 
   const lightCount    = 4
-  const basicShader   = new BasicShader(gl, lightCount)
-  const textureShader = new BasicTextureShader(gl, lightCount)
+  const basicShader   = new BasicMRTShader(gl, lightCount)
+  const textureShader = new BasicTextureMRTShader(gl, lightCount)
 
   basicShader.createUniformBlockSetters(gl)
   textureShader.updateUniformBlockSetters(gl, basicShader)
@@ -116,10 +118,10 @@ export function MakeScene(gl)
        .setScale([scale, scale, scale])
 
       const m = new Material
-      m.setAmbient   ([0.1,  0.1,  0.1 ])
-       .setDiffuse   ([0.9,  0.9,  0.9 ])
-       .setSpecular  ([1.0,  1.0,  1.0 ])
-       .setShininess (64)
+      m.setAmbient   ([0.9,  0.9,  0.9])
+       .setDiffuse   ([1.9,  1.9,  1.9])
+       .setSpecular  ([1.0,  1.0,  1.0])
+       .setShininess (32)
 
       const data = new MeshData({
         primtype: cubeModel.primtype,
@@ -180,11 +182,18 @@ export function MakeScene(gl)
     const count  = lightCount
     const lights = []
 
-    const colours = [
-      [0, 0, 1],
-      [1, 1, 0],
-      [0, 1, 0],
-      [1, 0, 0]
+    const diffuseColours = [
+      [0,    0,    1],
+      [0.76, 0.76, 0],
+      [0,    1,    0],
+      [1,    0,    0]
+    ]
+
+    const lightColours = [
+      [0,   0,   7],
+      [0.6, 0.6, 0],
+      [0,   0.7, 0],
+      [1.9, 0,   0]
     ]
 
     ;[...Array(count)].forEach((_, index) => {
@@ -198,7 +207,7 @@ export function MakeScene(gl)
       t.setTranslation([0,1,0])
 
       const m = new Material
-      m.setAmbient   (colours[index])
+      m.setAmbient   (diffuseColours[index])
        .setDiffuse   ([0,0,0])
        .setSpecular  ([0,0,0])
        .setShininess (1)
@@ -225,7 +234,7 @@ export function MakeScene(gl)
       const r = new Renderable(gl, data, basicShader)
 
       const l = new Light
-      l.setColour(colours[index])
+      l.setColour(lightColours[index])
        .setPosition([0,1,0])
       lights.push(l)
 

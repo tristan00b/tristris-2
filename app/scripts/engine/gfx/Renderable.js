@@ -56,10 +56,9 @@ function vertexAttributeName(type)
 export class Renderable
 {
   /**
-   * @param {Object} args
-   * @param {external:WebGL2RenderingContext} args.gl WebGL2 rendering context
-   * @param {MeshData} args.data The data to acquire buffers on the graphics card for
-   * @param {ShaderProgram} args.shader Used to enable the vertex attributes described by `data`
+   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
+   * @param {MeshData} data The data to acquire buffers on the graphics card for
+   * @param {ShaderProgram} shader Used to enable the vertex attributes described by `data`
    * @todo Cache attribute indices
    */
   constructor(gl, data, shader)
