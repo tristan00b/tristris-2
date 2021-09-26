@@ -69,13 +69,13 @@ export class Renderer
 
     this.screen.shader[0].use(gl)
     this.screen.shader[0].setUniforms(gl, {
-      'image': [0],
+      'image': 0,
     })
     this.screen.shader[0].unuse(gl)
     this.screen.shader[1].use(gl)
     this.screen.shader[1].setUniforms(gl, {
-      'scene': [0],
-      'bloom': [1],
+      'scene': 0,
+      'bloom': 1,
     })
     this.screen.shader[1].unuse(gl)
 
@@ -325,7 +325,7 @@ export class Renderer
         framebuffer = this.framebuffer[1 + horizontal].bind(gl) // int + boolean...¯\_(ツ)_/¯
 
         this.screen.shader[0].setUniforms(gl, {
-          'horizontal': [horizontal]
+          'horizontal': horizontal
         })
 
         horizontal = !horizontal

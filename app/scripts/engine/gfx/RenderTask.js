@@ -223,10 +223,10 @@ function getNodeTasks(nodeState)
   {
     const cb = renderer => {
       renderer.shader.setUniforms(renderer.context, {
-        'material.ambient'   :  material.ambient,
-        'material.diffuse'   :  material.diffuse,
-        'material.specular'  :  material.specular,
-        'material.shininess' : [material.shininess],
+        'material.ambient'   : material.ambient,
+        'material.diffuse'   : material.diffuse,
+        'material.specular'  : material.specular,
+        'material.shininess' : material.shininess,
       })
     }
 

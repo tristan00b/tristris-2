@@ -1,4 +1,4 @@
-import { MakeErrorType, MakeLogger } from '../../utilities'
+import { isArray, MakeErrorType, MakeLogger } from '../../utilities'
 import * as c from './constants'
 
 
@@ -147,7 +147,9 @@ function createShaderSetter(gl, info, location, setters)
   const setter   = setters[typeInfo.setter]
   const Type     = typeInfo.type
 
-  return (context, paramName, data) =>  setter(context, location, new Type(Array.from(data)))
+  return (context, paramName, data) => {
+    setter(context, location, new Type( isArray(data) ? data : [data] ))
+  }
 }
 
 
@@ -205,7 +207,7 @@ export function createBlockUniformSetter(type, program, buffer, offset)
   const Type = typeInfo.type
   return (context, uniformName, data) => {
     buffer.bind(context)
-    buffer.subData(context, offset, new Type(Array.from(data)))
+    buffer.subData(context, offset, new Type( isArray(data) ? data : [data] ))
     buffer.unbind(context)
   }
 }
