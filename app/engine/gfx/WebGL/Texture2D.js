@@ -5,7 +5,7 @@ import { Texture        } from './Texture'
 
 
 /**
- * Provids an interface for 2D WebGLTexture objects
+ * Provides an interface for 2D WebGLTexture objects
  */
 export class Texture2D extends Texture
 {
@@ -106,6 +106,7 @@ export class Texture2D extends Texture
    * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
    * @param {String} url The location of the data to load
    * @returns {Texture2D}
+   * @todo remove to avoid resetting texter parameters after loading image data
    */
   static fromURL(gl, url)
   {

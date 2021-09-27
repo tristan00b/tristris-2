@@ -1,5 +1,6 @@
 import { Buffer               } from './Buffer'
 import { Texture2D            } from './Texture2D'
+import { RenderBuffer         } from './RenderBuffer'
 import { MakeConstEnumerator,
          MakeErrorType,
          MakeLogger           } from '../../utilities'
@@ -7,6 +8,7 @@ import { FRAMEBUFFER,
          READ_FRAMEBUFFER,
          DRAW_FRAMEBUFFER     } from './constants'
 import { onErrorThrowAs       } from './utilities'
+
 
 
 /**
@@ -38,7 +40,6 @@ export const FrameBufferDataDir = MakeConstEnumerator('FrameBufferDataDir', {
 
 
 /**
- *
  */
 export class FrameBuffer
 {
@@ -71,15 +72,35 @@ export class FrameBuffer
 
   /**
    * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
-   * @param {external:GLenum} attachment
-   * @param {Texture2D} texture
-   * @param {Number} [level=0]
+   * @param {external:GLenum} bindpoint The attachment bindpoint (e.g. `gl.COLOR_ATTACHMENT0`)
+   * @param {Texture2D|RenderBuffer} buffer
+   * @param {Number} [level=0] Texture LOD; has no effect if `buffer` is an instance of RenderBuffer
    */
-  setTextureAttachment(gl, attachment, texture, level=0)
+  setAttachment(gl, bindpoint, buffer, level=0)
   {
-    gl.framebufferTexture2D(this.target, attachment, gl.TEXTURE_2D, texture.location, level)
+    if (buffer.isRenderBuffer)
+    {
+      gl.framebufferRenderbuffer(this.target, bindpoint, buffer.target, buffer.location)
+    }
+    else
+    {
+      gl.framebufferTexture2D(this.target, bindpoint, gl.TEXTURE_2D, buffer.location, level)
+    }
+
     onErrorThrowAs(gl, FrameBufferError)
   }
+
+  // /**
+  //  *
+  //  * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
+  //  * @param {external:GLenum} bindpoint The attachment bindpoint (e.g. `gl.COLOR_ATTACHMENT0`)
+  //  * @param {RenderBuffer} buffer
+  //  */
+  // attachRenderBuffer(gl, bindpoint, buffer)
+  // {
+  //   gl.framebufferRenderbuffer(this.target, bindpoint, buffer.target, buffer)
+  //   onErrorThrowAs(gl, FrameBufferError)
+  // }
 
   /**
    * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
@@ -115,11 +136,6 @@ export class FrameBuffer
   delete(gl)
   {
     gl.deleteFramebuffer(this.location)
-  }
-
-  resize(gl)
-  {
-    const { width, height } = gl.canvas
   }
 }
 
