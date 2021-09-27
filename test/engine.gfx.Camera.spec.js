@@ -1,4 +1,4 @@
-import { Camera } from '../app/scripts/engine/gfx/Camera'
+import { Camera } from '../app/engine/gfx/Camera'
 import { mat4,
          vec3   } from 'gl-matrix'
 

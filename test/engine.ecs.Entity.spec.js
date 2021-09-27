@@ -1,5 +1,5 @@
-import { Entity } from '../app/scripts/engine/ecs/Entity'
-import { Scene } from '../app/scripts/engine/ecs/Scene'
+import { Entity } from '../app/engine/ecs/Entity'
+import { Scene } from '../app/engine/ecs/Scene'
 
 describe('Entity', () => {
 

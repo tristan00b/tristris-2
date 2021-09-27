@@ -1,4 +1,4 @@
-import { MakeConstEnumerator } from "../app/scripts/engine/utilities"
+import { MakeConstEnumerator } from "../app/engine/utilities"
 
 
 describe('Engine/Utilities', () => {

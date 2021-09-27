@@ -96,7 +96,10 @@ const opts = {
   Task Definitions
 \* ------------------------------------------------------------------------------------------------------------------ */
 
-const assets = async _ => src('app/assets/**/*.*').pipe(dst('build/assets'))
+const assets = async _ => {
+  src('app/game/textures/**.*').pipe(dst('build/assets/textures'))
+  src('app/images/**/*.*').pipe(dst('build/assets/images'))
+}
 
 const markup = async _ => {
   return src('app/**/*.@(ejs|html)')
@@ -117,12 +120,12 @@ const scripts = /* must be synchronouse for proper browser reloading */ _ => {
   .pipe(gulpif(is_debugging_enabled, sourcemaps.init(opts.sourcemaps)))
   .pipe(uglify(opts.uglify))
   .pipe(gulpif(is_debugging_enabled, sourcemaps.write('.')))
-  .pipe(dst('build/scripts'))
+  .pipe(dst('build'))
   .on('error', log.error)
 }
 
 const styles = async _ => {
-  return src('app/sass/**/*.scss', opts.sourcemaps)
+  return src('app/scss/**/*.scss', opts.sourcemaps)
     .pipe(sass(opts.sass).on('error', sass.logError))
     .pipe(autoprefix())
     .pipe(dst('build/css', opts.sourcemaps))
@@ -137,30 +140,28 @@ const setenv = async _ => {
 }
 
 const docs = async _ => {
-  return src('app/scripts/**/*.js')
+  return src('app/engine/**/*.js')
     .pipe(jsdoc(opts.jsdoc))
-    .pipe(dst('build/doc' /* this arg expected to be ignored by jsdoc */))
 }
 
-const reload = async _ => {
+const reloadBrowser = cb => {
   bsync.reload()
+  cb()
 }
 
 gulp.task('watch:assets', async _ => {
-  gulp.watch('app/assets/**.*', assets).on('change', bsync.reload)
+  gulp.watch([
+    'app/game/textures/**/*',
+    'app/images/**/*',
+  ], assets).on('change', reloadBrowser)
 })
 
 gulp.task('watch:markup', async _ => {
-  gulp.watch('app/**/*.@(ejs|html)', markup).on('change', bsync.reload)
+  gulp.watch('app/**/*.@(ejs|html)', markup).on('change', reloadBrowser)
 })
 
 gulp.task('watch:scripts', async _ => {
-  // ensure reload happens after scripts are processed
-  gulp.watch('app/scripts/**/*.js', ser(scripts, reload))
-})
-
-gulp.task('watch:docs', async _ => {
-  gulp.watch('app/scripts/**/*.js', docs)
+  gulp.watch('app/**/*.js', ser(par(scripts, docs), reloadBrowser))
 })
 
 gulp.task('watch:styles', async _ => {
@@ -173,7 +174,7 @@ gulp.task('server:start', async _ => {
 
 const clean = _ => del('build/*')
 const build = ser(clean, setenv, par(assets, docs, markup, styles, scripts))
-const watch = par('watch:assets', 'watch:markup', 'watch:scripts', 'watch:styles', 'watch:docs')
+const watch = par('watch:assets', 'watch:markup', 'watch:scripts', 'watch:styles')
 const serve = ser(build, par(watch, 'server:start'))
 
 

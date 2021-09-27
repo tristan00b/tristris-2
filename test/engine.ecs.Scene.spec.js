@@ -1,9 +1,9 @@
 import WebGLRenderingContext from 'jest-webgl-canvas-mock/lib/classes/WebGLRenderingContext'
 
-import { Entity } from '../app/scripts/engine/ecs/Entity'
-import { Scene, keyFrom } from '../app/scripts/engine/ecs/Scene'
-import { ShaderProgram } from '../app/scripts/engine/gfx/ShaderProgram'
-import { BasicShader } from '../app/scripts/engine/gfx/shaders/BasicShader'
+import { Entity } from '../app/engine/ecs/Entity'
+import { Scene, keyFrom } from '../app/engine/ecs/Scene'
+import { ShaderProgram } from '../app/engine/gfx/ShaderProgram'
+import { BasicShader } from '../app/engine/gfx/shaders/BasicShader'
 
 
 describe('Scene', function () {

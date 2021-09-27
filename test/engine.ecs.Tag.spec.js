@@ -1,4 +1,4 @@
-import { Tag } from "../app/scripts/engine/ecs/Tag"
+import { Tag } from "../app/engine/ecs/Tag"
 
 describe('Tag', function () {
 

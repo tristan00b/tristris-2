@@ -1,5 +1,5 @@
-import { MeshData, VertexAttributeType } from '../app/scripts/engine/gfx/MeshData'
-import * as gl from '../app/scripts/engine/gfx/WebGL/constants'
+import { MeshData, VertexAttributeType } from '../app/engine/gfx/MeshData'
+import * as gl from '../app/engine/gfx/WebGL/constants'
 
 
 describe('MeshData', function () {

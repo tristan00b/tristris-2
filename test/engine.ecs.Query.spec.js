@@ -1,6 +1,6 @@
 import { makeTestScene } from './helpers'
 
-import { Query } from '../app/scripts/engine/ecs/Query'
+import { Query } from '../app/engine/ecs/Query'
 
 
 describe('Query', function () {

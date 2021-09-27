@@ -1,9 +1,9 @@
-import { Tristris as App } from './scripts/game/Tristris'
+import { Tristris as Game } from './game/Tristris'
 
 window.addEventListener('load', async _ => {
   try {
-    const app = new App()
-    app.run()
+    const game = new Game()
+    game.run()
   } catch (e) {
     console.error(e)
   }

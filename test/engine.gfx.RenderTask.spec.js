@@ -5,7 +5,7 @@ import {
   Scene,
   SceneNode,
   System,
-} from '../app/scripts/engine/ecs/all'
+} from '../app/engine/ecs/all'
 
 import {
   Camera,
@@ -13,15 +13,15 @@ import {
   Material,
   RenderTask,
   Transform
-} from '../app/scripts/engine/gfx/all'
+} from '../app/engine/gfx/all'
 
-import { RenderTaskType } from '../app/scripts/engine/gfx/RenderTask'
+import { RenderTaskType } from '../app/engine/gfx/RenderTask'
 
-import { ShaderProgram } from '../app/scripts/engine/gfx/ShaderProgram'
-jest.mock('../app/scripts/engine/gfx/ShaderProgram')
+import { ShaderProgram } from '../app/engine/gfx/ShaderProgram'
+jest.mock('../app/engine/gfx/ShaderProgram')
 
-import { Renderable } from '../app/scripts/engine/gfx/Renderable'
-jest.mock('../app/scripts/engine/gfx/Renderable')
+import { Renderable } from '../app/engine/gfx/Renderable'
+jest.mock('../app/engine/gfx/Renderable')
 
 
 describe('RenderTask', () => {

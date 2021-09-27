@@ -1,9 +1,9 @@
 import { makeTestScene } from './helpers'
 
-import { Entity } from '../app/scripts/engine/ecs/Entity'
-import { Query } from '../app/scripts/engine/ecs/Query'
-import { Scene } from '../app/scripts/engine/ecs/Scene'
-import { System } from '../app/scripts/engine/ecs/System'
+import { Entity } from '../app/engine/ecs/Entity'
+import { Query } from '../app/engine/ecs/Query'
+import { Scene } from '../app/engine/ecs/Scene'
+import { System } from '../app/engine/ecs/System'
 
 
 class ComponentA {
