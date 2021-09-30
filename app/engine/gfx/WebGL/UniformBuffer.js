@@ -84,15 +84,14 @@ export class UniformBuffer extends Buffer
   /**
    * Creates and initializes the buffer's data store
    * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
-   * @param {ArrayBuffer|SharedArrayBuffer|ArrayBufferView|null} data The data to copy to the data store. If `null`, a
-   *   data store is still be created but will be uninitialized.
-   * @param {Number} [usage=gl.DYNAMIC_DRAW]  Specifies the intended usage pattern of the data store
+   * @param {ArrayBuffer|Number|null} dataOrSize The data to copy to the buffer's data store, the size (in bytes) of the
+   *   data store to be allocated, or, `null`, which will result in the data store being created but left uninitialized.
+   * @param {Number} [usage=gl.STATIC_DRAW]  Specifies the intended usage pattern of the data store
    * @throws {BufferError} Throws on encountering a WebGL error
    */
-  data(gl, data, usage)
+  data(gl, dataOrSize, usage)
   {
-    usage ??= gl.DYNAMIC_DRAW
-    super.data(gl, gl.UNIFORM_BUFFER, data, usage)
+    super.data(gl, gl.UNIFORM_BUFFER, dataOrSize, usage ?? gl.STATIC_DRAW)
   }
 
   /**
