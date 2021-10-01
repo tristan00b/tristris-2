@@ -178,16 +178,10 @@ export const createUniformSetter = (gl, info, location) => createShaderSetter(gl
 export function createUniformBlockSetter(program, buffer, offset=0)
 {
   return (context, blockName, data) => {
-
-    // console.log(`block name:  ${blockName}`)
-    // console.log(`buffer size: ${buffer.size}`)
-    // console.log(`data length: ${data.length}`)
-    // console.log(`data size:   ${data.length * Float32Array.BYTES_PER_ELEMENT}`)
-    // console.log(`data offset: ${offset}`)
-
     buffer.bind(context)
     buffer.subData(context, offset, data)
     buffer.unbind(context)
+    buffer.bindBase(context, buffer.bindPoint)
   }
 }
 

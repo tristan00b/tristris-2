@@ -151,7 +151,8 @@ export class ShaderProgram
    */
   use(gl)
   {
-    gl.useProgram(this.program.location)
+    this.program.use(gl)
+    this._uniformBuffers?.forEach(b => b.bindBase(gl, b.bindPoint))
   }
 
   /**
@@ -358,7 +359,7 @@ function createUniformBlockBuffers(gl, blockInfoArr)
     const buffer = new UniformBuffer(gl)
 
     buffer.bind(gl)
-    gl.bufferData(gl.UNIFORM_BUFFER, info.blockSize, gl.STATIC_DRAW)
+    buffer.data(gl, info.blockSize, gl.STATIC_DRAW)
     buffer.unbind(gl)
 
     return buffer
@@ -443,7 +444,7 @@ function connectUniformBuffers(gl, buffers, bindings)
 {
   bindings.forEach(binding => {
     const buffer = buffers[binding.blockIndex]
-    buffer.setBindPoint(gl, binding.bindPoint)
+    buffer.bindPoint = binding.bindPoint
   })
 }
 

@@ -40,13 +40,9 @@ export class UniformBuffer extends Buffer
     super(gl)
   }
 
-  /**
-   * Reports the size of the buffer in bytes
-   * @type {Number}
-   */
-  get size()
+  getParameter(gl, pname)
   {
-    return this._size
+    return super.getBufferParameter(gl, gl.UNIFORM_BUFFER, pname)
   }
 
   /**
@@ -61,6 +57,28 @@ export class UniformBuffer extends Buffer
   }
 
   /**
+   * Binds the buffer to the `gl.UNIFORM_BUFFER` target and a given bind point (index)
+   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
+   * @param {Number} bindPoint A nonnegative integer, less than or equal to `gl.MAX_UNIFORM_BUFFER_BINDINGS - 1`
+   */
+  bindBase(gl, bindPoint)
+  {
+    gl.bindBufferBase(gl.UNIFORM_BUFFER, bindPoint, this.location)
+  }
+
+  /**
+   * Binds a range of the buffer to the `gl.UNIFORM_BUFFER` target and a given bind point (index)
+   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
+   * @param {Number} bindPoint A nonnegative integer, less than or equal to `gl.MAX_UNIFORM_BUFFER_BINDINGS - 1`
+   * @param {Number} offset The starting offset in bytes
+   * @param {Number} size The number of bytes to bind
+   */
+  bindRange(gl, bindPoint, offset, size)
+  {
+    gl.bindBufferRange(gl.UNIFORM_BUFFER, bindPoint, this.location, offset, size)
+  }
+
+  /**
    * Unbinds the buffer from the `gl.UNIFORM_BUFFER` target
    * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
    */
@@ -70,27 +88,19 @@ export class UniformBuffer extends Buffer
   }
 
   /**
-   * Sets the buffer's bind point (index)
-   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
-   * @param {Number} bindPoint A nonnegative integer less than or equal to `gl.MAX_UNIFORM_BUFFER_BINDINGS - 1`
-   *   (Implementation dependent)
+   * The buffer's bind point (index)
+   * @type {Number}
    * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext/bindBufferBase}
    * @see {@link https://www.khronos.org/opengl/wiki/Uniform_Buffer_Object}
-   *
-   */
-  setBindPoint(gl, bindPoint)
-  {
-    gl.bindBufferBase(gl.UNIFORM_BUFFER, bindPoint, this.location)
-    this._bindPoint = bindPoint
-  }
-
-  /**
-   * Reports the buffer's bind point, if set
-   * @type {Number}
    */
   get bindPoint()
   {
     return this._bindPoint
+  }
+
+  set bindPoint(bindPoint)
+  {
+    this._bindPoint = bindPoint
   }
 
   /**
