@@ -80,7 +80,7 @@ export class RenderBuffer
    * Deletes the internal `WebGLRenderbuffer` object
    * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
    */
-  delete(gl)
+  destroy(gl)
   {
     gl.deleteRenderbuffer(this.location)
   }

@@ -74,7 +74,7 @@ export class Texture
    * Deletes the internal `WebGLTexture` object
    * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
    */
-  delete(gl)
+  destroy(gl)
   {
     gl.deleteTexture(this.location)
   }

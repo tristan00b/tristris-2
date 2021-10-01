@@ -133,7 +133,7 @@ export class FrameBuffer
     gl.bindFramebuffer(this.target, null)
   }
 
-  delete(gl)
+  destroy(gl)
   {
     gl.deleteFramebuffer(this.location)
   }

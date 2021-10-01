@@ -95,7 +95,7 @@ export class Buffer
    * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
    * @throws {BufferError} Throws on encountering a WebGL error
    */
-  delete(gl)
+  destroy(gl)
   {
     gl.deleteBuffer(this.location)
     onErrorThrowAs(gl, BufferError)
