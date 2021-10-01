@@ -1,6 +1,29 @@
-import { Buffer         } from './Buffer'
-import { MakeErrorType,
-         MakeLogger     } from "../../utilities"
+import { Buffer               } from './Buffer'
+import { MakeConstEnumerator,
+         MakeErrorType,
+         MakeLogger           } from "../../utilities"
+
+
+const UniformBlockIndex = MakeConstEnumerator('UniformBlockIndex', [
+  'MATRICES',
+  'DIRECTIONAL_LIGHTS',
+  'POINT_LIGHTS',
+  'SPOT_LIGHTS',
+])
+
+/**
+ * @property {Number} index The position of the uniform within the block
+ * @property {Number} size The number of elements including STD140 padding
+ * @property {Number} offset The number of elements from the buffer base includeing STD140 padding
+ */
+const BlockUniformIndex = Object.freeze({
+  MODEL        : { index: 0, size: 16, offset:  0 },
+  VIEW         : { index: 1, size: 16, offset: 16 },
+  PROJECTION   : { index: 2, size: 16, offset: 48 },
+  DIR_LIGHTS   : { index: 0, size:  8, offset:  0 },
+  POINT_LIGHTS : { index: 0, size: 12, offset:  0 },
+  SPOT_LIGHTS  : { index: 0, size: 13, offset:  0 },
+})
 
 
 /**
@@ -11,21 +34,10 @@ export class UniformBuffer extends Buffer
 {
   /**
    * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
-   * @param {Number} size a positive integer specifying the size of the buffer (in bytes) to instantiate
-   * @throws {UniformBufferError} Throws when `size` is less than or equal to zero
    */
-  constructor(gl, size)
+  constructor(gl)
   {
     super(gl)
-    if (size && size > 0) {
-      this.bind(gl)
-      gl.bufferData(gl.UNIFORM_BUFFER, size, gl.DYNAMIC_DRAW)
-      this._size = this.getBufferParameter(gl, gl.UNIFORM_BUFFER, gl.BUFFER_SIZE)
-      this.unbind(gl)
-    }
-    else {
-      throw new UniformBufferError(`buffer size required for instantiation (got: ${size})`)
-    }
   }
 
   /**

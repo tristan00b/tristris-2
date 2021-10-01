@@ -16,14 +16,26 @@ export class Program
   }
 
   /**
-   * Given a WebGL shader program and an attribute name, queries the program for the index of the attribute.
+   * Returns the attribute location for a given attribute name and shader program
    * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
    * @param {Program} program The shader program to query
-   * @param {*} name The name of the vertex attribute variable to query `program` for
+   * @param {String} name The name of the vertex attribute to find
+   * @returns {Number} The location of the attribute, if found, -1 otherwise
    */
-  static getAttributeIndex(gl, program, name)
+  static getAttributeLocation(gl, program, name)
   {
     return gl.getAttribLocation(program.location, name)
+  }
+
+  /**
+   * Returns attribute info for a given location and shader program
+   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
+   * @param {Program} program The shader program to query
+   * @param {Number} location The index of the attribute to find
+   */
+  static getActiveAttribute(gl, program, location)
+  {
+    return gl.getActiveAttrib(program.location, location)
   }
 
   /**
@@ -43,15 +55,9 @@ export class Program
     return isArray(param) ? Array.from(param) : param
   }
 
-  /**
-   * Gets a list of uniform block indices for a given `WebGLProgram`
-   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
-   * @param {Program} program The shader program to query
-   * @returns {Number[]} An array of uniform block indices for `program`
-   */
-  static getUniformBlockIndices(gl, program)
+  static getAllUniformIndices(gl, program)
   {
-    const count = this.getParameter(gl, program, gl.ACTIVE_UNIFORM_BLOCKS)
+    const count = this.getParameter(gl, program, gl.ACTIVE_UNIFORMS)
     return [...Array(count).keys()]
   }
 
@@ -134,9 +140,37 @@ export class Program
   }
 
   /**
+   * Gets information pertaining to a given uniform block
+   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
+   * @param {Program} program The shader program to query
+   * @param {Number[]} uniformIndices The indices of the block uniforms to query
+   * @param {Number} pname A GLenum specifying paramter to be retrieved
+   * @returns {*} Return value depends on the parameter that is queried for
+   */
+   static getBlockUniformParameter(gl, program, uniformIndices, pname)
+   {
+     const result = gl.getActiveUniforms(program.location, uniformIndices, pname)
+     onErrorThrowAs(gl, ProgramError)
+     return result
+   }
+
+   /**
+    * Returns a list of names of uniforms corresponding to a given list of indices
+    * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
+    * @param {Program} program The program to query
+    * @param {Number[]} uniformIndices The indices of the block uniforms to query
+    * @returns {String[]} The names of the queried uniforms
+    */
+   static getBlockUniformNames(gl, program, uniformIndices)
+   {
+     return uniformIndices.map(uniformIndex => gl.getActiveUniform(program.location, uniformIndex))
+                          .map(uniformInfo  => uniformInfo.name)
+   }
+
+  /**
    * Gets indices for each uniform within a given block
    * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
-   * @param {Program} program The shader program to which the uniform block belongs
+   * @param {Program} program The program to query
    * @param {Number} blockIndex The index of the block to query
    * @returns {Number[]} The indices for each uniform within the block
    */
@@ -146,32 +180,31 @@ export class Program
   }
 
   /**
-   * Gets information pertaining to a given uniform block
+   * Gets a list of uniform block indices for a given program
    * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
-   * @param {Program} program The shader program to which the uniform block belongs
-   * @param {Number[]} uniformIndices The indices of the block uniforms to query
-   * @param {Number} pname A GLenum specifying paramter to be retrieved
-   * @returns {*} Return value depends on the parameter that is queried for
+   * @param {Program} program The shader program to query
+   * @returns {Number[]} An array of uniform block indices for `program`
    */
-  static getBlockUniformParameter(gl, program, uniformIndices, pname)
-  {
-    const result = gl.getActiveUniforms(program.location, uniformIndices, pname)
-    onErrorThrowAs(gl, ProgramError)
-    return result
-  }
+   static getUniformBlockIndices(gl, program)
+   {
+     const count = this.getParameter(gl, program, gl.ACTIVE_UNIFORM_BLOCKS)
+     return [...Array(count).keys()]
+   }
 
-  /**
-   * Returns a list of names of uniforms corresponding to a given list of indices
-   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
-   * @param {Program} program The shader program to which the uniform block belongs
-   * @param {Number[]} uniformIndices The indices of the block uniforms to query
-   * @returns {String[]} The names of the queried uniforms
-   */
-  static getBlockUniformNames(gl, program, uniformIndices)
-  {
-    return uniformIndices.map(uniformIndex => gl.getActiveUniform(program.location, uniformIndex))
-                         .map(uniformInfo  => uniformInfo.name)
-  }
+   /**
+    * Gets indices for all block uniforms for a given program
+    * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
+    * @param {Program} program The program to query
+    * @returns {Number[]} The indices for each block uniform within the block
+    */
+   static getAllBlockUniformIndices(gl, program)
+   {
+     return this.getUniformBlockIndices(gl, program).flatMap(blockIndex => {
+       const indices = this.getUniformBlockParameter(gl, program, blockIndex, gl.UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES)
+       return indices
+     })
+   }
+
 
   /**
    * Returns an array indicating the sizes (number of entries, not size in bytes!) of the uniforms queried

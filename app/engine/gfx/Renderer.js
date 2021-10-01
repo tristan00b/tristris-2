@@ -72,6 +72,7 @@ export class Renderer
     this.screen.shader[0].setUniforms(gl, {
       'image': 0,
     })
+
     this.screen.shader[0].unuse(gl)
     this.screen.shader[1].use(gl)
     this.screen.shader[1].setUniforms(gl, {
@@ -93,6 +94,7 @@ export class Renderer
       new Texture2D(gl),          // ping-pong texture 0
       new Texture2D(gl),          // pint-pong texture 1
     ]
+
     this.screen.quad = new Renderable(gl, quad(-1, -1, 2, 2), this.screen.shader[0])
 
     // -----------------------------------------------------------------------------------------------------------------

@@ -1,12 +1,12 @@
 import { mat4,
          quat,
-         vec3                } from 'gl-matrix'
+         vec3                  } from 'gl-matrix'
 import { Entity,
          Query,
          Scene,
          SceneNode,
          System,
-         Tag                 } from '../../engine/ecs/all'
+         Tag                   } from '../../engine/ecs/all'
 import { Camera,
          Light,
          Material,
@@ -15,15 +15,14 @@ import { Camera,
          RenderTask,
          ShaderProgram,
          Transform,
-         VertexAttributeType } from '../../engine/gfx/all'
-import { Texture2D           } from '../../engine/gfx/WebGL/Texture2D'
-import { quad                } from '../../engine/gfx/meshes/quad'
-
+         VertexAttributeType   } from '../../engine/gfx/all'
+import { Texture2D             } from '../../engine/gfx/WebGL/Texture2D'
 import { BasicMRTShader        } from '../../engine/gfx/shaders/BasicMRTShader'
 import { BasicTextureMRTShader } from '../../engine/gfx/shaders/BasicTextureMRTShader'
 
-import { model as cubeModel   } from '../meshes/CubeMesh'
-import { model as sphereModel } from '../meshes/SphereMesh'
+import { model as cubeMesh     } from '../meshes/CubeMesh'
+import { model as planeMesh    } from '../meshes/PlaneMesh'
+import { model as sphereMesh   } from '../meshes/SphereMesh'
 
 
 class CubeTag extends Tag {}
@@ -47,12 +46,14 @@ export function MakeScene(gl)
     Transform,
   ].forEach(scene.registerComponentType.bind(scene))
 
-  const lightCount    = 4
-  const basicShader   = new BasicMRTShader(gl, lightCount)
-  const textureShader = new BasicTextureMRTShader(gl, lightCount)
+  const lightCount = 4
+  const shaders    = [
+    new BasicMRTShader(gl, lightCount),
+    new BasicTextureMRTShader(gl, lightCount),
+  ]
 
-  basicShader.createUniformBlockSetters(gl)
-  textureShader.updateUniformBlockSetters(gl, basicShader)
+  shaders[0].initUniformBlockSetters(gl)
+  shaders[1].initUniformBlockSetters(gl, shaders[0])
 
   const c = new Camera
   c.setLookat({ eye: [0, 15, 25], up: [0, 1, 0], at: [0, 0, 0] })
@@ -64,7 +65,7 @@ export function MakeScene(gl)
   scene.addEntity(e0)
   scene.setComponent(e0, c)
   scene.setComponent(e0, root)
-  scene.setComponent(e0, basicShader)
+  scene.setComponent(e0, shaders[0])
 
   { // Plane -----------------------------------------------------------------------------------------------------------
     const e = new Entity
@@ -73,26 +74,49 @@ export function MakeScene(gl)
     root.addChild(n)
 
     const t = new Transform
-    t.setRotation(quat.fromEuler([], -90, 0, 0))
-     .setScale([10, 10, 1])
 
-     const m = new Material
+    const m = new Material
      m.setAmbient   ([0.0, 0.0, 0.0])
       .setDiffuse   ([0.9, 0.9, 0.9])
       .setSpecular  ([1.0, 1.0, 1.0])
       .setShininess (32)
 
-    const r = new Renderable(gl, quad(-1, -1, 2, 2), textureShader)
-
     const texture = Texture2D.fromURL(gl, '/assets/textures/checkerboard.png')
+
+    const data = new MeshData({
+      primtype: planeMesh.primtype,
+      indices: planeMesh.indices,
+      attributes: [
+        {
+          type: VertexAttributeType.POSITIONS,
+          size: 3,
+          format: gl.FLOAT,
+          data: planeMesh.positions
+        },
+        {
+          type: VertexAttributeType.NORMALS,
+          size: 3,
+          format: gl.FLOAT,
+          data: planeMesh.normals
+        },
+        {
+          type: VertexAttributeType.UVCOORDS,
+          size: 2,
+          format: gl.FLOAT,
+          data: planeMesh.uvcoords
+        },
+      ]
+    })
+
+    const r = new Renderable(gl, data, shaders[1])
 
     scene.addEntity(e)
     scene.setComponent(e, n)
     scene.setComponent(e, t)
     scene.setComponent(e, m)
-    scene.setComponent(e, r)
     scene.setComponent(e, texture)
-    scene.setComponent(e, textureShader)
+    scene.setComponent(e, r)
+    scene.setComponent(e, shaders[1])
   }
 
   { // Cubes -----------------------------------------------------------------------------------------------------------
@@ -123,38 +147,38 @@ export function MakeScene(gl)
        .setSpecular  ([1.0,  1.0,  1.0])
        .setShininess (32)
 
-      const data = new MeshData({
-        primtype: cubeModel.primtype,
-        indices: cubeModel.indices,
+      const mesh = new MeshData({
+        primtype: cubeMesh.primtype,
+        indices: cubeMesh.indices,
         attributes: [
           {
             type: VertexAttributeType.POSITIONS,
             size: 3,
             format: gl.FLOAT,
-            data: cubeModel.positions,
+            data: cubeMesh.positions,
           },
           {
             type: VertexAttributeType.NORMALS,
             size: 3,
             format: gl.FLOAT,
-            data: cubeModel.normals,
+            data: cubeMesh.normals,
           },
           {
             type: VertexAttributeType.UVCOORDS,
             size: 2,
             format: gl.FLOAT,
-            data: cubeModel.uvcoords,
+            data: cubeMesh.uvcoords,
           }
         ]
       })
 
-      const r = new Renderable(gl, data, basicShader)
+      const r = new Renderable(gl, mesh, shaders[0])
 
       scene.setComponent(e, n)
       scene.setComponent(e, t)
       scene.setComponent(e, m)
       scene.setComponent(e, r)
-      scene.setComponent(e, basicShader)
+      scene.setComponent(e, shaders[0])
       scene.setComponent(e, cubeTag)
     })
 
@@ -190,10 +214,10 @@ export function MakeScene(gl)
     ]
 
     const lightColours = [
-      [0,   0,   7],
-      [0.6, 0.6, 0],
-      [0,   0.7, 0],
-      [1.9, 0,   0]
+      [0,    0,    7],
+      [0.6,  0.6,  0],
+      [0,    0.7,  0],
+      [1.9,  0,    0]
     ]
 
     ;[...Array(count)].forEach((_, index) => {
@@ -212,26 +236,26 @@ export function MakeScene(gl)
        .setSpecular  ([0,0,0])
        .setShininess (1)
 
-      const data = new MeshData({
-        primtype: sphereModel.primtype,
-        indices: sphereModel.indices,
+      const mesh = new MeshData({
+        primtype: sphereMesh.primtype,
+        indices: sphereMesh.indices,
         attributes: [
           {
             type: VertexAttributeType.POSITIONS,
             size: 3,
             format: gl.FLOAT,
-            data: sphereModel.positions,
+            data: sphereMesh.positions,
           },
           {
             type: VertexAttributeType.NORMALS,
             size: 3,
             format: gl.FLOAT,
-            data: sphereModel.normals,
+            data: sphereMesh.normals,
           },
         ]
       })
 
-      const r = new Renderable(gl, data, basicShader)
+      const r = new Renderable(gl, mesh, shaders[0])
 
       const l = new Light
       l.setColour(lightColours[index])
@@ -247,7 +271,7 @@ export function MakeScene(gl)
 
     scene.setComponent(e0, lights)
 
-    { // Updaate sphere-lights -----------------------------------------------------------------------------------------
+    { // Update sphere-lights ------------------------------------------------------------------------------------------
       const a = 10 - 20/16
       const halfPI = Math.PI/2
       const w = 0.1*Math.PI/1000/count

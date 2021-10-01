@@ -72,7 +72,7 @@ export class Renderable
     // Configure VAO for the given mesh data
     ;[...VertexAttributeType].forEach(type => {
       const name      = vertexAttributeName(type)
-      const index     = Program.getAttributeIndex(gl, shader.location, name)
+      const index     = Program.getAttributeLocation(gl, shader.program, name)
       const attribute = data.at(type)
 
       if (index === -1) return // the shader does not reference this attribute
@@ -182,10 +182,10 @@ function getVertexArrayDrawCount(descriptor)
  */
 function makeVertexAttributeBuffer(gl, data)
 {
-  const buf = new ArrayBuffer(gl)
-  buf.bind(gl)
-  buf.data(gl, new Float32Array(data), gl.STATIC_DRAW)
-  return buf
+  const buffer = new ArrayBuffer(gl)
+  buffer.bind(gl)
+  buffer.data(gl, new Float32Array(data), gl.STATIC_DRAW)
+  return buffer
 }
 
 
@@ -195,10 +195,10 @@ function makeVertexAttributeBuffer(gl, data)
  */
 function makeIndexBuffer(gl, data)
 {
-  const buf = new ElementArrayBuffer(gl)
-  buf.bind(gl)
-  buf.data(gl, new Uint32Array(data), gl.STATIC_DRAW)
-  return buf
+  const buffer = new ElementArrayBuffer(gl)
+  buffer.bind(gl)
+  buffer.data(gl, new Uint32Array(data), gl.STATIC_DRAW)
+  return buffer
 }
 
 
