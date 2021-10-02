@@ -52,9 +52,6 @@ export function MakeScene(gl)
     new BasicTextureMRTShader(gl, lightCount),
   ]
 
-  shaders[0].initUniformBlockSetters(gl)
-  shaders[1].initUniformBlockSetters(gl, shaders[0])
-
   const c = new Camera
   c.setLookat({ eye: [0, 15, 25], up: [0, 1, 0], at: [0, 0, 0] })
    .setPerspective({ aspect: gl.canvas.width/gl.canvas.height  })

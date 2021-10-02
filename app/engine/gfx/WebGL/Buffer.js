@@ -48,14 +48,15 @@ export class Buffer
   }
 
   /**
-   * Queries for a the specified buffer parameter
+   * Queries the buffer for a given parameter
    * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
    * @param {external:GLenum} target The binding point (e.g. gl.ARRAY_BUFFER)
    * @param {Number} pname A GLenum specifying paramter to be retrieved
+   * @returns {*} Return value depends on the parameter that is queried for
    * @throws {BufferError} Throws on encountering a WebGL error
    * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/getBufferParameter}
    */
-  getBufferParameter(gl, target, pname)
+  getParameter(gl, target, pname)
   {
     const result = gl.getBufferParameter(target, pname)
     onErrorThrowAs(gl, BufferError)

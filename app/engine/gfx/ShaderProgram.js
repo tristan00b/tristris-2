@@ -45,6 +45,11 @@ import { MakeErrorType,
 export class ShaderProgram
 {
   /**
+   * @private
+   */
+  static _uniformBlockBuffers = {}
+
+  /**
    * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
    * @param  {...Object.<external:GLenum, String>} shaders Arrays grouping shader type (e.g. `gl.VERTEX_SHADER`) followed by the corresponding GLSL source
    * @example
@@ -57,12 +62,19 @@ export class ShaderProgram
     this._shaders = shaders.map(({ type, source }) => new Shader(gl, type, source))
 
     this._program = new Program(gl)
-    this._program.attachShaders(gl, ...(this._shaders))
-    this._program.linkProgram(gl)
+    this.program.attachShaders(gl, ...(this._shaders))
+    this.program.linkProgram(gl)
+
+    const blockInfoArr          = getUniformBlockInfo(gl, this.program)
+    this._uniformBlockBuffers   = createUniformBlockBuffers(gl, blockInfoArr)
 
     this._setters = {}
-    this._setters.attributes = createAttributeSetters(gl, this.program)
-    this._setters.uniforms   = createUniformSetters(gl, this.program)
+    this._setters.attributes    = createAttributeSetters(gl, this.program)
+    this._setters.uniforms      = createUniformSetters(gl, this.program)
+    this._setters.uniformBlocks = createUniformBlockSetters (gl, this.program, blockInfoArr, this._uniformBlockBuffers)
+    this._setters.blockUniforms = createBlockUniformSetters (gl, this.program, blockInfoArr, this._uniformBlockBuffers)
+
+    this._uniformBlockBuffers.forEach(buf => Program.bindBlockIndex(gl, this.program, buf.bindPoint, buf.bindPoint))
   }
 
   /**
@@ -76,83 +88,17 @@ export class ShaderProgram
   }
 
   /**
-   * Returns `true` when this shader owns the buffers providing shared access to a common set of uniform blocks
-   * @type {Boolean}
-   * @see {@link ShaderProgram#initUniformBlockSetters}
-   * @readonly
-   */
-  get isDesignated()
-  {
-    return this._isDesignated
-  }
-
-  /**
-   * Returns `true` when this shader has successfully had its uniform block setters initialized
-   * @type {Boolean}
-   * @readonly
-   */
-  get hasUniformBlockBindings()
-  {
-    return !!this._uniformBlockBindings
-  }
-
-  /**
-   * Initializes uniform block setters for a given shader. When called without the optional `shader` arg, this shader
-   * will initialize and own the uniform buffers for its set of uniform blocks (if any), as well as provide bindings to
-   * to enable access to these buffers by other shaders, whose programs reference the same set of uniform blocks.
-   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
-   * @param {ShaderProgram} [shader] A shader on which this method as already been successfully called
-   *
-   * @example
-   * // 0. Create shaders according to your program's needs
-   * const shaders = createShaders(opts)
-   *
-   * // 1. Init uniform block setters on the first shader
-   * shaders[0].initUniformBlockSetters(gl)
-   *
-   * // 2. Initialize uniform block setters for the remaining shaders
-   * shaders.slice(1).forEach((_, i) => shader[i+1].initUniformBlockSetters(gl, shaders[i]))
-   */
-  initUniformBlockSetters(gl, shader)
-  {
-    if (shader?.hasUniformBlockBindings)
-    {
-      if (!this.isDesignated)
-      {
-        this._setters.uniformBlocks = shader._setters.uniformBlocks
-        this._setters.blockUniforms = shader._setters.blockUniforms
-        this._uniformBlockBindings  = shader._uniformBlockBindings
-
-        connectUniformBlocks(gl, this._program, this._uniformBlockBindings)
-      }
-      else
-      {
-        Log.warn(`cannot reinitialize uniform block setters on a designated shader`)
-      }
-    }
-    else
-    {
-      const blockInfoArr          = getUniformBlockInfo(gl, this._program)
-      this._uniformBuffers        = createUniformBlockBuffers (gl, blockInfoArr)
-      this._uniformBlockBindings  = createUniformBlockBindings(gl, blockInfoArr)
-      this._setters.uniformBlocks = createUniformBlockSetters (gl, this._program, blockInfoArr, this._uniformBuffers)
-      this._setters.blockUniforms = createBlockUniformSetters (gl, this._program, blockInfoArr, this._uniformBuffers)
-
-      connectUniformBlocks (gl, this._program,        this._uniformBlockBindings)
-      connectUniformBuffers(gl, this._uniformBuffers, this._uniformBlockBindings)
-
-      this._isDesignated = true
-    }
-  }
-
-  /**
    * Sets the shader as part of the current rendering state
    * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
    */
   use(gl)
   {
     this.program.use(gl)
-    this._uniformBuffers?.forEach(b => b.bindBase(gl, b.bindPoint))
+
+    for (const buffer of this._uniformBlockBuffers)
+    {
+      buffer.bindBase(gl, buffer.bindPoint)
+    }
   }
 
   /**
@@ -171,15 +117,14 @@ export class ShaderProgram
    */
   destroy(gl)
   {
-    this._uniformBuffers.forEach(b => b.destroy(gl))
-    this._shaders.forEach(s => s.destroy(gl))
     this._program.destroy(gl)
+    this._shaders.forEach(s => s.destroy(gl))
 
-    delete this._uniformBindings
-    delete this._setters
-    delete this._uniformBuffers
-    delete this._shaders
-    delete this._program
+    for (const buffer of this._uniformBlockBuffers)
+    {
+      delete ShaderProgram._uniformBlockBuffers[buffer.blockName]
+      buffer.destroy(gl)
+    }
   }
 
   /**
@@ -348,24 +293,32 @@ function getUniformBlockInfo(gl, program)
 
 
 /**
- * Creates and initializes buffers for each uniform block of a given program
+ * Creates and initializes buffers for each uniform block of a given program. Buffers are cached in a static class
+ * property of ShaderProgram, ensuring that programs with the same uniform blocks are able to utilize the same buffers.
  * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
  * @param {BlockInfo[]} blockInfoArr The info objects corresponding to each respective uniform block
  * @private
  */
 function createUniformBlockBuffers(gl, blockInfoArr)
 {
-  return blockInfoArr.map(info => {
-    const buffer = new UniformBuffer(gl)
+  return blockInfoArr.map(info =>
+    (info.blockName in ShaderProgram._uniformBlockBuffers)
+    ? ShaderProgram._uniformBlockBuffers[info.blockName]
+    : do
+    {
+      const buffer = new UniformBuffer(gl)
 
-    buffer.bind(gl)
-    buffer.data(gl, info.blockSize, gl.STATIC_DRAW)
-    buffer.unbind(gl)
+      buffer.blockName = info.blockName
+      buffer.bindPoint = info.blockIndex
 
-    return buffer
-  })
+      buffer.bind(gl)
+      buffer.data(gl, info.blockSize)
+      buffer.unbind(gl)
+
+      ShaderProgram._uniformBlockBuffers[info.blockName] = buffer
+    }
+  )
 }
-
 
 /**
  * Generates a list of bindings for each uniform block of a given program
@@ -434,36 +387,7 @@ function createBlockUniformSetters(gl, program, blockInfoArr, buffers)
 
 
 /**
- * Associates a program's uniform buffers with a given set of bind points
- * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
- * @param {UniformBuffer[]} buffers The buffers to connect to bind points
- * @param {UniformBlockBinding[]} bindings A list of bindings mapping uniform blocks to bind points
- * @private
- */
-function connectUniformBuffers(gl, buffers, bindings)
-{
-  bindings.forEach(binding => {
-    const buffer = buffers[binding.blockIndex]
-    buffer.bindPoint = binding.bindPoint
-  })
-}
-
-
-/**
- * Associates a program's uniform blocks with a given set of bind points
- * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
- * @param {Program} program The program for which to connect the uniform blocks to bind points
- * @param {UniformBlockBinding[]} bindings A list mapping uniform blocks to bind points
- * @private
- */
-function connectUniformBlocks(gl, program, bindings)
-{
-  bindings.forEach(binding => Program.bindBlockIndex(gl, program, binding.blockIndex, binding.bindPoint))
-}
-
-
-/**
- * Takes an array of shader parameter setters and applies them to the given name-data pairs
+ * Takes an array o fshader parameter setters and applies them to the given name-data pairs
  * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
  * @param {Object<String, ShaderParameterSetterCallback>} setters A mapping of parameter names to setter callbacks
  * @param {Array.<String, *>} nameDataPairs An array of pairs, mapping a shader paramters to the desired value(s)

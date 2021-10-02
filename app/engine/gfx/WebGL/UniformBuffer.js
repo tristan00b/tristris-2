@@ -40,9 +40,47 @@ export class UniformBuffer extends Buffer
     super(gl)
   }
 
+  /**
+   * The buffer's bind point (index)
+   * @type {Number}
+   * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext/bindBufferBase}
+   * @see {@link https://www.khronos.org/opengl/wiki/Uniform_Buffer_Object}
+   */
+  get bindPoint()
+  {
+    return this._bindPoint
+  }
+
+  set bindPoint(bindPoint)
+  {
+    this._bindPoint = bindPoint
+  }
+
+  /**
+   * Tne name of the uniform block for which this buffer provides a data store
+   * @type {String}
+   */
+  get blockName()
+  {
+    return this._blockName
+  }
+
+  set blockName(name)
+  {
+    this._blockName = name
+  }
+
+  /**
+   * Queries the buffer for a given parameter
+   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
+   * @param {Number} pname A GLenum specifying paramter to be retrieved
+   * @returns {*} Return value depends on the parameter that is queried for
+   * @throws {BufferError} Throws on encountering a WebGL error
+   * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/getBufferParameter}
+   */
   getParameter(gl, pname)
   {
-    return super.getBufferParameter(gl, gl.UNIFORM_BUFFER, pname)
+    return super.getParameter(gl, gl.UNIFORM_BUFFER, pname)
   }
 
   /**
@@ -87,21 +125,6 @@ export class UniformBuffer extends Buffer
     super.unbind(gl, gl.UNIFORM_BUFFER)
   }
 
-  /**
-   * The buffer's bind point (index)
-   * @type {Number}
-   * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext/bindBufferBase}
-   * @see {@link https://www.khronos.org/opengl/wiki/Uniform_Buffer_Object}
-   */
-  get bindPoint()
-  {
-    return this._bindPoint
-  }
-
-  set bindPoint(bindPoint)
-  {
-    this._bindPoint = bindPoint
-  }
 
   /**
    * Creates and initializes the buffer's data store
