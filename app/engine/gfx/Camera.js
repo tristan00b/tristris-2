@@ -73,7 +73,7 @@ export class Camera
    * @type {Object<external:vec3,external:vec3,external:vec3>}
    * @param {Object} args
    * @param {external:vec3} [args.eye=[0,0,1]] The camera's position in world coordinates
-   * @param {external:vec3} [args.at=[0,0,0]]  The position that the camera is looking at in world coordinates
+   * @param {external:vec3} [args.at=[0,0,-1]] The position that the camera is looking at in world coordinates
    * @param {external:vec3} [args.up=[0,1,0]]  A vector specifying the direction that the top of the camera
    *                                           points (often aligns with the y-axis)
    * @returns {Camera} The `this` object reference
@@ -82,9 +82,9 @@ export class Camera
   {
     // Set properties by priority: arg > currently set value > default value
     this._lookatIsDirty = true
-    this._eye = eye ?? this._eye ?? [0, 0, 1]
-    this._at  = at  ?? this._at  ?? [0, 0, 0]
-    this._up  = up  ?? this._up  ?? [0, 1, 0]
+    this._eye = eye ?? this._eye ?? [0,  0,  1]
+    this._at  = at  ?? this._at  ?? [0,  0, -1]
+    this._up  = up  ?? this._up  ?? [0,  1,  0]
     return this
   }
 

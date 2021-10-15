@@ -1,7 +1,5 @@
-import { InputHandler   } from './InputHandler'
-import { Renderer       } from './gfx/all'
-import { MakeErrorType,
-         MakeLogger     } from './utilities'
+import { Renderer   } from './gfx/all'
+import { MakeLogger } from './utilities'
 
 
 /**
