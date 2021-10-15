@@ -1,6 +1,7 @@
-import { Game } from '../engine/all'
+import { Game,
+         InputHandler } from '../engine/all'
 
-import config from './config'
+import   config         from './config'
 
 // import { MakeScene } from './scenes/01-ecs-demo.js'
 // import { MakeScene } from './scenes/02-textures'
@@ -13,5 +14,7 @@ export class Tristris extends Game
     const context = canvas.getContext('webgl2') || new Error('failed to acquire WebGL 2 context')
 
     super(context, MakeScene(context))
+
+    this._input = new InputHandler(config.input)
   }
 }

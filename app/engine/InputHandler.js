@@ -12,11 +12,13 @@ export class InputHandler
 {
   constructor(eventMap)
   {
-    this._eventMap = eventMap ?? {}
+    this._kbdEvents = eventMap?.keyboard || {}
+    this._mseEvents = eventMap?.mouse    || {}
 
-    window.addEventListener('keydown', this.handleKeyDnEvent.bind(this))
-    window.addEventListener('keyup',   this.handleKeyUpEvent.bind(this))
-    window.addEventListener('click',   this.handleMouseClickEvent.bind(this))
+    window.addEventListener('keydown',   this.handleKeyDnEvent.bind(this))
+    window.addEventListener('keyup',     this.handleKeyUpEvent.bind(this))
+    window.addEventListener('mousedown', this.handleMouseDnEvent.bind(this))
+    window.addEventListener('mouseup',   this.handleMouseUpEvent.bind(this))
   }
 
   /**
@@ -24,8 +26,9 @@ export class InputHandler
    */
   handleKeyDnEvent(event)
   {
-    const eventName = this._eventMap?.keyboard?.[event.key]
-    eventName && window.dispatchEvent(new CustomEvent(eventName, { detail: true }))
+    event.stopPropagation()
+    const name = this._kbdEvents[event.key]
+    name && window.dispatchEvent(new CustomEvent(name, { detail: { state: true } }))
   }
 
   /**
@@ -33,20 +36,27 @@ export class InputHandler
    */
   handleKeyUpEvent(event)
   {
-    const eventName = this._eventMap?.keyboard?.[event.key]
-    eventName && window.dispatchEvent(new CustomEvent(eventName, { detail: false }))
-
+    const name = this._kbdEvents[event.key]
+    event.stopPropagation()
+    name && window.dispatchEvent(new CustomEvent(name, { detail: { state: false } }))
   }
 
   /**
    * @param {MouseEvent} event
    */
-  handleMouseClickEvent(e)
+  handleMouseDnEvent(event)
   {
-    // if (event.button === MouseButton.LEFT)
-    // {
-    //   Log.debug(`MouseClick ${event.button}: [${event.x}, ${event.y}]`)
-    // }
+    const name = this._mseEvents[event.button]
+    event.stopPropagation()
+    name && window.dispatchEvent(new CustomEvent(name))
+  }
+
+  /**
+   * @param {MouseEvent} event
+   */
+  handleMouseUpEvent(event)
+  {
+    event.stopPropagation()
   }
 }
 

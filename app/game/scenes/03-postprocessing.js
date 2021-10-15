@@ -19,6 +19,7 @@ import { Camera,
 import { Texture2D             } from '../../engine/gfx/WebGL/Texture2D'
 import { BasicMRTShader        } from '../../engine/gfx/shaders/BasicMRTShader'
 import { BasicTextureMRTShader } from '../../engine/gfx/shaders/BasicTextureMRTShader'
+import { PlayerController      } from '../../engine/PlayerController'
 
 import { model as cubeMesh     } from '../meshes/CubeMesh'
 import { model as planeMesh    } from '../meshes/PlaneMesh'
@@ -38,6 +39,7 @@ export function MakeScene(gl)
     CubeTag,
     Light,
     Material,
+    PlayerController,
     Renderable,
     SceneNode,
     ShaderProgram,
@@ -53,14 +55,17 @@ export function MakeScene(gl)
   ]
 
   const c = new Camera
-  c.setLookat({ eye: [0, 15, 25], up: [0, 1, 0], at: [0, 0, 0] })
+  c.setLookat({ eye: [0, 15, 25] })
    .setPerspective({ aspect: gl.canvas.width/gl.canvas.height  })
 
   const e0 = new Entity
   const root = new SceneNode
 
+  const player = new PlayerController(gl, c)
+
   scene.addEntity(e0)
   scene.setComponent(e0, c)
+  scene.setComponent(e0, player)
   scene.setComponent(e0, root)
   scene.setComponent(e0, shaders[0])
 
@@ -312,6 +317,67 @@ export function MakeScene(gl)
         scene.addSystem(system)
       }
     }
+  }
+
+  { // Update PlayerController -----------------------------------------------------------------------------------------
+    const update = (dt, player, camera) =>
+    {
+      let playerMoved = false
+      const distance = dt * 0.04 // ms * m/ms
+      const position = vec3.create()
+
+      if (player.isMovingForward)
+      {
+        position[2] -= distance
+        playerMoved  = true
+      }
+
+      if (player.isMovingLeft)
+      {
+        position[0] -= distance
+        playerMoved  = true
+      }
+
+      if (player.isMovingBack)
+      {
+        position[2] += distance
+        playerMoved  = true
+      }
+
+      if (player.isMovingRight)
+      {
+        position[0] += distance
+        playerMoved  = true
+      }
+
+      if (player.isMovingUp)
+      {
+        position[1] += distance
+        playerMoved  = true
+      }
+
+      if (player.isMovingDown)
+      {
+        position[1] -= distance
+        playerMoved  = true
+      }
+
+      if (playerMoved)
+      {
+        console.log(`t: ${dt}, d: ${distance}`)
+
+        const M = mat4.invert([], camera.lookat)
+        const newPos = vec3.transformMat4([], position, M)
+        const offset = vec3.sub([], newPos, camera.eye)
+
+        camera.eye = newPos
+        camera.at  = vec3.add([], camera.at, offset)
+      }
+    }
+
+    const query  = new Query(PlayerController, Camera).run(scene)
+    const system = new System(query, update)
+    scene.addSystem(system)
   }
 
   { // Update world transforms -----------------------------------------------------------------------------------------
