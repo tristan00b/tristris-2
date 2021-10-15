@@ -5,6 +5,19 @@
 
 
 /**
+ * Limits a given value to the specified range [min, max]
+ * @param {Number} val
+ * @param {Number} min
+ * @param {Number} max
+ * @returns {Number}
+ */
+export function clip(val, min, max)
+{
+  return Math.max(Math.min(val, max), min)
+}
+
+
+/**
  * Loads the image located at a specified URL
  * @param {String} url The location of the image to load
  * @param {Function(event)} callback a callback to apply when the image has loaded (assigned to Image.onload)
@@ -120,6 +133,29 @@ export function MakeConstEnumerator(clsname, properties)
 
 
 /**
+ * Counts the number of rotations for a given angle (sign preserving)
+ * @param {Number} angle The angle in radians
+ * @returns {Number} The number of rotations
+ */
+export function rotations(angle)
+{
+  return angle / Math.PI / 2
+}
+
+
+/**
+ * Rounds a given value to a specified number of decimal places (trailing zeros not preserved)
+ * @param {Number} val The value to round
+ * @param {Number} places The number of decimal places to round to (must be integral)
+ * @returns {Number} The rounded value
+ */
+export function round(val, places)
+{
+  return Number(`${ Math.round(`${ val }e${ places }`) }e-${ places }`)
+}
+
+
+/**
  * Produces a copy of `str` with all leading and trailing instances of `char` removed
  * @param {String} str The string to strip `char` from
  * @param {String} [char='<space>'] A one character string
@@ -136,6 +172,28 @@ export function stringstrip(str, char=' ')
   const l = new RegExp(`^[${char}]+`)
   const r = new RegExp(`[${char}]+$`)
   return str.replace(l, '').replace(r, '')
+}
+
+
+/**
+ * Converts an angle from radians to degrees
+ * @param {Number} angle
+ * @returns {Number}
+ */
+export function toDeg(angle)
+{
+  return angle * 180 / Math.PI
+}
+
+
+/**
+ * Converts an angle from degrees to radians
+ * @param {Number} angle
+ * @returns {Number}
+ */
+export function toRad(angle)
+{
+  return angle * Math.PI / 180
 }
 
 
