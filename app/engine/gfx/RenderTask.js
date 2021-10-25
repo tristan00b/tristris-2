@@ -155,7 +155,7 @@ function getNodeTasks(nodeState)
 {
   const shader     = nodeState[keyFrom(ShaderProgram)]
   const camera     = nodeState[keyFrom(Camera)]
-  const lights     = nodeState[keyFrom(Light)]
+  const light      = nodeState[keyFrom(Light)]
   const transform  = nodeState[keyFrom(Transform)]
   const texture    = nodeState[keyFrom(Texture2D)]
   const material   = nodeState[keyFrom(Material)]
@@ -184,11 +184,12 @@ function getNodeTasks(nodeState)
     tasks.push(new RenderTask(cb, RenderTaskType.SET_CAMERA))
   }
 
-  if (lights)
+  if (light)
   {
     const cb = renderer => {
       // N.B. vectors are zero-padded to conform to GLSL std140 layout
-      const data = Array.from(lights).flatMap(l => [...l.position, 0.0, ...l.colour, 0.0])
+      const lights = Array.isArray(light) ? light : [light]
+      const data = lights.flatMap(l => [...l.position, 0.0, ...l.colour, 0.0])
       renderer.shader.setUniformBlocks(renderer.context, {
         'LightSources' : new Float32Array(data)
       })
