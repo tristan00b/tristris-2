@@ -25,7 +25,6 @@ export class Renderer
    */
   constructor(context)
   {
-    // this.canvas = canvas ?? throw new RendererError('reference to canvas object not supplied')
     this.context = context ?? throw new RendererError('reference to the context not supplied')
 
     const gl = this.context
