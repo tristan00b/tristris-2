@@ -42,7 +42,7 @@ const taskType = [
   'SET_CAMERA',
   'SET_LIGHTS',
   'SET_TRANSFORM',
-  'USE_TEXTURE_2D',
+  'USE_TEXTURE',
   'SET_MATERIAL',
   'DRAW_MESH'
 ]
@@ -57,7 +57,7 @@ const RenderTaskDescription = Object.freeze(taskType)
  * @property {Number} SET_TRANSFORM
  * @property {Number} USE_TEXTURE
  * @property {Number} SET_MATERIAL
- * @property {Number} DRAW
+ * @property {Number} DRAW_MESH
  */
 export const RenderTaskType = MakeConstEnumerator('RenderTaskType', taskType)
 
@@ -216,7 +216,7 @@ function getNodeTasks(nodeState)
       texture.bind(renderer.context)
       onErrorThrowAs(renderer.context, RenderTaskError)
     }
-    tasks.push(new RenderTask(cb, RenderTaskType.USE_TEXTURE_2D))
+    tasks.push(new RenderTask(cb, RenderTaskType.USE_TEXTURE))
   }
 
   if (material)
@@ -236,7 +236,7 @@ function getNodeTasks(nodeState)
   if (renderable)
   {
     const cb = renderer => renderable.draw(renderer.context)
-    tasks.push(new RenderTask(cb, RenderTaskType.DRAW))
+    tasks.push(new RenderTask(cb, RenderTaskType.DRAW_MESH))
   }
 
   return tasks
