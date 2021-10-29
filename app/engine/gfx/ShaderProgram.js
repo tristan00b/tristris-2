@@ -1,13 +1,14 @@
-import { createAttributeSetter,
-         createUniformSetter,
-         createUniformBlockSetter,
-         createBlockUniformSetter  } from './WebGL/ShaderTypeSetters'
+import { MakeErrorType,
+         MakeLogger                } from '../utilities'
 import { Program,
          UniformBuffer,
          Shader,
          onErrorThrowAs            } from './WebGL/all'
-import { MakeErrorType,
-        MakeLogger                } from '../utilities'
+import { createAttributeSetter,
+         createUniformSetter,
+         createUniformBlockSetter,
+         createBlockUniformSetter  } from './WebGL/ShaderTypeSetters'
+
 
 /**
  * Stores information pertaining to a single uniform block of a given WebGL shader program
@@ -397,7 +398,7 @@ function setShaderParams(gl, setters, nameDataPairs)
 {
   Object.entries(nameDataPairs).forEach(([name, data]) => {
     if (name in setters) {
-      // Log.Debug(`setting: ${name}`)
+      // Log.debug(`setting: ${name}`)
       setters[name](gl, name, data)
     }
   })
