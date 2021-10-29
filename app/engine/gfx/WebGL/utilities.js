@@ -71,14 +71,15 @@ export function getError(gl)
  * Checks for WebGL errors and throws as `ErrorType` if any are found
  * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
  * @param {Type} ErrorType The type to throw as
+ * @param {String} [msg] An optional message for additional context
  * @throws {*} Throws instance of `ErrorType` when a WebGL error has occured
  */
-export function onErrorThrowAs(gl, ErrorType)
+export function onErrorThrowAs(gl, ErrorType, msg)
 {
-  const e = getError(gl)
-  if (e) {
-    throw new ErrorType(e)
-  }
+  const err = getError(gl)
+
+  if (err)
+    throw new ErrorType(msg ? `${msg} ` : '' + `[${err}]`)
 }
 
 
