@@ -1,5 +1,7 @@
-import { isArray, MakeErrorType, MakeLogger } from '../../utilities'
-import * as c from './constants'
+import { isArray,
+         MakeErrorType,
+         MakeLogger     } from '../../utilities'
+import   * as c           from './constants'
 
 
 /**

@@ -1,5 +1,7 @@
-import { MakeErrorType, MakeLogger } from "../../utilities"
-import { onErrorThrowAs } from './utilities'
+import { MakeConstEnumerator,
+         MakeErrorType,
+         MakeLogger           } from "../../utilities"
+import { onErrorThrowAs       } from './utilities'
 
 /**
  * An interface for storing data such as vertices or colors

@@ -30,10 +30,10 @@ export class ScreenBloomShader extends ShaderProgram
                   precision highp float;
 
                   const int FRAG_COUNT = 5;
+                  const float weight[5] = float[] (0.2270270270, 0.1945945946, 0.1216216216, 0.0540540541, 0.0162162162);
 
                   uniform sampler2D image;
                   uniform bool horizontal;
-                  const float weight[5] = float[] (0.2270270270, 0.1945945946, 0.1216216216, 0.0540540541, 0.0162162162);
 
                   in vec2 pass_vertex_uvcoord;
                   out vec4 out_colour;

@@ -56,7 +56,6 @@ export class Texture
   bind(gl, target)
   {
     gl.bindTexture(target, this.location)
-    onErrorThrowAs(gl, TextureError)
   }
 
   /**
@@ -67,7 +66,6 @@ export class Texture
   unbind(gl, target)
   {
     gl.bindTexture(target, null)
-    onErrorThrowAs(gl, TextureError)
   }
 
   /**

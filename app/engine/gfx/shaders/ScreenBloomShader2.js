@@ -29,7 +29,6 @@ export class ScreenBloomShader2 extends ShaderProgram
         source:  `#version 300 es
                   precision highp float;
 
-                  uniform bool horizontal;
                   uniform sampler2D scene;
                   uniform sampler2D bloom;
 
