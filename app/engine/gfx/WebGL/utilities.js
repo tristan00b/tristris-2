@@ -57,11 +57,12 @@ export function getError(gl)
 {
   const err = gl.getError(gl)
 
-  return err === gl.NO_ERROR      ? null
-       : err === gl.INVALID_ENUM  ? 'INVALID_ENUM'
-       : err === gl.INVALID_VALUE ? 'INVALID_VALUE'
-       : err === gl.OUT_OF_MEMORY ? 'OUT_OF_MEMORY'
-       : err === gl.CONTEXT_LOST  ? 'CONTEXT_LOST'
+  return err === gl.NO_ERROR           ? null
+       : err === gl.INVALID_ENUM       ? 'INVALID_ENUM'
+       : err === gl.INVALID_OPERATION  ? 'INVALID_OPERATION'
+       : err === gl.INVALID_VALUE      ? 'INVALID_VALUE'
+       : err === gl.OUT_OF_MEMORY      ? 'OUT_OF_MEMORY'
+       : err === gl.CONTEXT_LOST_WEBGL ? 'CONTEXT_LOST'
        : err
 }
 
