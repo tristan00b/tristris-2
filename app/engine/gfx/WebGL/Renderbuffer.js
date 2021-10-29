@@ -1,19 +1,18 @@
-import { Texture2D      } from './Texture2D'
-import { onErrorThrowAs } from './utilities'
 import { MakeErrorType,
          MakeLogger     } from '../../utilities'
-import { RENDERBUFFER   } from './constants'
+import { onErrorThrowAs } from './utilities'
 
 /**
  * Provides an interface for WebGLRenderbuffer objects
  */
-export class RenderBuffer
+export class Renderbuffer
 {
   /**
    * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
    */
   constructor(gl)
   {
+    this._target   = gl.RENDERBUFFER
     this._location = gl.createRenderbuffer()
   }
 
@@ -33,7 +32,7 @@ export class RenderBuffer
    */
   get target()
   {
-    return RENDERBUFFER
+    return this._target
   }
 
   /**
