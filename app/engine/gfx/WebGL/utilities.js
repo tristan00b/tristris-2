@@ -25,7 +25,6 @@ export function needCanvasResize(gl)
  */
 export function resizeCanvas(gl)
 {
-  const rect = gl.canvas.getBoundingClientRect()
   gl.canvas.width  = gl.canvas.clientWidth
   gl.canvas.height = gl.canvas.clientHeight
   gl.viewport(0, 0, gl.canvas.width, gl.canvas.height)
