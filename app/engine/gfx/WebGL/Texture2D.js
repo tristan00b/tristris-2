@@ -1,5 +1,5 @@
-import { loadImage      } from '../../utilities'
-import { MakeErrorType,
+import { loadImage,
+         MakeErrorType,
          MakeLogger     } from '../../utilities'
 import { Texture        } from './Texture'
 
@@ -128,6 +128,28 @@ export class Texture2D extends Texture
       texture.generateMipmap(gl)
       texture.unbind(gl)
     })
+
+    return texture
+  }
+
+  /**
+   * Initializes a new texture according to a given `FramebufferAttachmentSpec`
+   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
+   * @param {FramebufferAttachmentSpec} spec A specification for how the texture is to be configured
+   * @param {Number} width The width of the texture in pixels
+   * @param {Number} height The height of the texture in pixels
+   * @returns {Texture2D}
+   */
+  static fromSpec(gl, spec, width, height)
+  {
+    const texture = new Texture2D(gl)
+    texture.bind(gl)
+    texture.setIntegerParam(gl, gl.TEXTURE_MIN_FILTER, spec.minfilter)
+    texture.setIntegerParam(gl, gl.TEXTURE_MAG_FILTER, spec.magfilter)
+    texture.setIntegerParam(gl, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+    texture.setIntegerParam(gl, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+    texture.setData(gl, 0, spec.datafmt, width, height, spec.pixelfmt, spec.datatype, null)
+    texture.unbind(gl)
 
     return texture
   }
