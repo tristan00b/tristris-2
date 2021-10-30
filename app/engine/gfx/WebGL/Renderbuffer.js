@@ -39,7 +39,7 @@ export class Renderbuffer
    * Always returns true; used to differentiate between texture objects
    * @type {Boolean}
    */
-  get isRenderBuffer()
+  get isRenderbuffer()
   {
     return true
   }
@@ -82,5 +82,22 @@ export class Renderbuffer
   destroy(gl)
   {
     gl.deleteRenderbuffer(this.location)
+  }
+
+  /**
+   * Initializes a new renderbuffer according to a given `FramebufferAttachmentSpec`
+   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
+   * @param {FramebufferAttachmentSpec} spec A specification for how the texture is to be configured
+   * @param {Number} width The width of the texture in pixels
+   * @param {Number} height The height of the texture in pixels
+   * @returns {Renderbuffer}
+   */
+  static fromSpec(gl, spec, width, height)
+  {
+    const buffer = new Renderbuffer(gl)
+    buffer.bind(gl)
+    buffer.setStorage(gl, spec.datafmt, width, height)
+    buffer.unbind(gl)
+    return buffer
   }
 }
