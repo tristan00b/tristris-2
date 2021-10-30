@@ -1,17 +1,45 @@
-import { Renderable           } from './Renderable'
-import { RenderTask           } from './RenderTask'
-import { MeshData,
-         VertexAttributeType  } from './MeshData'
-import { quad                 } from './meshes/quad'
-import { ScreenBloomShader    } from './shaders/ScreenBloomShader'
-import { ScreenBloomShader2   } from './shaders/ScreenBloomShader2'
-import { FrameBuffer          } from './WebGL/FrameBuffer'
-import { RenderBuffer         } from './WebGL/RenderBuffer'
-import { Texture2D            } from './WebGL/Texture2D'
-import { onErrorThrowAs,
-         resizeCanvas         } from './WebGL/utilities'
 import { MakeErrorType,
-         MakeLogger           } from '../utilities'
+         MakeLogger                 } from '../utilities'
+import { MeshData,
+         VertexAttributeType        } from './MeshData'
+import { Renderable                 } from './Renderable'
+import { RenderTask                 } from './RenderTask'
+import { quad                       } from './meshes/quad'
+import { ScreenBloomShader          } from './shaders/ScreenBloomShader'
+import { ScreenBloomShader2         } from './shaders/ScreenBloomShader2'
+import { Framebuffer,
+         FramebufferAttachmentType,
+         FramebufferDataDirection,
+         Renderbuffer,
+         Texture,
+         Texture2D                  } from './WebGL/all'
+import { onErrorThrowAs             } from './WebGL/utilities'
+
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Constants
+//
+
+// Bloom Shaders
+const BLOOM_SHADER0         = 0
+const BLOOM_SHADER1         = 1
+
+const MRT_FRAMEBUFFER       = 0
+const PINGPONG_FRAMEBUFFER0 = 1
+const PINGPONG_FRAMEBUFFER1 = 2
+
+// HDR Framebuffer
+const COLOUR_TEXTURE        = 0
+const BRIGHTNESS_TEXTURE    = 1
+const DEPTH_TEXTURE         = 2
+
+// Bloom 0 Shader
+// const COLOUR_TEXTURE     = 0 // already defined
+
+// Bloom 1 Shader
+const SCENE_TEXTURE         = 0
+const BLOOM_TEXTURE         = 1
+
 
 /**
  * Manages drawing the elements of enqueued `SceneGraph` objects
@@ -26,8 +54,11 @@ export class Renderer
   constructor(context)
   {
     this.context = context ?? throw new RendererError('reference to the context not supplied')
-
     const gl = this.context
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // Renderer Config
+    //
 
     { // Webgl2 setup
       gl.enable(gl.CULL_FACE)
@@ -51,15 +82,14 @@ export class Renderer
       }
     }
 
-    //this._maxActiveTextureUnits = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS)
     this._task_queue = []
     this._shader = null
 
     // -----------------------------------------------------------------------------------------------------------------
-    // Configure screen-space structures
-    //------------------------------------------------------------------------------------------------------------------
+    // Screen-space structures
+    //
+
     this.screen = {}
-    const [ width, height ] = [gl.canvas.clientWidth, gl.canvas.clientHeight]
 
     // Shaders
     this.screen.shader = [
@@ -67,145 +97,90 @@ export class Renderer
       new ScreenBloomShader2(gl),
     ]
 
-    this.screen.shader[0].use(gl)
-    this.screen.shader[0].setUniforms(gl, {
+    this.screen.shader[BLOOM_SHADER0].use(gl)
+    this.screen.shader[BLOOM_SHADER0].setUniforms(gl, {
       'image': 0,
     })
+    this.screen.shader[BLOOM_SHADER0].unuse(gl)
 
-    this.screen.shader[0].unuse(gl)
-    this.screen.shader[1].use(gl)
-    this.screen.shader[1].setUniforms(gl, {
+    this.screen.shader[BLOOM_SHADER1].use(gl)
+    this.screen.shader[BLOOM_SHADER1].setUniforms(gl, {
       'scene': 0,
       'bloom': 1,
     })
-    this.screen.shader[1].unuse(gl)
+    this.screen.shader[BLOOM_SHADER1].unuse(gl)
 
-    this.framebuffer = [
-      new FrameBuffer(gl),        // HDR buffer
-      new FrameBuffer(gl),        // ping-pong buffer 1
-      new FrameBuffer(gl),        // ping-pong buffer 2
-    ]
-
-    this.screen.texture = [
-      new Texture2D(gl),          // HDR colour texture 0
-      new Texture2D(gl),          // HDR colour texture 1
-      new Texture2D(gl),          // HDR depth texture
-      new Texture2D(gl),          // ping-pong texture 0
-      new Texture2D(gl),          // pint-pong texture 1
-    ]
-
+    // screen space quad
     this.screen.quad = new Renderable(gl, quad(-1, -1, 2, 2), this.screen.shader[0])
 
     // -----------------------------------------------------------------------------------------------------------------
-    // Configure (MRT) colour framebuffer
+    // Framebuffers
     //
 
-    // Configure colour texture 0
-    this.screen.texture[0].bind(gl)
-    this.screen.texture[0].setIntegerParam(gl, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-    this.screen.texture[0].setIntegerParam(gl, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-    this.screen.texture[0].setIntegerParam(gl, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-    this.screen.texture[0].setIntegerParam(gl, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-    this.screen.texture[0].setData(gl, 0, gl.RGBA16F, width, height, gl.RGBA, gl.FLOAT, null)
-    this.screen.texture[0].unbind(gl)
+    this.framebuffers = []
 
-    // Configure colour texture 1
-    this.screen.texture[1].bind(gl)
-    this.screen.texture[1].setIntegerParam(gl, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-    this.screen.texture[1].setIntegerParam(gl, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-    this.screen.texture[1].setIntegerParam(gl, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-    this.screen.texture[1].setIntegerParam(gl, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-    this.screen.texture[1].setData(gl, 0, gl.RGBA16F, width, height, gl.RGBA, gl.FLOAT, null)
-    this.screen.texture[1].unbind(gl)
+    const attachmentSpecs = [
+      {
+        name       : 'colour', // for testing
+        type       : FramebufferAttachmentType.COLOUR+0,
+        direction  : FramebufferDataDirection.READ_WRITE,
+        datafmt    : gl.RGBA16F,
+        pixelfmt   : gl.RGBA,
+        datatype   : gl.FLOAT,
+        minfilter  : gl.LINEAR,
+        magfilter  : gl.LINEAR,
+      },
 
-    // Configure renderbuffer
-    this.screen.renderbuffer = new RenderBuffer(gl)
-    this.screen.renderbuffer.bind(gl)
-    this.screen.renderbuffer.setStorage(gl, gl.DEPTH_COMPONENT24, width, height)
-    this.screen.renderbuffer.unbind(gl)
+      {
+        name       : 'bright', // for testing
+        type       : FramebufferAttachmentType.COLOUR+1,
+        direction  : FramebufferDataDirection.READ_WRITE,
+        datafmt    : gl.RGBA16F,
+        pixelfmt   : gl.RGBA,
+        datatype   : gl.FLOAT,
+        minfilter  : gl.LINEAR,
+        magfilter  : gl.LINEAR,
+      },
 
-    // console.log(gl.isRenderbuffer(this.screen.renderbuffer.location))
+      // { // Texture2D backed depth buffer attachment
+      //   name       : 'depth', // for testing
+      //   type       : FramebufferAttachmentType.DEPTH,
+      //   datatype   : gl.UNSIGNED_INT,
+      //   datafmt    : gl.DEPTH_COMPONENT24,
+      //   pixelfmt   : gl.DEPTH_COMPONENT,
+      //   minfilter  : gl.NEAREST,
+      //   magfilter  : gl.NEAREST,
+      // },
 
-    // Configure the framebuffer
-    this.framebuffer[0].bind(gl)
-    this.framebuffer[0].setAttachment(gl, gl.COLOR_ATTACHMENT0, this.screen.texture[0]);
-    this.framebuffer[0].setAttachment(gl, gl.COLOR_ATTACHMENT1, this.screen.texture[1]);
-    this.framebuffer[0].setAttachment(gl, gl.DEPTH_ATTACHMENT, this.screen.renderbuffer);
+      { // Renderbuffer backed depth buffer attachment
+        name       : 'depth', // for testing
+        type       : FramebufferAttachmentType.DEPTH,
+        direction  : FramebufferDataDirection.WRITE_ONLY,
+        datafmt    : gl.DEPTH_COMPONENT24,
+      }
+    ]
 
+    this.framebuffers[MRT_FRAMEBUFFER] = new Framebuffer(gl, ...attachmentSpecs)
+    this.framebuffers[MRT_FRAMEBUFFER].bind(gl)
+    this.framebuffers[MRT_FRAMEBUFFER].setDrawbuffers(gl, [ attachmentSpecs[0].type, attachmentSpecs[1].type ])
+    this.framebuffers[MRT_FRAMEBUFFER].unbind(gl)
 
-    gl.drawBuffers([gl.COLOR_ATTACHMENT0, gl.COLOR_ATTACHMENT1])
+    this.framebuffers[PINGPONG_FRAMEBUFFER0] = new Framebuffer(gl, attachmentSpecs[0])
+    this.framebuffers[PINGPONG_FRAMEBUFFER0].bind(gl)
+    this.framebuffers[PINGPONG_FRAMEBUFFER0].setDrawbuffers(gl, [ attachmentSpecs[0].type ])
+    this.framebuffers[PINGPONG_FRAMEBUFFER0].unbind(gl)
 
-    { // Check framebuffer status
-      onErrorThrowAs(gl, RendererError)
-      const status = this.framebuffer[0].getStatus(gl)
-      status === gl.FRAMEBUFFER_COMPLETE || throw new RendererError(`framebuffer incomplete (status: ${status})`)
-    }
-
-    this.framebuffer[0].unbind(gl)
+    this.framebuffers[PINGPONG_FRAMEBUFFER1] = new Framebuffer(gl, attachmentSpecs[0])
+    this.framebuffers[PINGPONG_FRAMEBUFFER1].bind(gl)
+    this.framebuffers[PINGPONG_FRAMEBUFFER1].setDrawbuffers(gl, [ attachmentSpecs[0].type ])
+    this.framebuffers[PINGPONG_FRAMEBUFFER1].unbind(gl)
 
     // -----------------------------------------------------------------------------------------------------------------
-    // Configure ping-pong blur framebuffers
+    // Event listeners
     //
-
-    // Configure ping-pong texture 0
-    this.screen.texture[2].bind(gl)
-    this.screen.texture[2].setIntegerParam(gl, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-    this.screen.texture[2].setIntegerParam(gl, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-    this.screen.texture[2].setIntegerParam(gl, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-    this.screen.texture[2].setIntegerParam(gl, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-    this.screen.texture[2].setData(gl, 0, gl.RGBA16F, width, height, gl.RGBA, gl.FLOAT, null)
-    this.screen.texture[2].unbind(gl)
-
-    // Configure ping-pong framebuffer 0
-    this.framebuffer[1].bind(gl)
-    this.framebuffer[1].setAttachment(gl, gl.COLOR_ATTACHMENT0, this.screen.texture[2])
-
-    gl.drawBuffers([gl.COLOR_ATTACHMENT0])
-
-    { // Check framebuffer status
-      onErrorThrowAs(gl, RendererError)
-      const status = this.framebuffer[1].getStatus(gl)
-      status === gl.FRAMEBUFFER_COMPLETE || throw new RendererError(`framebuffer incomplete (status: ${status})`)
-    }
-
-    this.framebuffer[1].unbind(gl)
-
-    // Configure ping-pong texture 1
-    this.screen.texture[3].bind(gl)
-    this.screen.texture[3].setIntegerParam(gl, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-    this.screen.texture[3].setIntegerParam(gl, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-    this.screen.texture[3].setIntegerParam(gl, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-    this.screen.texture[3].setIntegerParam(gl, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-    this.screen.texture[3].setData(gl, 0, gl.RGBA16F, width, height, gl.RGBA, gl.FLOAT, null)
-    this.screen.texture[3].unbind(gl)
-
-    // Configure ping-pong framebuffer 1
-    this.framebuffer[2].bind(gl)
-    this.framebuffer[2].setAttachment(gl, gl.COLOR_ATTACHMENT0, this.screen.texture[3])
-
-    gl.drawBuffers([gl.COLOR_ATTACHMENT0])
-
-    { // Check framebuffer status
-      onErrorThrowAs(gl, RendererError)
-      const status = this.framebuffer[2].getStatus(gl)
-      status === gl.FRAMEBUFFER_COMPLETE || throw new RendererError(`framebuffer incomplete (status: ${status})`)
-    }
-
-    this.framebuffer[2].unbind(gl)
-
-    // -----------------------------------------------------------------------------------------------------------------
-
 
     window.addEventListener('resize', this.handleResize.bind(this))
     window.dispatchEvent(new Event('resize'))
-  }
-
-  /**
-   * @type {Number}
-   */
-  get maxActiveTextureUnits()
-  {
-    return this._maxActiveTextureUnits
   }
 
   /**
@@ -217,9 +192,7 @@ export class Renderer
    */
   setActiveTexture(index)
   {
-    const gl = this.context
-    gl.activeTexture(gl.TEXTURE0 + index)
-    onErrorThrowAs(gl, RendererError)
+    Texture.setActiveTexture(this.context, index)
   }
 
   /**
@@ -300,41 +273,32 @@ export class Renderer
   render()
   {
     const gl = this.context
-    const [width, height] = [gl.drawingBufferWidth, gl.drawingBufferHeight]
-
-    gl.clearColor(0.0, 0.0, 0.0, 1.0)
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
     // Render Scene ----------------------------------------------------------------------------------------------------
-    this.framebuffer[0].bind(gl)
+    this.framebuffers[MRT_FRAMEBUFFER].bind(gl)
+
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-    // Draw the scene into the bound framebuffer
+    // Draw the scene into the MRT framebuffer
     this._task_queue.forEach(task => task.run(this))
-
-    this.framebuffer[0].unbind(gl);
 
     // Blur Frame ------------------------------------------------------------------------------------------------------
     {
       const iterations = 10;
-      this.screen.shader[0].use(gl)
-
-      let framebuffer = null
+      this.screen.shader[BLOOM_SHADER0].use(gl)
 
       for (let i=0, horizontal=true; i<iterations; i++)
       {
-        framebuffer = this.framebuffer[1 + horizontal].bind(gl) // int + boolean...¯\_(ツ)_/¯
+        this.framebuffers[PINGPONG_FRAMEBUFFER0 + horizontal].bind(gl)
 
-        this.screen.shader[0].setUniforms(gl, {
-          'horizontal': horizontal
-        })
+        this.screen.shader[BLOOM_SHADER0].setUniforms(gl, { 'horizontal': horizontal })
 
         horizontal = !horizontal
 
         if (i === 0)
-          this.screen.texture[1].bind(gl)
+          this.framebuffers[MRT_FRAMEBUFFER].bindTexture(gl, BRIGHTNESS_TEXTURE)
         else
-          this.screen.texture[2 + horizontal].bind(gl)
+          this.framebuffers[PINGPONG_FRAMEBUFFER0 + horizontal].bindTexture(gl, COLOUR_TEXTURE)
 
         this.screen.quad.draw(gl)
       }
@@ -343,15 +307,16 @@ export class Renderer
     // Combine ---------------------------------------------------------------------------------------------------------
     gl.bindFramebuffer(gl.FRAMEBUFFER, null)
 
+    gl.clearColor(0.0, 0.0, 0.0, 1.0)
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-    this.screen.shader[1].use(gl)
+    this.screen.shader[BLOOM_SHADER1].use(gl)
 
-    gl.activeTexture(gl.TEXTURE0)
-    this.screen.texture[0].bind(gl)
+    this.setActiveTexture(0)
+    this.framebuffers[MRT_FRAMEBUFFER].bindTexture(gl, COLOUR_TEXTURE)
 
-    gl.activeTexture(gl.TEXTURE1)
-    this.screen.texture[3].bind(gl)
+    this.setActiveTexture(1)
+    this.framebuffers[PINGPONG_FRAMEBUFFER1].bindTexture(gl, COLOUR_TEXTURE)
 
     this.screen.quad.draw(gl)
   }
@@ -370,37 +335,19 @@ export class Renderer
    */
   handleResize()
   {
-    this.resizeCanvas()
-    this.resizeFrameBuffer()
-  }
+    const gl  = this.context
 
-  /**
-   * Updates canvas width and height dimensions to match client with and height dimensions
-   * @private
-   */
-  resizeCanvas()
-  {
-    resizeCanvas(this.context)
-  }
+    gl.canvas.width  = gl.canvas.clientWidth
+    gl.canvas.height = gl.canvas.clientHeight
 
-  /**
-   * Updates the framebuffer's texture width and height dimensions to match drawing buffer width and height dimensions
-   * @private
-   */
-  resizeFrameBuffer()
-  {
-    const gl = this.context
     const [width, height] = [gl.drawingBufferWidth, gl.drawingBufferHeight]
 
-    this.screen.texture.forEach(texture => {
-      texture.bind(gl)
-      texture.setData(gl, 0, gl.RGBA16F, width, height, gl.RGBA, gl.FLOAT, null)
-      texture.unbind(gl)
+    this.framebuffers.forEach(framebuffer => {
+      framebuffer.resize(gl, width, height)
     })
 
-    this.screen.renderbuffer.bind(gl)
-    this.screen.renderbuffer.setStorage(gl, gl.DEPTH_COMPONENT24, width, height)
-    this.screen.renderbuffer.unbind(gl)
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+    gl.viewport(0, 0, width, height)
   }
 }
 
