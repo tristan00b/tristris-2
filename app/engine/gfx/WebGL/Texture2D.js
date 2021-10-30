@@ -102,6 +102,15 @@ export class Texture2D extends Texture
   }
 
   /**
+   * Deletes the internal `WebGLTexture2D` object
+   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
+   */
+  destroy(gl)
+  {
+    gl.deleteTexture(this.location)
+  }
+
+  /**
    * Fetches the data located at `url` and uses it to create and initalize a new `Texture2D` instance
    * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
    * @param {String} url The location of the data to load
