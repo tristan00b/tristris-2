@@ -61,42 +61,38 @@ export function MakeLogger(T) {
 
     /**
      * Writes to `console.debug`
-     * @param {*} msg
-     * @param {...any} rest
+     * @param {...any} args
      */
-    static debug(msg, ...rest)
+    static debug(...args)
     {
-      console.debug(`${T.name}: ${msg}`, ...rest)
+      console.debug(`${T.name}:`, ...args)
     }
 
     /**
      * Writes to `console.info`
-     * @param {*} msg
-     * @param {...any} rest
+     * @param {...any} args
      */
-    static info(msg, ...rest)
+    static info(...args)
     {
-      console.info(`${T.name}: ${msg}`, ...rest)
+      console.info(`${T.name}:`, ...args)
     }
 
     /**
      * Writes to console.warn
-     * @param {*} msg
-     * @param {...any} rest
+     * @param {...any} args
      */
-    static warn(msg, ...rest)
+    static warn(...args)
     {
-      console.warn(`${T.name}: ${msg}`, ...rest)
+      console.warn(`${T.name}:`, ...args)
     }
 
     /**
      * Writes to console.error
-     * @param {*} msg
-     * @param {...any} rest
+     * @param {...any} args
      */
-    static error(msg, ...rest)
+    static error(...args)
     {
-      console.error(`${T.name}: ${msg}`, ...rest)
+      console.error(`${T.name}:`, ...args)
     }
   }
 }
