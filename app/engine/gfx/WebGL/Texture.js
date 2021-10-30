@@ -147,6 +147,16 @@ export class Texture
   {
     gl.texParameteri(target, pname, value)
   }
+
+  /**
+   * Specifies the index of the texture unit to make active (i.e. `index==n` equates to `gl.TEXTURE0+n`)
+   * @param {external:WebGL2RenderingContext} gl WebGL2 rendering context
+   * @param {Number} index The index of the texture unit to make active
+   */
+  static setActiveTexture(gl, index)
+  {
+    gl.activeTexture(gl.TEXTURE0 + index)
+  }
 }
 
 
